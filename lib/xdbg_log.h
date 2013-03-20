@@ -86,7 +86,7 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 #define XDBG_INFO(mod, fmt, ARG...)       XLOG_INFO(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 #define XDBG_WARNING(mod, fmt, ARG...)    XLOG_WARNING(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 #define XDBG_ERROR(mod, fmt, ARG...)      XLOG_ERROR(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
-#define XDBG_ERRNO(mod, fmt, ARG...)      XLOG_ERROR(mod, "[%s](err=%(%d)) "fmt, __FUNCTION__, strerror(errno), errno, ##ARG)
+#define XDBG_ERRNO(mod, fmt, ARG...)      XLOG_ERROR(mod, "[%s](err=%s(%d)) "fmt, __FUNCTION__, strerror(errno), errno, ##ARG)
 #define XDBG_KLOG(mod, fmt, ARG...)       XLOG_KLOG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 #define XDBG_SLOG(mod, fmt, ARG...)       XLOG_SLOG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 
