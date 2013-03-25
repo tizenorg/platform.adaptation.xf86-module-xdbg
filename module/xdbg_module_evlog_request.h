@@ -34,6 +34,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_module_types.h"
 
-Bool  xDbgModuleEvlogReqeust (ClientPtr pClient, char *buf, int remain);
+Bool  xDbgModuleEvlogReqeust (EvlogClientInfo *evinfo, xReq *req , char *buf, int remain);
 
 #endif /* __XDBG_MODULE_EVLOG_REQUEST_H__ */

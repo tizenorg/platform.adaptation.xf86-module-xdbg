@@ -81,14 +81,15 @@ _EvlogRequestGetExtentionEntry (void)
 }
 
 static Bool
-_EvlogRequestCore (ClientPtr client, char *buf, int remain)
+_EvlogRequestCore (xReq *req, char *buf, int remain)
 {
-    REQUEST(xReq);
+    xReq *stuff = req;
+
     switch (stuff->reqType)
     {
     case X_PutImage:
         {
-            REQUEST(xPutImageReq);
+            xPutImageReq *stuff = (xPutImageReq *)req;
             snprintf (buf, remain, ": XID(%lx) size(%dx%d) dst(%d,%d)",
                 stuff->drawable,
                 stuff->width,
@@ -105,14 +106,15 @@ _EvlogRequestCore (ClientPtr client, char *buf, int remain)
 }
 
 static Bool
-_EvlogRequestShm (ClientPtr client, char *buf, int remain)
+_EvlogRequestShm (xReq *req, char *buf, int remain)
 {
-    REQUEST(xReq);
+    xReq *stuff = req;
+
     switch (stuff->data)
     {
     case X_ShmPutImage:
         {
-            REQUEST(xShmPutImageReq);
+            xShmPutImageReq *stuff = (xShmPutImageReq *)req;
             snprintf (buf, remain, ": XID(%lx) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
                 stuff->drawable,
                 stuff->totalWidth,
@@ -133,34 +135,32 @@ _EvlogRequestShm (ClientPtr client, char *buf, int remain)
 }
 
 Bool
-xDbgModuleEvlogReqeust (ClientPtr client, char *buf, int remain)
+xDbgModuleEvlogReqeust (EvlogClientInfo *evinfo, xReq *req, char *buf, int remain)
 {
     const char *req_name;
     int len;
 
-    if (!_EvlogRequestGetExtentionEntry ())
+    if (!_EvlogRequestGetExtentionEntry () || !req)
         return FALSE;
 
-    REQUEST(xReq);
-
-    if (stuff->reqType < EXTENSION_BASE)
+    if (req->reqType < EXTENSION_BASE)
     {
-        req_name = LookupRequestName (stuff->reqType, 0);
+        req_name = LookupRequestName (req->reqType, 0);
         len = snprintf (buf, remain, "%s", req_name);
         buf += len;
         remain -= len;
 
-        return _EvlogRequestCore (client, buf, remain);
+        return _EvlogRequestCore (req, buf, remain);
     }
     else
     {
-        req_name = LookupRequestName (stuff->reqType, stuff->data);
+        req_name = LookupRequestName (req->reqType, req->data);
         len = snprintf (buf, remain, "%s", req_name);
         buf += len;
         remain -= len;
 
-        if (stuff->reqType == xext->base)
-           return _EvlogRequestShm (client, buf, remain);
+        if (req->reqType == xext->base)
+           return _EvlogRequestShm (req, buf, remain);
     }
 
     return FALSE;

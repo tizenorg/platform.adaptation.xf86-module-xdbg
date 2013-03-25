@@ -66,6 +66,17 @@ typedef struct _XDbgModule
     char *evlog_path;
 } XDbgModule;
 
+typedef struct _EvlogClientInfo
+{
+    int    index;
+    int    pid;
+    int    gid;
+    int    uid;
+    char   command[PATH_MAX+1];
+    pointer requestBuffer;
+    CARD32 req_len;
+} EvlogClientInfo;
+
 extern DevPrivateKeyRec debug_client_key;
 #define DebugClientKey (&debug_client_key)
 #define GetClientInfo(pClient) ((ModuleClientInfo*)dixLookupPrivate(&(pClient)->devPrivates, DebugClientKey))

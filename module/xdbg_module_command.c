@@ -257,7 +257,7 @@ _CommandSetEvlogPrint (int pid, int argc, char **argv, char *reply, int *len, XD
 {
     char *evlog_path;
 
-    if (!argv[2] || strlen(argv[2]) <= 0)
+    if (argc < 3 || !argv[2] || strlen(argv[2]) <= 0)
         evlog_path = pMod->evlog_path;
     else
         evlog_path = argv[2];
