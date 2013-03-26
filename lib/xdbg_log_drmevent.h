@@ -4,7 +4,7 @@ xdbg
 
 Copyright (c) 2013 Samsung Electronics Co., Ltd All Rights Reserved
 
-Contact: Boram Park <boram1288.park@samsung.com>
+Contact: SooChan Lim <sc1.lim@samsung.com>
          Sangjin LEE <lsj119@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,11 +29,19 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_H__
-#define __XDBG_H__
+#ifndef __XDBG_LOG_DRMEVENT_H__
+#define __XDBG_LOG_DRMEVENT_H__
 
-/* include only headers */
-#include <xdbg_log.h>
-#include <xdbg_log_drmevent.h>
+void xDbgLogDrmEventInit (void);
+void xDbgLogDrmEventDeInit (void);
 
-#endif  /* __XDBG_H__ */
+void * xDbgLogDrmEventAddVblank ( int crtc_pipe, unsigned int client_idx, unsigned int draw_id, int flag);
+void xDbgLogDrmEventRemoveVblank (void *vblank_data);
+
+void *xDbgLogDrmEventAddPageflip (int crtc_pipe, unsigned int client_idx, unsigned int draw_id);
+void xDbgLogDrmEventRemovePageflip (void *pageflip_data);
+
+void xDbgLogDrmEventPendingLists ( char *reply, int *remain);
+
+
+#endif  /* __XDBG_LOG_DRMEVENT_H__ */

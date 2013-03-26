@@ -4,7 +4,7 @@ xdbg
 
 Copyright (c) 2013 Samsung Electronics Co., Ltd All Rights Reserved
 
-Contact: Boram Park <boram1288.park@samsung.com>
+Contact: SooChan Lim <sc1.lim@samsung.com>
          Sangjin LEE <lsj119@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,11 +29,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_H__
-#define __XDBG_H__
+#ifndef __XDBG_MODULE_DRMEVENT_H__
+#define __XDBG_MODULE_DRMEVENT_H__
 
-/* include only headers */
-#include <xdbg_log.h>
-#include <xdbg_log_drmevent.h>
+#include "xdbg_module_types.h"
 
-#endif  /* __XDBG_H__ */
+void xDbgModuleDrmEventPending (XDbgModule *pMod, char *reply, int *remain);
+
+#endif /* __XDBG_MODULE_DRMEVENT_H__ */

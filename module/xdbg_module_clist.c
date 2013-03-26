@@ -46,8 +46,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define XREGISTRY
 #include <registry.h>
 
-#include <xdbg.h>
-
+#include "xdbg.h"
 #include "xdbg_module_types.h"
 
 

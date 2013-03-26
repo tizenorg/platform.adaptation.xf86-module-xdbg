@@ -1,7 +1,7 @@
 # Copyright 2013 Samsung Electronics co., Ltd. All Rights Reserved.
-# 
+#
 # Contact: Boram Park <boram1288.park@samsung.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -9,11 +9,11 @@
 # distribute, sub license, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice (including the
 # next paragraph) shall be included in all copies or substantial portions
 # of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -34,12 +34,14 @@ libxdbg_log_la_CFLAGS = \
 libxdbg_log_la_SOURCES = \
 	xdbg_log.c \
 	xdbg_log_klog.c \
-	xdbg_log_dlog.c
+	xdbg_log_dlog.c \
+	xdbg_log_drmevent.c
 
 libincludedir = $(includedir)/xdbg
 libinclude_HEADERS = \
 	xdbg.h \
-	xdbg_log.h
+	xdbg_log.h \
+	xdbg_log_drmevent.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = xdbg.pc

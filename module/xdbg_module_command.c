@@ -47,6 +47,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_module_clist.h"
 #include "xdbg_module_rlist.h"
 #include "xdbg_module_evlog.h"
+#include "xdbg_module_drmevent.h"
 #include "xdbg_module_command.h"
 
 static Bool
@@ -270,6 +271,17 @@ _CommandSetEvlogPrint (int pid, int argc, char **argv, char *reply, int *len, XD
     xDbgModuleEvlogPrintEvlog (pMod, pid, evlog_path, reply, len);
 }
 
+static void
+_CommandDrmEventPending (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
+{
+    if (argc != 2)
+    {
+        XDBG_REPLY ("Error : too few arguments\n");
+        return;
+    }
+
+    xDbgModuleDrmEventPending (pMod, reply, len);
+}
 
 static struct
 {
@@ -329,6 +341,12 @@ static struct
         "evlog_print", "to print evlog file", "[filepath]",
         NULL, "[filepath]",
         _CommandSetEvlogPrint
+    },
+
+    {
+        "drmevent_pending", "to print pending drmvents", "",
+        NULL, "",
+        _CommandDrmEventPending
     },
 };
 
