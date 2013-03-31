@@ -78,3 +78,4 @@ cp -af COPYING %{buildroot}/usr/share/license/%{name}
 %{_includedir}/xdbg/*.h
 %{_libdir}/libxdbg-log.so
 %{_libdir}/pkgconfig/xdbg.pc
+

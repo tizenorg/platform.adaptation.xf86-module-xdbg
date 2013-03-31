@@ -45,7 +45,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xf86Priv.h>
 #include "xdbg_module_types.h"
 #include "xdbg_module_clist.h"
-#include "xdbg_module_rlist.h"
+#include "xdbg_module_plist.h"
 #include "xdbg_module_evlog.h"
 #include "xdbg_module_drmevent.h"
 #include "xdbg_module_command.h"
@@ -181,22 +181,15 @@ _CommandClientList (int pid, int argc, char **argv, char *reply, int *len, XDbgM
 }
 
 static void
-_CommandResourceList (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
+_CommandPixmapList (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
 {
-    char* info;
-
     if (argc != 2)
     {
         XDBG_REPLY ("Error : too few arguments\n");
         return;
     }
 
-    info = xDbgModuleRList (pMod, reply, len);
-    if (info)
-    {
-        XDBG_REPLY ("%s", info);
-        free (info);
-    }
+    xDbgModulePList (pMod, reply, len);
 }
 
 static void
@@ -314,9 +307,9 @@ static struct
     },
 
     {
-        "rlist", "to print resource list", "",
+        "plist", "to print pixmap list", "",
         NULL, "",
-        _CommandResourceList
+        _CommandPixmapList
     },
 
     {
