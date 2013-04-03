@@ -34,6 +34,7 @@ BuildRequires:  pkgconfig(xf86driproto)
 BuildRequires:  pkgconfig(xf86vidmodeproto)
 BuildRequires:  pkgconfig(xineramaproto)
 BuildRequires:  pkgconfig(xproto)
+BuildRequires:  pkgconfig(libdrm)
 
 
 %description

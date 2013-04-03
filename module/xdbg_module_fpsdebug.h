@@ -29,13 +29,12 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_H__
-#define __XDBG_H__
+#ifndef __XDBG_MODULE_FPSDEBUG_H__
+#define __XDBG_MODULE_FPSDEBUG_H__
 
-/* include only headers */
-#include <xdbg_log.h>
-#include <xdbg_log_drmevent.h>
-#include <xdbg_log_plist.h>
-#include <xdbg_log_fpsdebug.h>
+#include "xdbg_module_types.h"
 
-#endif  /* __XDBG_H__ */
+void xDbgModuleFpsDebug (XDbgModule *pMod, int on, char *reply, int *len);
+
+
+#endif /* __XDBG_MODULE_FPSDEBUG_H__ */

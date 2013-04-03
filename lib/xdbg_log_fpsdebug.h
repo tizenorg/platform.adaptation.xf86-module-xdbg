@@ -4,7 +4,7 @@ xdbg
 
 Copyright (c) 2013 Samsung Electronics Co., Ltd All Rights Reserved
 
-Contact: Boram Park <boram1288.park@samsung.com>
+Contact: SooChan Lim <sc1.lim@samsung.com>
          Sangjin LEE <lsj119@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
@@ -29,13 +29,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_H__
-#define __XDBG_H__
+#ifndef __XDBG_LOG_FPSDEBUG_H__
+#define __XDBG_LOG_FPSDEBUG_H__
 
-/* include only headers */
-#include <xdbg_log.h>
-#include <xdbg_log_drmevent.h>
-#include <xdbg_log_plist.h>
-#include <xdbg_log_fpsdebug.h>
+typedef struct _fpsDebug *FpsDebugPtr;
 
-#endif  /* __XDBG_H__ */
+FpsDebugPtr xDbgLogFpsDebugCreate  (void);
+void        xDbgLogFpsDebugDestroy (FpsDebugPtr pFpsDebug);
+void        xDbgLogFpsDebugCount (FpsDebugPtr pFpsDebug, int connector_type);
+
+void        xDbgLogFpsDebug        (int on);
+
+#endif  /* __XDBG_LOG_FPSDEBUG_H__ */
+

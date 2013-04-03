@@ -48,6 +48,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_module_plist.h"
 #include "xdbg_module_evlog.h"
 #include "xdbg_module_drmevent.h"
+#include "xdbg_module_fpsdebug.h"
 #include "xdbg_module_command.h"
 
 static Bool
@@ -276,6 +277,24 @@ _CommandDrmEventPending (int pid, int argc, char **argv, char *reply, int *len, 
     xDbgModuleDrmEventPending (pMod, reply, len);
 }
 
+static void
+_CommandFpsDebug (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
+{
+    int on;
+
+    if (argc != 3)
+    {
+        XDBG_REPLY ("Error : too few arguments\n");
+        return;
+    }
+
+    on = atoi (argv[2]);
+
+    xDbgModuleFpsDebug (pMod, on, reply, len);
+
+    XDBG_REPLY ("Success\n");
+}
+
 static struct
 {
     const char *Cmd;
@@ -340,6 +359,12 @@ static struct
         "drmevent_pending", "to print pending drmvents", "",
         NULL, "",
         _CommandDrmEventPending
+    },
+
+    {
+        "fpsdebug", "to print fps", "[0-1]",
+        NULL, "[OFF:0/ON:1]",
+        _CommandFpsDebug
     },
 };
 

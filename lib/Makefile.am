@@ -36,14 +36,16 @@ libxdbg_log_la_SOURCES = \
 	xdbg_log_klog.c \
 	xdbg_log_dlog.c \
 	xdbg_log_drmevent.c \
-	xdbg_log_plist.c
+	xdbg_log_plist.c \
+	xdbg_log_fpsdebug.c
 
 xdbgincludedir = $(includedir)/xdbg
 xdbginclude_HEADERS = \
 	xdbg.h \
 	xdbg_log.h \
 	xdbg_log_drmevent.h \
-	xdbg_log_plist.h
+	xdbg_log_plist.h \
+	xdbg_log_fpsdebug.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = xdbg.pc

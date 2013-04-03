@@ -41,6 +41,7 @@ libxdbg_la_SOURCES = \
 	xdbg_module_command.c \
 	xdbg_module_clist.c \
 	xdbg_module_plist.c \
+	xdbg_module_fpsdebug.c \
 	xdbg_module_evlog.c \
 	xdbg_module_evlog_request.c \
 	xdbg_module_evlog_event.c \

@@ -29,11 +29,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_MODULE_RLIST_H__
-#define __XDBG_MODULE_RLIST_H__
+#ifndef __XDBG_MODULE_PLIST_H__
+#define __XDBG_MODULE_PLIST_H__
 
 #include "xdbg_module_types.h"
 
 void xDbgModulePList (XDbgModule *pMod, char *reply, int *remain);
 
-#endif /* __XDBG_MODULE_CLIENT_LIST_H__ */
+#endif /* __XDBG_MODULE_PLIST_H__ */
