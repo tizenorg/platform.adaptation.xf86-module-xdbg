@@ -199,8 +199,6 @@ _xDbgDBusServerWakeupHandler (pointer data, int error, pointer pRead)
 
     if (FD_ISSET(info->fd, (fd_set*)pRead))
     {
-        dbus_connection_ref (info->conn);
-
         do {
             dbus_connection_read_write_dispatch (info->conn, 0);
         } while (info->conn &&
@@ -208,7 +206,9 @@ _xDbgDBusServerWakeupHandler (pointer data, int error, pointer pRead)
                  dbus_connection_get_dispatch_status (info->conn) ==
                  DBUS_DISPATCH_DATA_REMAINS);
 
-        dbus_connection_unref (info->conn);
+        /* DON'T use info->conn from here. info->conn becomes NULL by
+         * dbus_connection_read_write_dispatch(_xDbgDBusServerMsgFilter)
+         */
     }
 }
 

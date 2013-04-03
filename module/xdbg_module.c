@@ -114,4 +114,5 @@ xDbgModuleSetup (pointer module, pointer opts, int *errmaj, int *errmin)
 void
 xDbgModuleTearDown (pointer module)
 {
+    xDbgModuleMainExit (module);
 }
