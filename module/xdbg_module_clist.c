@@ -34,59 +34,22 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include <stdio.h>
-#include <string.h>
-#include <strings.h>
-#include <sys/types.h>
-#include <sys/fcntl.h>
-#include <unistd.h>
-#include <stdarg.h>
-#include <fcntl.h>
-#include <unistd.h>
-
-#define XREGISTRY
-#include <registry.h>
 
 #include "xdbg.h"
 #include "xdbg_module_types.h"
 
 
-static void
-_findSyncAwait (pointer value, XID id, pointer cdata)
-{
-    Bool *sync_await = cdata;
-
-    if (sync_await)
-        *sync_await = TRUE;
-}
-
 void
-xDbgModuleCList (XDbgModule *pMod, char *reply, int *remain)
+xDbgModuleCList (XDbgModule *pMod, char *reply, int *len)
 {
-    char *p = reply;
-    int i, len;
-    RESTYPE res_type = 0;
-    const char *name;
+    int i;
 
-    len = snprintf (p, *remain, "%6s   %6s   %s   %s   %s\n", "INDEX", "PID", "SYNC_AWAIT", "BLOCKED", "NAME");
-    p += len;
-    *remain -= len;
+    XDBG_REPLY ("%6s   %6s   %s   %s\n", "INDEX", "PID", "BLOCKED", "NAME");
 
-    /* get the res_type of SyncAwait */
-    for (i = 0; i < lastResourceType; i++)
-    {
-        name = LookupResourceName(i + 1);
-        if (!strcmp(name, "SyncAwait"))
-        {
-            res_type = i + 1;
-            break;
-        }
-    }
-
-    for (i = 1; i < currentMaxClients && (0 < *remain); i++)
+    for (i = 1; i < currentMaxClients && (0 < *len); i++)
     {
         ClientPtr pClient = clients[i];
         ModuleClientInfo *info;
-        Bool sync_await;
 
         if (!pClient)
             continue;
@@ -95,13 +58,7 @@ xDbgModuleCList (XDbgModule *pMod, char *reply, int *remain)
         if (!info)
             continue;
 
-        /* find SyncAwait resources */
-        sync_await = FALSE;
-        FindClientResourcesByType (pClient, res_type, _findSyncAwait, &sync_await);
-
-        len = snprintf (p, *remain, "%6d   %6d    %4d         %4d      %9s\n",
-                        info->index, info->pid, sync_await, pClient->ignoreCount, info->command);
-        p += len;
-        *remain -= len;
+        XDBG_REPLY ("%6d   %6d   %4d      %9s\n",
+                        info->index, info->pid, pClient->ignoreCount, info->command);
     }
 }

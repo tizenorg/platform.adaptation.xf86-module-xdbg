@@ -34,6 +34,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_module_types.h"
 
-void xDbgModuleCList (XDbgModule *pMod, char *reply, int *remain);
+void xDbgModuleCList (XDbgModule *pMod, char *reply, int *len);
 
 #endif /* __XDBG_MODULE_CLIST_H__ */
