@@ -29,7 +29,8 @@ libxdbg_log_la_LDFLAGS = ${LDFLAGS}
 libxdbg_log_la_CFLAGS = \
     ${CFLAGS} \
     @XDBG_CFLAGS@ \
-    -I$(top_srcdir)/lib
+    -I$(top_srcdir)/lib \
+    -I$(top_srcdir)/common
 
 libxdbg_log_la_SOURCES = \
 	xdbg_log.c \

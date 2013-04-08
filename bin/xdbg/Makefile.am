@@ -24,13 +24,12 @@
 
 bin_PROGRAMS = xdbg
 
-xdbg_LDADD = $(XDBG_LIBS) ../../dbus/libdbus.la ../../lib/libxdbg-log.la
+xdbg_LDADD = $(XDBG_CLIENT_LIBS) ../../common/libcommon-client.la
 xdbg_LDFLAGS = ${LDFLAGS}
 xdbg_CFLAGS = \
 	${CFLAGS} \
-	@XDBG_CFLAGS@ \
-	-I$(top_srcdir)/dbus \
-	-I$(top_srcdir)/lib
+	@XDBG_CLIENT_CFLAGS@ \
+	-I$(top_srcdir)/common
 
 xdbg_sc_SOURCES =	\
         xdbg.c

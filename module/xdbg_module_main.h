@@ -32,7 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __XDBG_MODULE_MAIN_H__
 #define __XDBG_MODULE_MAIN_H__
 
-#include "xdbg_module_types.h"
+#include "xdbg_module.h"
 
 Bool    xDbgModuleMain     (XDbgModule *pMod);
 void    xDbgModuleMainExit (XDbgModule *pMod);

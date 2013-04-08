@@ -29,17 +29,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#if defined(XDBG_CLIENT)
-#error "This header is not for client."
+#ifndef __XDBG_EVLOG_REQUEST_H__
+#define __XDBG_EVLOG_REQUEST_H__
+
+#include "xdbg_types.h"
+
+char * xDbgEvlogReqeust (EvlogInfo *evinfo, char *reply, int *len);
+
 #endif
-
-#ifndef __XDBG_H__
-#define __XDBG_H__
-
-/* include only headers */
-#include <xdbg_log.h>
-#include <xdbg_log_drmevent.h>
-#include <xdbg_log_plist.h>
-#include <xdbg_log_fpsdebug.h>
-
-#endif  /* __XDBG_H__ */

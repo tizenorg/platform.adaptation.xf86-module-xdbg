@@ -29,6 +29,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
+#if defined(XDBG_CLIENT)
+#error "This header is not for client."
+#endif
+
 #ifndef __XDBG_LOG_DRMEVENT_H__
 #define __XDBG_LOG_DRMEVENT_H__
 

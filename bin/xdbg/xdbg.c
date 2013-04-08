@@ -45,7 +45,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/mman.h>
 
 #include <X11/Xlib.h>
-#include <xdbg.h>
 #include "xdbg_dbus_client.h"
 
 int main(int argc, char ** argv)

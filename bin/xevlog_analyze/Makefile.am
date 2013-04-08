@@ -1,7 +1,7 @@
 # Copyright 2013 Samsung Electronics co., Ltd. All Rights Reserved.
-# 
+#
 # Contact: Boram Park <boram1288.park@samsung.com>
-# 
+#
 # Permission is hereby granted, free of charge, to any person obtaining a
 # copy of this software and associated documentation files (the
 # "Software"), to deal in the Software without restriction, including
@@ -9,11 +9,11 @@
 # distribute, sub license, and/or sell copies of the Software, and to
 # permit persons to whom the Software is furnished to do so, subject to
 # the following conditions:
-# 
+#
 # The above copyright notice and this permission notice (including the
 # next paragraph) shall be included in all copies or substantial portions
 # of the Software.
-# 
+#
 # THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS
 # OR IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF
 # MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND NON-INFRINGEMENT.
@@ -22,15 +22,14 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-noinst_LTLIBRARIES = libdbus.la
+bin_PROGRAMS = xevlog_analyze
 
-libdbus_la_LIBADD = @XDBG_LIBS@
-libdbus_la_LDFLAGS = ${LDFLAGS}
-libdbus_la_CFLAGS = \
-    ${CFLAGS} \
-    @XDBG_CFLAGS@ \
-    -I$(top_srcdir)/lib
+xevlog_analyze_LDADD = $(XDBG_CLIENT_LIBS) ../../common/libcommon-client.la
+xevlog_analyze_LDFLAGS = ${LDFLAGS}
+xevlog_analyze_CFLAGS = \
+	${CFLAGS} \
+	@XDBG_CLIENT_CFLAGS@ \
+	-I$(top_srcdir)/common
 
-libdbus_la_SOURCES = \
-    xdbg_dbus_server.c \
-    xdbg_dbus_client.c
+xevlog_analyze_sc_SOURCES = \
+        xevlog_analyze.c

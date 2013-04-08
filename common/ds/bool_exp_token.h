@@ -28,36 +28,26 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef _BOOL_EXP_PARSER_H_
-#define _BOOL_EXP_PARSER_H_
+#ifndef _BOOL_EXP_TOKEN_H_
+#define _BOOL_EXP_TOKEN_H_
 
-#include "bintree.h"
-
-#define STRING_MAX	64
-
-typedef enum { NONE, AND, OR, DATA, ALL } NODE_TYPE;
-typedef enum { EQUAL, LESS, GREATER, LESS_EQ, GREATER_EQ, NOT_EQ } COMPARER;
-typedef enum { INTEGER, STRING } DATA_TYPE;
-
-typedef struct _PARSE_DATA * PARSE_DATA;
-
-struct _PARSE_DATA
+typedef enum
 {
-    NODE_TYPE node_type;
+    BET_UNKNOWN = 0,
+    BET_L_BR = 1,
+    BET_R_BR = 2,
+    BET_NOT_EQ = 3,
+    BET_EQUAL = 4,
+    BET_LSS_THAN = 5,
+    BET_LSS_EQ = 6,
+    BET_GRT_THAN = 7,
+    BET_GRT_EQ = 8,
+    BET_AND = 9,
+    BET_OR = 10,
+    BET_SPACE = 11,
+    BET_SYMBOL = 12,
+    BET_NUMBER = 13,
+    BET_EOS = 14,
+} TOKEN;
 
-    char variable_name[STRING_MAX];
-    COMPARER compare;
-    DATA_TYPE value_type;
-    union
-    {
-        char string[STRING_MAX];
-        int integer;
-    } value;
-
-    enum { BEP_UNKNOWN, BEP_TRUE, BEP_FALSE } result;
-};
-
-BINARY_TREE bool_exp_parse (const char * string);
-
-#endif /* _BOOL_EXP_PARSER_H_ */
-
+#endif /* _BOOL_EXP_TOKEN_H_ */

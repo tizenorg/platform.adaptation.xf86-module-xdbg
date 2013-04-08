@@ -24,15 +24,14 @@
 
 libxdbg_la_LTLIBRARIES = libxdbg.la
 libxdbg_ladir = @moduledir@
-libxdbg_la_LIBADD = @XDBG_LIBS@ ../dbus/libdbus.la ../lib/libxdbg-log.la
+libxdbg_la_LIBADD = @XDBG_LIBS@ ../common/libcommon-server.la ../lib/libxdbg-log.la
 libxdbg_la_LDFLAGS = -module -avoid-version ${LDFLAGS}
 libxdbg_la_CFLAGS = \
 	${CFLAGS} \
 	@XDBG_CFLAGS@ \
-	-I$(top_srcdir)/dbus \
+	-I$(top_srcdir)/common \
 	-I$(top_srcdir)/lib \
-	-I$(top_srcdir)/module \
-	-I$(top_srcdir)/module/ds
+	-I$(top_srcdir)/module
 
 libxdbg_la_SOURCES = \
 	xdbg_module.c \
@@ -43,10 +42,4 @@ libxdbg_la_SOURCES = \
 	xdbg_module_plist.c \
 	xdbg_module_fpsdebug.c \
 	xdbg_module_evlog.c \
-	xdbg_module_evlog_request.c \
-	xdbg_module_evlog_event.c \
-	xdbg_module_drmevent.c \
-	ds/bintree.c \
-	ds/bool_exp_parser.c \
-	ds/bool_exp_rule_checker.c \
-	ds/bool_exp_tokenizer.c
+	xdbg_module_drmevent.c

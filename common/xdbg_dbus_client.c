@@ -36,18 +36,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <sys/types.h>
 #include <unistd.h>
 
-#include "xdbg.h"
+#include "xdbg_types.h"
 #include "xdbg_dbus_client.h"
 
 #define REPLY_TIME 1000
 #define STR_LEN  128
-
-#define WARNING_IF_FAIL(cond)         {if (!(cond)) { fprintf (stderr, "[%s] '%s' failed.\n", __FUNCTION__, #cond);}}
-#define RETURN_IF_FAIL(cond)          {if (!(cond)) { fprintf (stderr, "[%s] '%s' failed.\n", __FUNCTION__, #cond); return; }}
-#define RETURN_VAL_IF_FAIL(cond, val) {if (!(cond)) { fprintf (stderr, "[%s] '%s' failed.\n", __FUNCTION__, #cond); return val; }}
-#define RETURN_VAL_IF_ERRNO(cond, val, errno)       {if (!(cond)) { fprintf (stderr, "[%s] '%s' failed. (err=%s(%d))\n", __FUNCTION__, #cond, strerror(errno), errno); return val; }}
-#define GOTO_IF_FAIL(cond, dst)       {if (!(cond)) { fprintf (stderr, "[%s] '%s' failed.\n", __FUNCTION__, #cond); goto dst; }}
-#define GOTO_IF_ERRNO(cond, dst, errno)       {if (!(cond)) { fprintf (stderr, "[%s] '%s' failed. (err=%s(%d))\n", __FUNCTION__, #cond, strerror(errno), errno); goto dst; }}
 
 struct _XDbgDBusClientInfo
 {

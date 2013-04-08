@@ -32,7 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __XDBG_MODULE_OPTIONS_H__
 #define __XDBG_MODULE_OPTIONS_H__
 
-#include "xdbg_module_types.h"
+#include "xdbg_module.h"
 
 void    xDbgModuleParseOptions (XDbgModule *pMod, XF86OptionPtr pOpt);
 

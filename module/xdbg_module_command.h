@@ -32,7 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __XDBG_MODULE_COMMAND_H__
 #define __XDBG_MODULE_COMMAND_H__
 
-#include "xdbg_module_types.h"
+#include "xdbg_module.h"
 
 void xDbgModuleCommand (void *data, int argc, char **argv, char *reply, int *len);
 Bool xDbgModuleCommandInitLogPath (XDbgModule *pMod);

@@ -258,4 +258,3 @@ BINARY_TREE bool_exp_parse (const char * string)
 
     return tree;
 }
-

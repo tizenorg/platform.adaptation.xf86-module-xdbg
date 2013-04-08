@@ -52,20 +52,55 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/extensions/damageproto.h>
 #include <X11/extensions/damagewire.h>
 #include <X11/extensions/XI2proto.h>
+#include <X11/Xlib.h>
 #include <windowstr.h>
+#include <X11/extensions/Xdamage.h>
 
-#include <xdbg.h>
+#include "xdbg_types.h"
+#include "xdbg_evlog_event.h"
 
-#include "xdbg_module_types.h"
-#include "xdbg_module_evlog_request.h"
 
 #define UNKNOWN_EVENT "<unknown>"
 
+#ifdef XDBG_CLIENT
+static int damage_base;
+static int damage_err_base;
+#else
 static ExtensionEntry *damage;
+#endif
 
 static Bool
-_EvlogEventGetExtentionEntry (void)
+_EvlogEventGetExtentionEntry ()
 {
+#ifdef XDBG_CLIENT
+
+    static int init = 0;
+    static Bool success = FALSE;
+    Display *dpy;
+
+    if (init)
+        return success;
+
+    init = 1;
+
+    dpy = XOpenDisplay (NULL);
+    if (!dpy)
+    {
+        fprintf (stderr, "failed: open display\n");
+        exit (-1);
+    }
+
+    if (!XDamageQueryExtension(dpy, &damage_base, &damage_err_base))
+    {
+        fprintf (stderr, "[UTILX] no X Damage extension. \n");
+        return False;
+    }
+    success = TRUE;
+    XCloseDisplay (dpy);
+    return success;
+
+#else
+
     static int init = 0;
     static Bool success = FALSE;
 
@@ -73,33 +108,42 @@ _EvlogEventGetExtentionEntry (void)
         return success;
 
     init = 1;
-
-    damage = CheckExtension (DAMAGE_NAME); 
-    XDBG_RETURN_VAL_IF_FAIL (damage != NULL, FALSE);
+    damage = CheckExtension (DAMAGE_NAME);
+    RETURN_VAL_IF_FAIL (damage != NULL, FALSE);
 
     success = TRUE;
 
     return success;
+
+#endif
 }
 
-Bool
-xDbgModuleEvlogEvent (xEvent *ev, char *buf, int remain)
+
+char *
+xDbgEvlogEvent (EvlogInfo *evinfo, char *reply, int *len)
 {
-    const char *evt_name;
-    int len;
+    EvlogEvent   ev;
+    xEvent *xEvt = NULL;
+
+    RETURN_VAL_IF_FAIL (evinfo != NULL, reply);
+    RETURN_VAL_IF_FAIL (evinfo->type == EVENT, reply);
+
+    ev = evinfo->evt;
+    xEvt = ev.ptr;
 
     if (!_EvlogEventGetExtentionEntry ())
-        return FALSE;
+        return reply;
 
-    evt_name = LookupEventName ((int)(ev->u.u.type));
-    len = snprintf (buf, remain, "%s", evt_name);
-    buf += len;
-    remain -= len;
+    XDBG_REPLY ("%s", ev.name);
 
-    if (ev->u.u.type == damage->eventBase + XDamageNotify)
+#ifdef XDBG_CLIENT
+    if (xEvt->u.u.type == damage_base + XDamageNotify)
+#else
+    if (xEvt->u.u.type == damage->eventBase + XDamageNotify)
+#endif
     {
-        xDamageNotifyEvent *damage_e = (xDamageNotifyEvent*)ev;
-        snprintf (buf, remain, ": XID(%lx) area(%d,%d %dx%d) geo(%d,%d %dx%d)",
+        xDamageNotifyEvent *damage_e = (xDamageNotifyEvent*)xEvt;
+        XDBG_REPLY (": XID(%lx) area(%d,%d %dx%d) geo(%d,%d %dx%d)",
             damage_e->drawable,
             damage_e->area.x,
             damage_e->area.y,
@@ -109,9 +153,7 @@ xDbgModuleEvlogEvent (xEvent *ev, char *buf, int remain)
             damage_e->geometry.y,
             damage_e->geometry.width,
             damage_e->geometry.height);
-        return TRUE;
+        return reply;
     }
-
-    return FALSE;
+    return reply;
 }
-

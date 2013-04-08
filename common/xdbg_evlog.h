@@ -29,11 +29,16 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_MODULE_EVLOG_REQUEST_H__
-#define __XDBG_MODULE_EVLOG_REQUEST_H__
+#ifndef __XDBG_EVLOG_H__
+#define __XDBG_EVLOG_H__
 
-#include "xdbg_module_types.h"
+#include "xdbg_types.h"
+#include "xdbg_evlog_request.h"
+#include "xdbg_evlog_event.h"
 
-Bool  xDbgModuleEvlogReqeust (EvlogClientInfo *evinfo, xReq *req , char *buf, int remain);
+char*   xDbgEvlogGetCmd         (char *path);
+Bool    xDbgEvlogRuleSet        (const int argc, const char **argv, char *reply, int *len);
+Bool    xDbgEvlogRuleValidate   (EvlogInfo *evinfo);
+void    xDbgEvlogFillLog        (EvlogInfo *evinfo, char *reply, int *len);
 
-#endif /* __XDBG_MODULE_EVLOG_REQUEST_H__ */
+#endif

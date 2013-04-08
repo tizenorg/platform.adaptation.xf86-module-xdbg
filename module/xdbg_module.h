@@ -1,10 +1,11 @@
 /**************************************************************************
 
-xserver-xorg-video-exynos
+xdbg
 
-Copyright 2010 - 2011 Samsung Electronics co., Ltd. All Rights Reserved.
+Copyright (c) 2013 Samsung Electronics Co., Ltd All Rights Reserved
 
 Contact: Boram Park <boram1288.park@samsung.com>
+         Sangjin LEE <lsj119@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -28,28 +29,33 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef _BOOL_EXP_RULE_CHECKER_H_
-#define _BOOL_EXP_RULE_CHECKER_H_
+#ifndef __XDBG_MODULE_H__
+#define __XDBG_MODULE_H__
 
-typedef enum { UNDEFINED, ALLOW, DENY } POLICY_TYPE;
+#include <xf86.h>
+#include <X11/Xdefs.h>	/* for Bool */
+#include "xdbg_types.h"
 
-typedef enum { RC_OK, RC_ERR_TOO_MANY_RULES, RC_ERR_PARSE_ERROR, RC_ERR_NO_RULE } RC_RESULT_TYPE;
+typedef struct _ModuleClientInfo
+{
+    int    index;
+    int    pid;
+    int    gid;
+    int    uid;
+    int    conn_fd;
+    char   command[PATH_MAX+1];
+} ModuleClientInfo;
 
-typedef struct _RULE_CHECKER * RULE_CHECKER;
+typedef struct _XDbgModule
+{
+    char *log_path;
+    char *real_log_path;
 
-RULE_CHECKER rulechecker_init();
+    char *evlog_path;
+} XDbgModule;
 
-void rulechecker_destroy (RULE_CHECKER rc);
+extern DevPrivateKeyRec debug_client_key;
+#define DebugClientKey (&debug_client_key)
+#define GetClientInfo(pClient) ((ModuleClientInfo*)dixLookupPrivate(&(pClient)->devPrivates, DebugClientKey))
 
-RC_RESULT_TYPE rulechecker_add_rule (RULE_CHECKER rc, POLICY_TYPE policy, const char * rule_string);
-
-RC_RESULT_TYPE rulechecker_remove_rule (RULE_CHECKER rc, int index);
-
-void rulechecker_print_rule (RULE_CHECKER rc, char * rules_buf);
-
-const char * rulechecker_print_usage (void);
-
-int rulechecker_validate_rule (RULE_CHECKER rc, int direct, int reqID, const char * name, int pid, char * cmd);
-
-#endif /* _BOOL_EXP_RULE_CHECKER_H_ */
-
+#endif  /* __XDBG_MODULE_H__ */

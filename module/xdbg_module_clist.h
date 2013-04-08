@@ -32,7 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __XDBG_MODULE_CLIST_H__
 #define __XDBG_MODULE_CLIST_H__
 
-#include "xdbg_module_types.h"
+#include "xdbg_module.h"
 
 void xDbgModuleCList (XDbgModule *pMod, char *reply, int *len);
 

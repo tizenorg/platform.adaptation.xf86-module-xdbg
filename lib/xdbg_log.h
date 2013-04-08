@@ -29,6 +29,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
+#if defined(XDBG_CLIENT)
+#error "This header is not for client."
+#endif
+
 #ifndef __XDBG_LOG_H__
 #define __XDBG_LOG_H__
 
@@ -90,7 +94,7 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 #define XDBG_KLOG(mod, fmt, ARG...)       XLOG_KLOG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 #define XDBG_SLOG(mod, fmt, ARG...)       XLOG_SLOG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 
-#define XDBG_NEVER_GET_HERE(mod)          XLOG_ERROR(mod, "[%s] ** NEVER GET HERE **\n", __FUNCTION__)
+#define XDBG_NEVER_GET_HERE(mod)          XLOG_ERROR(mod, "[%s:%d] ** NEVER GET HERE **\n", __FUNCTION__,__LINE__)
 
 #define XDBG_WARNING_IF_FAIL(cond)         {if (!(cond)) { ErrorF ("[%s] '%s' failed.\n", __FUNCTION__, #cond);}}
 #define XDBG_RETURN_IF_FAIL(cond)          {if (!(cond)) { ErrorF ("[%s] '%s' failed.\n", __FUNCTION__, #cond); return; }}
@@ -98,16 +102,6 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 #define XDBG_RETURN_VAL_IF_ERRNO(cond, val, errno)       {if (!(cond)) { ErrorF ("[%s] '%s' failed. (err=%s(%d))\n", __FUNCTION__, #cond, strerror(errno), errno); return val; }}
 #define XDBG_GOTO_IF_FAIL(cond, dst)       {if (!(cond)) { ErrorF ("[%s] '%s' failed.\n", __FUNCTION__, #cond); goto dst; }}
 #define XDBG_GOTO_IF_ERRNO(cond, dst, errno)       {if (!(cond)) { ErrorF ("[%s] '%s' failed. (err=%s(%d))\n", __FUNCTION__, #cond, strerror(errno), errno); goto dst; }}
-
-#define XDBG_REPLY(fmt, ARG...)  \
-    do { \
-        if (reply && len && *len > 0) \
-        { \
-            int s = snprintf (reply, *len, fmt, ##ARG); \
-            reply += s; \
-            *len -= s; \
-        } \
-    } while (0)
 
 unsigned int xDbgLogGetModule (char *name);
 

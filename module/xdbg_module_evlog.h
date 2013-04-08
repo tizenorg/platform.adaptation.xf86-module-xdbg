@@ -32,7 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __XDBG_MODULE_EVLOG_H__
 #define __XDBG_MODULE_EVLOG_H__
 
-#include "xdbg_module_types.h"
+#include "xdbg_module.h"
 
 Bool    xDbgModuleEvlogInstallHooks   (XDbgModule *pMod);
 void    xDbgModuleEvlogUninstallHooks (XDbgModule *pMod);
@@ -41,6 +41,5 @@ void    xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * clie
 int     xDbgModuleEvlogInfoSetRule (XDbgModule *pMod, const int argc, const char ** argv, char *reply, int *len);
 
 Bool    xDbgModuleEvlogSetEvlogPath  (XDbgModule *pMod, int pid, char *path, char *reply, int *len);
-void    xDbgModuleEvlogPrintEvlog    (XDbgModule *pMod, int pid, char *evlog_path, char *reply, int *len);
 
 #endif /* __XDBG_MODULE_EVLOG_H__ */

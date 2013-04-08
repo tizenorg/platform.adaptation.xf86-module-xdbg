@@ -8,6 +8,7 @@ Source0:    %{name}-%{version}.tar.gz
 BuildRequires:  pkgconfig(xorg-server)
 BuildRequires:  pkgconfig(x11)
 BuildRequires:  pkgconfig(xext)
+BuildRequires:  pkgconfig(xdamage)
 BuildRequires:  pkgconfig(xorg-macros)
 BuildRequires:  pkgconfig(dbus-1)
 BuildRequires:  pkgconfig(bigreqsproto)
@@ -71,6 +72,7 @@ cp -af COPYING %{buildroot}/usr/share/license/%{name}
 %defattr(-,root,root,-)
 /usr/share/license/%{name}
 %{_bindir}/xdbg
+%{_bindir}/xevlog_analyze
 %{_libdir}/libxdbg-log.so.*
 %{_libdir}/xorg/modules/libxdbg.so
 

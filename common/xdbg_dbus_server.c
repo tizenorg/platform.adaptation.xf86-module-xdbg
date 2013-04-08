@@ -41,6 +41,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <dix.h>
 
 #include "xdbg.h"
+#include "xdbg_types.h"
 #include "xdbg_dbus_server.h"
 
 #define ARGV_NUM        128

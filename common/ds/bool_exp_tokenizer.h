@@ -1,11 +1,10 @@
 /**************************************************************************
 
-xdbg
+xserver-xorg-video-exynos
 
-Copyright (c) 2013 Samsung Electronics Co., Ltd All Rights Reserved
+Copyright 2010 - 2011 Samsung Electronics co., Ltd. All Rights Reserved.
 
 Contact: Boram Park <boram1288.park@samsung.com>
-         Sangjin LEE <lsj119@samsung.com>
 
 Permission is hereby granted, free of charge, to any person obtaining a
 copy of this software and associated documentation files (the
@@ -29,11 +28,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_MODULE_EVLOG_EVENT_H__
-#define __XDBG_MODULE_EVLOG_EVENT_H__
+#ifndef _BOOL_EXP_TOKENIZER_
+#define _BOOL_EXP_TOKENIZER_
+#include "bool_exp_token.h"
 
-#include "xdbg_module_types.h"
+TOKEN get_next_token (const char ** string);
 
-Bool  xDbgModuleEvlogEvent (xEvent *ev, char *buf, int remain);
-
-#endif /* __XDBG_MODULE_EVLOG_EVENT_H__ */
+#endif /* _BOOL_EXP_TOKENIZER_ */

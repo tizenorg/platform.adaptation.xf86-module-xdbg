@@ -42,8 +42,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <windowstr.h>
 #include <xacestr.h>
 #include <xdbg.h>
+#include "xdbg_types.h"
 #include <xf86Priv.h>
-#include "xdbg_module_types.h"
+#include "xdbg_module.h"
 #include "xdbg_module_clist.h"
 #include "xdbg_module_plist.h"
 #include "xdbg_module_evlog.h"
@@ -253,19 +254,6 @@ _CommandSetEvlogPath (int pid, int argc, char **argv, char *reply, int *len, XDb
 }
 
 static void
-_CommandSetEvlogPrint (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
-{
-    char *evlog_path;
-
-    if (argc < 3 || !argv[2] || strlen(argv[2]) <= 0)
-        evlog_path = pMod->evlog_path;
-    else
-        evlog_path = argv[2];
-
-    xDbgModuleEvlogPrintEvlog (pMod, pid, evlog_path, reply, len);
-}
-
-static void
 _CommandDrmEventPending (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
 {
     if (argc != 2)
@@ -347,12 +335,6 @@ static struct
         "evlog_path", "to set filepath of evlog", "[console/filepath]",
         NULL, "[console/filepath]",
         _CommandSetEvlogPath
-    },
-
-    {
-        "evlog_print", "to print evlog file", "[filepath]",
-        NULL, "[filepath]",
-        _CommandSetEvlogPrint
     },
 
     {

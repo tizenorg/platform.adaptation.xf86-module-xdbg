@@ -28,40 +28,35 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef _BOOL_EXP_BINTREE_H_
-#define _BOOL_EXP_BINTREE_H_
+#ifndef _BOOL_EXP_PARSER_H_
+#define _BOOL_EXP_PARSER_H_
 
-typedef struct _BINARY_TREE_NODE * BINARY_TREE_NODE;
-typedef struct _BINARY_TREE * BINARY_TREE;
-typedef int (*BINTREE_TRAVERSE_FUNC) (BINARY_TREE tree, BINARY_TREE_NODE node, BINARY_TREE_NODE parent, void * arg);
+#include "bintree.h"
 
-BINARY_TREE bintree_create_tree (int data_size);
+#define STRING_MAX	64
 
-BINARY_TREE_NODE bintree_create_node (BINARY_TREE tree);
+typedef enum { NONE, AND, OR, DATA, ALL } NODE_TYPE;
+typedef enum { EQUAL, LESS, GREATER, LESS_EQ, GREATER_EQ, NOT_EQ } COMPARER;
+typedef enum { INTEGER, STRING } DATA_TYPE;
 
-BINARY_TREE_NODE bintree_get_head (BINARY_TREE tree);
+typedef struct _PARSE_DATA * PARSE_DATA;
 
-void bintree_set_head (BINARY_TREE tree, BINARY_TREE_NODE head);
+struct _PARSE_DATA
+{
+    NODE_TYPE node_type;
 
-void bintree_set_left_child (BINARY_TREE_NODE node, BINARY_TREE_NODE child);
+    char variable_name[STRING_MAX];
+    COMPARER compare;
+    DATA_TYPE value_type;
+    union
+    {
+        char string[STRING_MAX];
+        int integer;
+    } value;
 
-void bintree_set_right_child (BINARY_TREE_NODE node, BINARY_TREE_NODE child);
+    enum { BEP_UNKNOWN, BEP_TRUE, BEP_FALSE } result;
+};
 
-BINARY_TREE_NODE bintree_get_left_child (BINARY_TREE_NODE node);
+BINARY_TREE bool_exp_parse (const char * string);
 
-BINARY_TREE_NODE bintree_get_right_child (BINARY_TREE_NODE node);
-
-void * bintree_get_node_data (BINARY_TREE_NODE node);
-
-void bintree_remove_node (BINARY_TREE_NODE node);
-
-void bintree_remove_node_recursive (BINARY_TREE_NODE node);
-
-void bintree_destroy_tree (BINARY_TREE tree);
-
-void bintree_inorder_traverse (BINARY_TREE tree, BINTREE_TRAVERSE_FUNC func, void * arg);
-
-void bintree_postorder_traverse (BINARY_TREE tree, BINTREE_TRAVERSE_FUNC func, void * arg);
-
-#endif /* _BOOL_EXP_BINTREE_H_ */
-
+#endif /* _BOOL_EXP_PARSER_H_ */

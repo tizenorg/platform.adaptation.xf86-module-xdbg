@@ -29,56 +29,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_MODULE_TYPES_H__
-#define __XDBG_MODULE_TYPES_H__
+#ifndef __XDBG_EVLOG_EVENT_H__
+#define __XDBG_EVLOG_EVENT_H__
 
-#include <xf86.h>
-#include <X11/Xdefs.h>	/* for Bool */
+#include "xdbg_types.h"
 
-#define XDBG_PATH_MAX        1024
+char *  xDbgEvlogEvent (EvlogInfo *evinfo, char *reply, int *len);
 
-#ifndef MAX
-#define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #endif
-#ifndef MIN
-#define MIN(a,b) (((a) < (b)) ? (a) : (b))
-#endif
-
-#ifndef SWAP
-#define SWAP(a, b)  ({int t; t = a; a = b; b = t;})
-#endif
-
-typedef struct _ModuleClientInfo
-{
-    int    index;
-    int    pid;
-    int    gid;
-    int    uid;
-    int    conn_fd;
-    char   command[PATH_MAX+1];
-} ModuleClientInfo;
-
-typedef struct _XDbgModule
-{
-    char *log_path;
-    char *real_log_path;
-
-    char *evlog_path;
-} XDbgModule;
-
-typedef struct _EvlogClientInfo
-{
-    int    index;
-    int    pid;
-    int    gid;
-    int    uid;
-    char   command[PATH_MAX+1];
-    pointer requestBuffer;
-    CARD32 req_len;
-} EvlogClientInfo;
-
-extern DevPrivateKeyRec debug_client_key;
-#define DebugClientKey (&debug_client_key)
-#define GetClientInfo(pClient) ((ModuleClientInfo*)dixLookupPrivate(&(pClient)->devPrivates, DebugClientKey))
-
-#endif  /* __XDBG_MODULE_TYPES_H__ */

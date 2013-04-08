@@ -59,12 +59,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <windowstr.h>
 
 #include <xdbg.h>
-
-#include "xdbg_module_types.h"
+#include "xdbg_types.h"
+#include "xdbg_module.h"
 #include "xdbg_module_evlog.h"
-#include "xdbg_module_evlog_request.h"
-#include "xdbg_module_evlog_event.h"
-#include "bool_exp_rule_checker.h"
+#include "xdbg_evlog.h"
 
 #define XREGISTRY
 #include "registry.h"
@@ -77,92 +75,34 @@ static int  xev_trace_record_fd = -1;
 static Atom atom_rotate = None;
 static Atom atom_client_pid = None;
 
-RULE_CHECKER rc = NULL;
-
-#define UNKNOWN_EVENT "<unknown>"
-
-typedef enum
+static void evtRecord (int fd, EvlogInfo *evinfo)
 {
-    EVENT,
-    REQUEST,
-    REPLY,
-    FLUSH
-} evtType;
+    int write_len = 0;
 
-#define EVTDATA_MASK_CLIENT_INFO    0x1
-#define EVTDATA_MASK_CLIENT_REQ     0x2
-#define EVTDATA_MASK_EVENT          0x4
-
-static char *evt_type[] = { "Event", "Request", "Reply", "Flush" };
-static char *evt_dir[]  = { "<====", "---->",   "<----", "*****" };
-
-static void _evtPrintF (int fd, const char * format, ...)
-{
-    va_list args;
-
-    va_start (args, format);
-    if (fd < 0)
-        VErrorF (format, args);
-    else
-        vdprintf (fd, format, args);
-    va_end (args);
-}
-
-static void evtGetReqInfo (evtType type, EvlogClientInfo *evinfo, xReq *req, xEvent *ev,
-                           int *req_id, const char **req_string,
-                           char **c_cmd, int *c_index, int *c_pid)
-{
-    if (type == REQUEST && req)
-    {
-        *req_id = req->reqType;
-        if (req->reqType < EXTENSION_BASE)
-            *req_string = LookupRequestName (req->reqType, 0);
-        else
-            *req_string = LookupRequestName (req->reqType, req->data);
-    }
-    else if (type == EVENT && ev)
-        *req_string = LookupEventName ((int)(ev->u.u.type));
-
-    if(evinfo)
-    {
-        *c_index = evinfo->index;
-        *c_pid = evinfo->pid;
-
-        *c_cmd = rindex (evinfo->command, '/');
-        if (*c_cmd == NULL)
-            *c_cmd = evinfo->command;
-        else
-            *c_cmd = *c_cmd + 1;
-    }
-}
-
-static void evtRecord (CARD32 msec, evtType type, EvlogClientInfo *evinfo, xEvent *ev)
-{
-    int mask = 0;
-    int write_len = sizeof (int) +
-                    sizeof (CARD32) +
-                    sizeof (evtType) +
-                    sizeof (int);
-
-    if (xev_trace_record_fd < 0)
-        return;
+    XDBG_RETURN_IF_FAIL (fd >= 0)
 
     if (evinfo)
     {
-        mask |= EVTDATA_MASK_CLIENT_INFO;
-        write_len += sizeof (EvlogClientInfo);
+        evinfo->mask = 0;
 
-        if (evinfo->requestBuffer)
+        write_len = sizeof (int) +
+                    sizeof (EvlogType) +
+                    sizeof (int) +
+                    sizeof (CARD32);
+
+        evinfo->mask |= EVLOG_MASK_CLIENT;
+        write_len += sizeof (EvlogClient);
+
+        if (evinfo->type == REQUEST)
         {
-            mask |= EVTDATA_MASK_CLIENT_REQ;
-            write_len += evinfo->req_len;
+            evinfo->mask |= EVLOG_MASK_REQUEST;
+            write_len += sizeof (EvlogRequest) + sizeof (xReq);
         }
-    }
-
-    if (ev)
-    {
-        mask |= EVTDATA_MASK_EVENT;
-        write_len += sizeof (xEvent);
+        else if (evinfo->type == EVENT)
+        {
+            evinfo->mask |= EVLOG_MASK_EVENT;
+            write_len += sizeof (EvlogEvent) + sizeof (xEvent);
+        }
     }
 
     if (write (xev_trace_record_fd, &write_len, sizeof(int)) == -1)
@@ -170,155 +110,135 @@ static void evtRecord (CARD32 msec, evtType type, EvlogClientInfo *evinfo, xEven
         XDBG_ERROR (MXDBG, "failed: write write_len\n");
         return;
     }
-    if (write (xev_trace_record_fd, &msec, sizeof(CARD32)) == -1)
-    {
-        XDBG_ERROR (MXDBG, "failed: write msec\n");
-        return;
-    }
-    if (write (xev_trace_record_fd, &type, sizeof(evtType)) == -1)
-    {
-        XDBG_ERROR (MXDBG, "failed: write type\n");
-        return;
-    }
-    if (write (xev_trace_record_fd, &mask, sizeof(int)) == -1)
-    {
-        XDBG_ERROR (MXDBG, "failed: write mask\n");
-        return;
-    }
 
     if (evinfo)
     {
-        if (write (xev_trace_record_fd, evinfo, sizeof (EvlogClientInfo)) == -1)
+        if (write (xev_trace_record_fd, &evinfo->time, sizeof(CARD32)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write msec\n");
+            return;
+        }
+        if (write (xev_trace_record_fd, &evinfo->type, sizeof(EvlogType)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write type\n");
+            return;
+        }
+        if (write (xev_trace_record_fd, &evinfo->mask, sizeof(int)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write mask\n");
+            return;
+        }
+        if (write (xev_trace_record_fd, &evinfo->client, sizeof (EvlogClient)) == -1)
         {
             XDBG_ERROR (MXDBG, "failed: write client\n");
             return;
         }
-        if (evinfo->requestBuffer)
-            if (write (xev_trace_record_fd, evinfo->requestBuffer, evinfo->req_len) == -1)
+
+        if (evinfo->type == REQUEST)
+        {
+            if (write (xev_trace_record_fd, &evinfo->req, sizeof (EvlogRequest)) == -1)
             {
-                XDBG_ERROR (MXDBG, "failed: write requestBuffer\n");
+                XDBG_ERROR (MXDBG, "failed: write request\n");
                 return;
             }
-    }
-
-    if (ev)
-        if (write (xev_trace_record_fd, ev, sizeof (xEvent)) == -1)
-        {
-            XDBG_ERROR (MXDBG, "failed: write ev\n");
-            return;
+            if (write (xev_trace_record_fd, evinfo->req.ptr, sizeof (xReq)) == -1)
+            {
+                XDBG_ERROR (MXDBG, "failed: write request\n");
+                return;
+            }
         }
+        else if (evinfo->type == EVENT)
+        {
+            if (write (xev_trace_record_fd, &evinfo->evt, sizeof (EvlogEvent)) == -1)
+            {
+                XDBG_ERROR (MXDBG, "failed: write event\n");
+                return;
+            }
+            if (write (xev_trace_record_fd, evinfo->evt.ptr, sizeof (xEvent)) == -1)
+            {
+                XDBG_ERROR (MXDBG, "failed: write event\n");
+                return;
+            }
+        }
+    }
 }
 
-static void evtPrintF (int fd, CARD32 msec, evtType type, EvlogClientInfo *evinfo, xEvent *ev)
+static void evtPrintF (int fd, EvlogInfo *evinfo)
 {
-    int   req_id = 0;
-    const char *req_string = "";
-    const char *req_detail = "";
-    char  tempbuf[256] = {0,};
-    char *c_cmd = "";
-    int   c_index = 0;
-    int   c_pid = 0;
-    static CARD32 prev;
-    xReq *req = NULL;
+    char log[1024];
+    int size = sizeof (log);
 
-    XDBG_RETURN_IF_FAIL (type >= 0 && (sizeof (evt_dir) / sizeof (char*)));
-    XDBG_RETURN_IF_FAIL (type >= 0 && (sizeof (evt_type) / sizeof (char*)));
+    xDbgEvlogFillLog (evinfo, log, &size);
 
-    if(evinfo)
-    {
-        req = (xReq *)evinfo->requestBuffer;
-    }
-
-    evtGetReqInfo (type, evinfo, req, ev, &req_id, &req_string, &c_cmd, &c_index, &c_pid);
-
-    if (type == REQUEST)
-    {
-        XDBG_RETURN_IF_FAIL (evinfo != NULL);
-        XDBG_RETURN_IF_FAIL (req != NULL);
-        xDbgModuleEvlogReqeust (evinfo, req, tempbuf, sizeof (tempbuf));
-        req_detail = tempbuf;
-    }
-    else if (type == EVENT)
-    {
-        XDBG_RETURN_IF_FAIL (ev != NULL);
-        xDbgModuleEvlogEvent (ev, tempbuf, sizeof (tempbuf));
-        req_detail = tempbuf;
-    }
+    if (fd < 0)
+        ErrorF ("%s", log);
     else
-        req_detail = req_string;
-
-    _evtPrintF (fd, "[%10.3f][%4ld] %15s(%2d:%4d) %s %7s (%s)\n",
-                msec / 1000.0,
-                msec - prev,
-                c_cmd, c_index, c_pid,
-                evt_dir[type],
-                evt_type[type], req_detail);
-
-    prev = msec;
+        dprintf (fd, "%s", log);
 }
 
-static void evtPrint (evtType type, ClientPtr client, xEvent *ev)
+static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
 {
-    int   req_id = 0;
-    const char *req_string = "";
-    char *c_cmd = "";
-    int   c_index = 0;
-    int   c_pid = 0;
-    CARD32 curr;
-    ModuleClientInfo *info = NULL;
-    EvlogClientInfo evinfo;
-    xReq *req = NULL;
+    EvlogInfo evinfo = {0,};
 
     if (xev_trace_on == FALSE)
         return;
 
+    /* evinfo.type */
+    evinfo.type = type;
+
+    /* evinfo.client */
     if (client)
     {
-        info = GetClientInfo (client);
+        ModuleClientInfo *info = GetClientInfo (client);
         XDBG_RETURN_IF_FAIL (info != NULL);
 
-        memset (&evinfo, 0, sizeof (EvlogClientInfo));
+        evinfo.mask |= EVLOG_MASK_CLIENT;
+        evinfo.client.index = info->index;
+        evinfo.client.pid = info->pid;
+        evinfo.client.gid = info->gid;
+        evinfo.client.uid = info->uid;
+        strncpy (evinfo.client.command, info->command, strlen (info->command));
 
-        evinfo.index = info->index;
-        evinfo.pid = info->pid;
-        evinfo.gid = info->gid;
-        evinfo.uid = info->uid;
-        strncpy (evinfo.command, info->command, strlen (info->command));
-        evinfo.requestBuffer = client->requestBuffer;
-        evinfo.req_len = client->req_len;
+        /* evinfo.req */
+        if (type == REQUEST)
+        {
+            REQUEST (xReq);
 
-        req = (xReq *)evinfo.requestBuffer;
+            evinfo.mask |= EVLOG_MASK_REQUEST;
+            evinfo.req.id = stuff->reqType;
+            evinfo.req.length = client->req_len;
+            evinfo.req.ptr = client->requestBuffer;
+
+            if (stuff->reqType < EXTENSION_BASE)
+                snprintf (evinfo.req.name, sizeof (evinfo.req.name), "%s",
+                          LookupRequestName (stuff->reqType, 0));
+            else
+                snprintf (evinfo.req.name, sizeof (evinfo.req.name), "%s",
+                          LookupRequestName (stuff->reqType, stuff->data));
+        }
     }
 
-    evtGetReqInfo (type, (client)?&evinfo:NULL, req, ev, &req_id, &req_string, &c_cmd, &c_index, &c_pid);
+    /* evinfo.evt */
+    if (ev)
+    {
+        XDBG_RETURN_IF_FAIL (type == EVENT);
 
-    if (rc == NULL)
-        rc = rulechecker_init();
+        evinfo.mask |= EVLOG_MASK_EVENT;
+        evinfo.evt.ptr = ev;
+        snprintf (evinfo.evt.name, sizeof (evinfo.evt.name), "%s",
+                  LookupEventName ((int)(ev->u.u.type)));
+    }
 
-    if (!rulechecker_validate_rule (rc, type, req_id, req_string, c_pid, c_cmd))
+    /* evinfo.time */
+    evinfo.time = GetTimeInMillis ();
+
+    if (!xDbgEvlogRuleValidate (&evinfo))
         return;
 
-    curr = GetTimeInMillis ();
-
     if (xev_trace_record_fd >= 0)
-        evtRecord (curr, type, (client)?&evinfo:NULL, ev);
+        evtRecord (xev_trace_record_fd, &evinfo);
     else
-        evtPrintF (xev_trace_fd, curr, type, (client)?&evinfo:NULL, ev);
-}
-
-static void _mergeArgs (char * target, int argc, const char ** argv)
-{
-    int i;
-    int len;
-
-    for (i=0; i<argc; i++)
-    {
-        len = sprintf (target, "%s", argv[i]);
-        target += len;
-
-        if (i != argc - 1)
-            *(target++) = ' ';
-    }
+        evtPrintF (xev_trace_fd, &evinfo);
 }
 
 static const char*
@@ -631,107 +551,7 @@ xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name,
 int
 xDbgModuleEvlogInfoSetRule (XDbgModule *pMod, const int argc, const char ** argv, char *reply, int *len)
 {
-    const char * command;
-
-    if (rc == NULL)
-        rc = rulechecker_init();
-
-    if (argc == 0)
-    {
-        rulechecker_print_rule (rc, reply);
-        return 0;
-    }
-
-    command = argv[0];
-
-    if (!strcasecmp (command, "add"))
-    {
-        POLICY_TYPE policy_type;
-        RC_RESULT_TYPE result;
-        const char * policy = argv[1];
-        char rule[8192];
-
-        if (argc < 3)
-        {
-            XDBG_REPLY ("Error : Too few arguments.\n");
-            return -1;
-        }
-
-        if (!strcasecmp (policy, "ALLOW"))
-            policy_type = ALLOW;
-        else if (!strcasecmp (policy, "DENY"))
-            policy_type = DENY;
-        else
-        {
-            XDBG_REPLY ("Error : Unknown policy : [%s].\n          Policy should be ALLOW or DENY.\n", policy);
-            return -1;
-        }
-
-        _mergeArgs (rule, argc - 2, &(argv[2]));
-
-        result = rulechecker_add_rule (rc, policy_type, rule);
-        if (result == RC_ERR_TOO_MANY_RULES)
-        {
-            XDBG_REPLY ("Error : Too many rules were added.\n");
-            return -1;
-        }
-        else if (result == RC_ERR_PARSE_ERROR)
-        {
-            XDBG_REPLY ("Error : An error occured during parsing the rule [%s]\n", rule);
-            return -1;
-        }
-
-        XDBG_REPLY ("The rule was successfully added.\n\n");
-        rulechecker_print_rule (rc, reply);
-        return 0;
-    }
-    else if (!strcasecmp (command, "remove"))
-    {
-        const char * remove_idx;
-        int i;
-
-        if (argc < 2)
-        {
-            XDBG_REPLY ("Error : Too few arguments.\n");
-            return -1;
-        }
-
-        for (i=0; i<argc - 1; i++)
-        {
-            remove_idx = argv[i+1];
-
-            if (!strcasecmp (remove_idx, "all"))
-            {
-                rulechecker_destroy (rc);
-                rc = rulechecker_init();
-                XDBG_REPLY ("Every rules were successfully removed.\n");
-            }
-            else
-            {
-                int index = atoi (remove_idx);
-                if (isdigit (*remove_idx) && rulechecker_remove_rule (rc, index) == 0)
-                    XDBG_REPLY ("The rule [%d] was successfully removed.\n", index);
-                else
-                    XDBG_REPLY ("Rule remove fail : No such rule [%s].\n", remove_idx);
-            }
-        }
-        rulechecker_print_rule (rc, reply);
-        return 0;
-    }
-    else if (!strcasecmp (command, "print"))
-    {
-        rulechecker_print_rule (rc, reply);
-        return 0;
-    }
-    else if (!strcasecmp (command, "help"))
-    {
-        XDBG_REPLY ("%s", rulechecker_print_usage());
-        return 0;
-    }
-
-    XDBG_REPLY ("%s\nUnknown command : [%s].\n\n", rulechecker_print_usage(), command);
-
-    return 0;
+    return xDbgEvlogRuleSet (argc, argv, reply, len);
 }
 
 Bool
@@ -805,105 +625,4 @@ xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply,
     }
 
     return TRUE;
-}
-
-void
-xDbgModuleEvlogPrintEvlog (XDbgModule *pMod, int pid, char *evlog_path, char *reply, int *len)
-{
-    int fd = -1, cfd = -1;
-    int total, read_len;
-    int evlog_len;
-    pointer requestBuffer = NULL;
-    char fd_name[256];
-
-    if (!evlog_path)
-    {
-        XDBG_REPLY ("failed: no evlog path\n");
-        return;
-    }
-
-    fd = open (evlog_path, O_RDONLY);
-    if (fd < 0)
-    {
-        XDBG_REPLY ("failed: open '%s'. (%s)\n", evlog_path, strerror(errno));
-        return;
-    }
-
-    snprintf (fd_name, sizeof (fd_name), "/proc/%d/fd/1", pid);
-    cfd = open (fd_name, O_RDWR);
-    if (cfd < 0)
-    {
-        XDBG_REPLY ("failed: open consol '%s'. (%s)\n", fd_name, strerror(errno));
-        goto print_done;
-    }
-
-    while ((read_len = read (fd, &evlog_len, sizeof (int))) == sizeof (int))
-    {
-        CARD32 msec;
-        evtType type;
-        int mask;
-        EvlogClientInfo evinfo;
-        xEvent ev;
-
-        total = read_len;
-
-        read_len = read (fd, &msec, sizeof (CARD32));
-        XDBG_GOTO_IF_FAIL (read_len == sizeof (CARD32), print_done);
-        total += read_len;
-
-        read_len = read (fd, &type, sizeof (evtType));
-        XDBG_GOTO_IF_FAIL (read_len == sizeof (evtType), print_done);
-        XDBG_GOTO_IF_FAIL (type >= EVENT && type <= FLUSH, print_done);
-        total += read_len;
-
-        read_len = read (fd, &mask, sizeof (int));
-        XDBG_GOTO_IF_FAIL (read_len == sizeof (int), print_done);
-        total += read_len;
-
-        if (mask & EVTDATA_MASK_CLIENT_INFO)
-        {
-            read_len = read (fd, &evinfo, sizeof (EvlogClientInfo));
-            XDBG_GOTO_IF_FAIL (read_len == sizeof (EvlogClientInfo), print_done);
-            total += read_len;
-
-            if (mask & EVTDATA_MASK_CLIENT_REQ && evinfo.req_len > 0)
-            {
-                requestBuffer = malloc (evinfo.req_len);
-                XDBG_GOTO_IF_FAIL (requestBuffer != NULL, print_done);
-
-                read_len = read (fd, requestBuffer, evinfo.req_len);
-                XDBG_GOTO_IF_FAIL (read_len == evinfo.req_len, print_done);
-                total += read_len;
-
-                evinfo.requestBuffer = requestBuffer;
-            }
-        }
-
-        if (mask & EVTDATA_MASK_EVENT)
-        {
-            read_len = read (fd, &ev, sizeof (xEvent));
-            XDBG_GOTO_IF_FAIL (read_len == sizeof (xEvent), print_done);
-            total += read_len;
-        }
-
-        XDBG_GOTO_IF_FAIL (evlog_len == total, print_done);
-
-        evtPrintF (cfd, msec, type, &evinfo, &ev);
-
-        if (requestBuffer)
-        {
-            free (requestBuffer);
-            requestBuffer = NULL;
-        }
-    }
-
-print_done:
-    if (requestBuffer)
-        free (requestBuffer);
-
-    if (cfd >= 0)
-        close (cfd);
-
-    if (fd >= 0)
-        close (fd);
 }

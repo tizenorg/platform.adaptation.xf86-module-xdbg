@@ -162,4 +162,3 @@ void bintree_postorder_traverse (BINARY_TREE tree, BINTREE_TRAVERSE_FUNC func, v
     if (tree->head)
         bintree_postorder_traverse_recursive (tree, tree->head, tree->head, func, arg);
 }
-

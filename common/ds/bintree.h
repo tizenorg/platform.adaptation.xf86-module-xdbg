@@ -28,27 +28,39 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef _BOOL_EXP_TOKEN_H_
-#define _BOOL_EXP_TOKEN_H_
+#ifndef _BOOL_EXP_BINTREE_H_
+#define _BOOL_EXP_BINTREE_H_
 
-typedef enum
-{
-    BET_UNKNOWN = 0,
-    BET_L_BR = 1,
-    BET_R_BR = 2,
-    BET_NOT_EQ = 3,
-    BET_EQUAL = 4,
-    BET_LSS_THAN = 5,
-    BET_LSS_EQ = 6,
-    BET_GRT_THAN = 7,
-    BET_GRT_EQ = 8,
-    BET_AND = 9,
-    BET_OR = 10,
-    BET_SPACE = 11,
-    BET_SYMBOL = 12,
-    BET_NUMBER = 13,
-    BET_EOS = 14,
-} TOKEN;
+typedef struct _BINARY_TREE_NODE * BINARY_TREE_NODE;
+typedef struct _BINARY_TREE * BINARY_TREE;
+typedef int (*BINTREE_TRAVERSE_FUNC) (BINARY_TREE tree, BINARY_TREE_NODE node, BINARY_TREE_NODE parent, void * arg);
 
-#endif /* _BOOL_EXP_TOKEN_H_ */
+BINARY_TREE bintree_create_tree (int data_size);
 
+BINARY_TREE_NODE bintree_create_node (BINARY_TREE tree);
+
+BINARY_TREE_NODE bintree_get_head (BINARY_TREE tree);
+
+void bintree_set_head (BINARY_TREE tree, BINARY_TREE_NODE head);
+
+void bintree_set_left_child (BINARY_TREE_NODE node, BINARY_TREE_NODE child);
+
+void bintree_set_right_child (BINARY_TREE_NODE node, BINARY_TREE_NODE child);
+
+BINARY_TREE_NODE bintree_get_left_child (BINARY_TREE_NODE node);
+
+BINARY_TREE_NODE bintree_get_right_child (BINARY_TREE_NODE node);
+
+void * bintree_get_node_data (BINARY_TREE_NODE node);
+
+void bintree_remove_node (BINARY_TREE_NODE node);
+
+void bintree_remove_node_recursive (BINARY_TREE_NODE node);
+
+void bintree_destroy_tree (BINARY_TREE tree);
+
+void bintree_inorder_traverse (BINARY_TREE tree, BINTREE_TRAVERSE_FUNC func, void * arg);
+
+void bintree_postorder_traverse (BINARY_TREE tree, BINTREE_TRAVERSE_FUNC func, void * arg);
+
+#endif /* _BOOL_EXP_BINTREE_H_ */

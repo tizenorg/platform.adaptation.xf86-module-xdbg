@@ -397,4 +397,3 @@ int rulechecker_validate_rule (RULE_CHECKER rc, int type, int reqID, const char 
 
     return default_policy == ALLOW;
 }
-

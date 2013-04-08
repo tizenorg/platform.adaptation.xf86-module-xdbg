@@ -49,9 +49,14 @@ AC_ARG_WITH(xorg-module-dir,
                            [moduledir="$libdir/xorg/modules"])
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XDBG, xorg-server x11 dbus-1 bigreqsproto compositeproto damageproto dmxproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto scrnsaverproto videoproto xcmiscproto xextproto xf86bigfontproto xf86dgaproto xf86driproto xf86vidmodeproto xineramaproto xproto libdrm)
+PKG_CHECK_MODULES(XDBG, xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dmxproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto scrnsaverproto videoproto xcmiscproto xextproto xf86bigfontproto xf86dgaproto xf86driproto xf86vidmodeproto xineramaproto xproto libdrm)
 AC_SUBST([XDBG_CFLAGS])
 AC_SUBST([XDBG_LIBS])
+
+XDBG_CLIENT_CFLAGS="${XDBG_CFLAGS} -DXDBG_CLIENT"
+XDBG_CLIENT_LIBS="${XDBG_LIBS}"
+AC_SUBST([XDBG_CLIENT_CFLAGS])
+AC_SUBST([XDBG_CLIENT_LIBS])
 
 # Checks for header files.
 AC_HEADER_STDC
@@ -63,9 +68,10 @@ AC_SUBST([moduledir])
 AC_DEFINE_UNQUOTED(MODULE_NAME, "$MODULE_NAME", [module name])
 
 AC_OUTPUT([Makefile
-           dbus/Makefile
+           common/Makefile
            bin/Makefile
            bin/xdbg/Makefile
+           bin/xevlog_analyze/Makefile
            lib/Makefile
            lib/xdbg.pc
            module/Makefile])
@@ -74,3 +80,5 @@ echo "CFLAGS     : $CFLAGS"
 echo "LDFLAGS    : $LDFLAGS"
 echo "XDBG_CFLAGS: $XDBG_CFLAGS"
 echo "XDBG_LIBS  : $XDBG_LIBS"
+echo "XDBG_CLIENT_CFLAGS: $XDBG_CLIENT_CFLAGS"
+echo "XDBG_CLIENT_LIBS  : $XDBG_CLIENT_LIBS"

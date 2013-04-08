@@ -50,20 +50,56 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xacestr.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/XI2proto.h>
+#include <X11/Xlib.h>
 #include <windowstr.h>
+#include <sys/shm.h>
+#include <X11/extensions/XShm.h>
 
-#include <xdbg.h>
-
-#include "xdbg_module_types.h"
-#include "xdbg_module_evlog_request.h"
+#include "xdbg_types.h"
+#include "xdbg_evlog_request.h"
 
 #define UNKNOWN_EVENT "<unknown>"
 
+#ifdef XDBG_CLIENT
+static int base;
+#else
 static ExtensionEntry *xext;
+#endif
 
 static Bool
-_EvlogRequestGetExtentionEntry (void)
+_EvlogRequestGetExtentionEntry ()
 {
+#ifdef XDBG_CLIENT
+
+    static int init = 0;
+    static Bool success = FALSE;
+    Display *dpy;
+
+    if (init)
+        return success;
+
+    init = 1;
+
+    dpy = XOpenDisplay (NULL);
+    if (!dpy)
+    {
+        fprintf (stderr, "failed: open display\n");
+        exit (-1);
+    }
+
+    if (!XShmQueryExtension (dpy))
+    {
+        fprintf (stderr, "[UTILX] no XShm extension. !!\n");
+        return False;
+    }
+    printf("debug request\n");
+    base = XShmGetEventBase(dpy);
+    success = TRUE;
+    XCloseDisplay (dpy);
+    return success;
+
+#else
+
     static int init = 0;
     static Bool success = FALSE;
 
@@ -71,17 +107,18 @@ _EvlogRequestGetExtentionEntry (void)
         return success;
 
     init = 1;
-
-    xext = CheckExtension (SHMNAME); 
-    XDBG_RETURN_VAL_IF_FAIL (xext != NULL, FALSE);
+    xext = CheckExtension (SHMNAME);
+    RETURN_VAL_IF_FAIL (xext != NULL, FALSE);
 
     success = TRUE;
 
     return success;
+
+#endif
 }
 
-static Bool
-_EvlogRequestCore (xReq *req, char *buf, int remain)
+static char *
+_EvlogRequestCore (xReq *req, char *reply, int *len)
 {
     xReq *stuff = req;
 
@@ -90,23 +127,23 @@ _EvlogRequestCore (xReq *req, char *buf, int remain)
     case X_PutImage:
         {
             xPutImageReq *stuff = (xPutImageReq *)req;
-            snprintf (buf, remain, ": XID(%lx) size(%dx%d) dst(%d,%d)",
+            XDBG_REPLY (": XID(%lx) size(%dx%d) dst(%d,%d)",
                 stuff->drawable,
                 stuff->width,
                 stuff->height,
                 stuff->dstX,
                 stuff->dstY);
-            return TRUE;
+            return reply;
         }
     default:
             break;
     }
 
-    return FALSE;
+    return reply;
 }
 
-static Bool
-_EvlogRequestShm (xReq *req, char *buf, int remain)
+static char *
+_EvlogRequestShm (xReq *req, char *reply, int *len)
 {
     xReq *stuff = req;
 
@@ -115,7 +152,7 @@ _EvlogRequestShm (xReq *req, char *buf, int remain)
     case X_ShmPutImage:
         {
             xShmPutImageReq *stuff = (xShmPutImageReq *)req;
-            snprintf (buf, remain, ": XID(%lx) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
+            XDBG_REPLY (": XID(%lx) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
                 stuff->drawable,
                 stuff->totalWidth,
                 stuff->totalHeight,
@@ -125,43 +162,49 @@ _EvlogRequestShm (xReq *req, char *buf, int remain)
                 stuff->srcHeight,
                 stuff->dstX,
                 stuff->dstY);
-            return TRUE;
+            return reply;
         }
     default:
             break;
     }
 
-    return FALSE;
+    return reply;
 }
 
-Bool
-xDbgModuleEvlogReqeust (EvlogClientInfo *evinfo, xReq *req, char *buf, int remain)
+char *
+xDbgEvlogReqeust (EvlogInfo *evinfo, char *reply, int *len)
 {
-    const char *req_name;
-    int len;
+    EvlogRequest req;
+    xReq *xReq = NULL;
 
-    if (!_EvlogRequestGetExtentionEntry () || !req)
-        return FALSE;
+    RETURN_VAL_IF_FAIL (evinfo != NULL, reply);
+    RETURN_VAL_IF_FAIL (evinfo->type == REQUEST, reply);
 
-    if (req->reqType < EXTENSION_BASE)
+    req = evinfo->req;
+    xReq = req.ptr;
+
+    if (!_EvlogRequestGetExtentionEntry ())
+        return reply;
+
+    XDBG_REPLY ("%s", req.name);
+
+    if (xReq->reqType < EXTENSION_BASE)
     {
-        req_name = LookupRequestName (req->reqType, 0);
-        len = snprintf (buf, remain, "%s", req_name);
-        buf += len;
-        remain -= len;
-
-        return _EvlogRequestCore (req, buf, remain);
+        return _EvlogRequestCore (xReq, reply, len);
     }
     else
     {
-        req_name = LookupRequestName (req->reqType, req->data);
-        len = snprintf (buf, remain, "%s", req_name);
-        buf += len;
-        remain -= len;
 
-        if (req->reqType == xext->base)
-           return _EvlogRequestShm (req, buf, remain);
+#ifdef XDBG_CLIENT
+        if (xReq->reqType == base)
+#else
+        if (xReq->reqType == xext->base)
+#endif
+
+        {
+            return _EvlogRequestShm (xReq, reply, len);
+        }
     }
 
-    return FALSE;
+    return reply;
 }
