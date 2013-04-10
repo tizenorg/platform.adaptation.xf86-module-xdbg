@@ -70,12 +70,15 @@ typedef struct _xdbgPageFlipInfo
     struct xorg_list link;
 } XDbgPageFlipInfo, *XDbgPageFlipInfoPtr;
 
+static int init_drmevent = 0;
 static struct xorg_list vblank_event_list;
 static struct xorg_list pageflip_event_list;
 
 API void
 xDbgLogDrmEventInit ()
 {
+    init_drmevent = 1;
+
     xorg_list_init (&vblank_event_list);
     xorg_list_init (&pageflip_event_list);
 }
@@ -148,7 +151,7 @@ xDbgLogDrmEventRemovePageflip (void *pageflip_data)
 }
 
 API void
-xDbgLogDrmEventPendingLists ( char *reply, int *remain)
+xDbgLogDrmEventPendingLists ( char *reply, int *len)
 {
     XDbgVblankInfoPtr vblank_ref = NULL;
     XDbgVblankInfoPtr vblank_next = NULL;
@@ -156,67 +159,48 @@ xDbgLogDrmEventPendingLists ( char *reply, int *remain)
     XDbgPageFlipInfoPtr flip_next = NULL;
     Bool check_flip = FALSE;
     Bool check_vblank = FALSE;
-    char *p = reply;
-    int len;
 
-    len = snprintf (p, *remain, "[vblank event pending]\n");
-    p += len;
-    *remain -= len;
+    if (!init_drmevent)
+    {
+        XDBG_REPLY ("drmevent_pending is not supported.\n");
+        return;
+    }
+
+
+    XDBG_REPLY ("[vblank event pending]\n");
     xorg_list_for_each_entry_safe (vblank_ref, vblank_next, &vblank_event_list, link)
     {
         check_vblank = TRUE;
 
         if (vblank_ref->flag > -1)
         {
-            len = snprintf (p, *remain, "req_time        client_id       draw_id       crtc_pipe     vblank_type\n");
-            p += len;
-           *remain -= len;
-           len = snprintf (p, *remain, "[%10.3f]    %5d          0x%x     %5d          %5d\n",
+            XDBG_REPLY ("req_time        client_id       draw_id       crtc_pipe     vblank_type\n");
+            XDBG_REPLY ("[%10.3f]    %5d          0x%x     %5d          %5d\n",
                        (double)vblank_ref->time/1000.0,
                        (unsigned int)vblank_ref->client_idx,
                        (unsigned int)vblank_ref->draw_id, vblank_ref->crtc_pipe, vblank_ref->flag);
-            p += len;
-           *remain -= len;
         }
         else
         {
-            len = snprintf (p, *remain, "req_time        vblank_type\n");
-            p += len;
-           *remain -= len;
-            len = snprintf (p, *remain, "[%10.3f]             %d\n", (double)vblank_ref->time/1000.0, vblank_ref->flag);
-            p += len;
-           *remain -= len;
+            XDBG_REPLY ("req_time        vblank_type\n");
+            XDBG_REPLY ("[%10.3f]             %d\n", (double)vblank_ref->time/1000.0, vblank_ref->flag);
         }
     }
     if (!check_vblank)
-    {
-        len = snprintf (p, *remain, "\t no pending events\n");
-        p += len;
-        *remain -= len;
-    }
+        XDBG_REPLY ("\t no pending events\n");
 
-    len = snprintf (p, *remain, "[flip event pending]\n");
-    p += len;
-    *remain -= len;
+    XDBG_REPLY ("[flip event pending]\n");
     xorg_list_for_each_entry_safe (flip_ref, flip_next, &pageflip_event_list, link)
     {
         check_flip = TRUE;
 
-        len = snprintf (p, *remain, "req_time        client_id       draw_id       crtc_pipe\n");
-        p += len;
-        *remain -= len;
-        len = snprintf (p, *remain, "[%10.3f]    %5d           0x%x      %4d\n",
+        XDBG_REPLY ("req_time        client_id       draw_id       crtc_pipe\n");
+        XDBG_REPLY ("[%10.3f]    %5d           0x%x      %4d\n",
                    (double)flip_ref->time/1000.0, (unsigned int)flip_ref->client_idx,
                    (unsigned int)flip_ref->draw_id, flip_ref->crtc_pipe);
-        p += len;
-        *remain -= len;
     }
     if (!check_flip)
-    {
-        len = snprintf (p, *remain, "\t no pending events\n");
-        p += len;
-        *remain -= len;
-    }
+        XDBG_REPLY ("\t no pending events\n");
 }
 
 

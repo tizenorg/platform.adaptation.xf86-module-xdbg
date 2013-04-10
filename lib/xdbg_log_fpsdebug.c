@@ -45,6 +45,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define API __attribute__ ((visibility("default")))
 #endif
 
+static int init_fpsdebug = 0;
 static Bool g_on = FALSE;
 
 struct _fpsDebug
@@ -128,6 +129,8 @@ xDbgLogFpsDebugCreate ()
 {
     FpsDebugPtr pFpsDebug = NULL;
 
+    init_fpsdebug = 1;
+
     pFpsDebug = calloc (1, sizeof (struct _fpsDebug));
     if (!pFpsDebug)
     {
@@ -155,9 +158,6 @@ xDbgLogFpsDebugCount (FpsDebugPtr pFpsDebug, int connector_type)
     if (!g_on)
         return;
 
-    if (!pFpsDebug)
-        return;
-
     if (connector_type != pFpsDebug->connector_type)
     {
         pFpsDebug->connector_type = connector_type;
@@ -179,8 +179,14 @@ xDbgLogFpsDebugCount (FpsDebugPtr pFpsDebug, int connector_type)
 }
 
 API void
-xDbgLogFpsDebug (int on)
+xDbgLogFpsDebug (char *reply, int *len, int on)
 {
+    if (!init_fpsdebug)
+    {
+        XDBG_REPLY ("fps_debug is not supported.\n");
+        return;
+    }
+
     if (g_on != on)
         g_on = on;
 }

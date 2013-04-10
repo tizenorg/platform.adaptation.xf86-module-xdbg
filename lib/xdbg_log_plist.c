@@ -81,6 +81,7 @@ typedef struct {
     struct xorg_list refPixmaps;
 } XDbgDrawable;
 
+static int init_plist = 0;
 static struct xorg_list xdbgPixmaps;
 static struct xorg_list xdbgDrawables;
 static PixmapPtr pPixRoot = NULL;
@@ -500,6 +501,8 @@ XDbgLogDestroyWindow (WindowPtr pWindow)
 API void
 xDbgLogPListInit (ScreenPtr pScreen)
 {
+    init_plist = 1;
+
     xorg_list_init (&xdbgPixmaps);
     xorg_list_init (&xdbgDrawables);
 
@@ -631,6 +634,12 @@ xDbgLogPListDrawRemoveRefPixmap (DrawablePtr pDraw, PixmapPtr pRefPixmap)
 API void
 xDbgLogPList (char *reply, int *len)
 {
+    if (!init_plist)
+    {
+        XDBG_REPLY ("plist is not supported.\n");
+        return;
+    }
+
     XDBG_REPLY ("\n\n====================================\n");
     XDBG_REPLY ("    Total:%d, Peek:%d\n", (unsigned int)total_size/1024, (unsigned int)peek_size/1024);
     XDBG_REPLY ( "====================================\n");

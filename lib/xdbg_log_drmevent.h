@@ -41,7 +41,7 @@ void xDbgLogDrmEventRemoveVblank (void *vblank_data);
 void *xDbgLogDrmEventAddPageflip (int crtc_pipe, unsigned int client_idx, unsigned int draw_id);
 void xDbgLogDrmEventRemovePageflip (void *pageflip_data);
 
-void xDbgLogDrmEventPendingLists ( char *reply, int *remain);
+void xDbgLogDrmEventPendingLists ( char *reply, int *len);
 
 
 #endif  /* __XDBG_LOG_DRMEVENT_H__ */

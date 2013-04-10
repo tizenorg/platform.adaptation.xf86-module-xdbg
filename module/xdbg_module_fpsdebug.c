@@ -39,6 +39,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 void
 xDbgModuleFpsDebug (XDbgModule *pMod, int on, char *reply, int *len)
 {
-    xDbgLogFpsDebug (on);
+    xDbgLogFpsDebug (reply, len, on);
 }
 

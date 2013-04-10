@@ -38,7 +38,7 @@ FpsDebugPtr xDbgLogFpsDebugCreate  (void);
 void        xDbgLogFpsDebugDestroy (FpsDebugPtr pFpsDebug);
 void        xDbgLogFpsDebugCount (FpsDebugPtr pFpsDebug, int connector_type);
 
-void        xDbgLogFpsDebug        (int on);
+void        xDbgLogFpsDebug        (char *reply, int *len, int on);
 
 #endif  /* __XDBG_LOG_FPSDEBUG_H__ */
 
