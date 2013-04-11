@@ -44,6 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <unistd.h>
 
 #include "xdbg.h"
+#include "xdbg_log_int.h"
 
 #include <list.h>
 

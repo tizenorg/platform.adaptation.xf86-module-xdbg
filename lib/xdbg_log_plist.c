@@ -42,7 +42,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <pixmap.h>
 #include <list.h>
 #include "xdbg.h"
-#include "xdbg_log_plist.h"
+#include "xdbg_log_int.h"
 
 /* for debug message */
 #define MMEM    XDBG_M('M','E','M',0)

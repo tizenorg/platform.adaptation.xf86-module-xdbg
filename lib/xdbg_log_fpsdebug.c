@@ -39,7 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xf86drm.h>
 #include "xorg-server.h"
 #include "xdbg.h"
-#include "xdbg_log_fpsdebug.h"
+#include "xdbg_log_int.h"
 
 #ifndef API
 #define API __attribute__ ((visibility("default")))

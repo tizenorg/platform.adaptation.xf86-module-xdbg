@@ -34,6 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #endif
 
 #include "xdbg.h"
+#include "xdbg_log_int.h"
 #include "xdbg_module_types.h"
 
 void
