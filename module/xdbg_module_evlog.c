@@ -221,6 +221,9 @@ static void evtPrintF (int fd, CARD32 msec, evtType type, EvlogClientInfo *evinf
     static CARD32 prev;
     xReq *req = NULL;
 
+    XDBG_RETURN_IF_FAIL (type >= 0 && (sizeof (evt_dir) / sizeof (char*)));
+    XDBG_RETURN_IF_FAIL (type >= 0 && (sizeof (evt_type) / sizeof (char*)));
+
     if(evinfo)
     {
         req = (xReq *)evinfo->requestBuffer;
@@ -850,6 +853,7 @@ xDbgModuleEvlogPrintEvlog (XDbgModule *pMod, int pid, char *evlog_path, char *re
 
         read_len = read (fd, &type, sizeof (evtType));
         XDBG_GOTO_IF_FAIL (read_len == sizeof (evtType), print_done);
+        XDBG_GOTO_IF_FAIL (type >= EVENT && type <= FLUSH, print_done);
         total += read_len;
 
         read_len = read (fd, &mask, sizeof (int));
