@@ -1,6 +1,6 @@
 Name: xorg-x11-module-xdbg
 Summary: Xserver debug module
-Version: 0.1.9
+Version: 0.1.10
 Release:    1
 Group:      System/Libraries
 License:    MIT

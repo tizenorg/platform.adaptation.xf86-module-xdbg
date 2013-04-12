@@ -358,14 +358,15 @@ static Bool
 XDbgLogDestroyPixmap (PixmapPtr pPixmap)
 {
     Bool ret;
+
     ScreenPtr pScreen = pPixmap->drawable.pScreen;
+
+    if (pPixmap->refcnt == 1)
+        _removeXDbgPixmap (pPixmap);
 
     pScreen->DestroyPixmap = fnDestroyPixmap;
     ret = pScreen->DestroyPixmap(pPixmap);
     pScreen->DestroyPixmap = XDbgLogDestroyPixmap;
-
-    if (pPixmap->refcnt == 0)
-        _removeXDbgPixmap (pPixmap);
 
     return ret;
 }
