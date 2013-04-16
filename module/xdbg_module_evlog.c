@@ -239,6 +239,7 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
         evtRecord (xev_trace_record_fd, &evinfo);
     else
         evtPrintF (xev_trace_fd, &evinfo);
+
 }
 
 static const char*
@@ -494,6 +495,10 @@ void
 xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name, char *reply, int *len)
 {
     int ret = TRUE;
+
+    on = (on)?TRUE:FALSE;
+    if (xev_trace_on == on)
+        return;
 
     xev_trace_on = on;
 
