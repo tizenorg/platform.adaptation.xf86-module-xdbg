@@ -127,7 +127,7 @@ _EvlogRequestCore (xReq *req, char *reply, int *len)
     case X_PutImage:
         {
             xPutImageReq *stuff = (xPutImageReq *)req;
-            XDBG_REPLY (": XID(%lx) size(%dx%d) dst(%d,%d)",
+            REPLY (": XID(%lx) size(%dx%d) dst(%d,%d)",
                 stuff->drawable,
                 stuff->width,
                 stuff->height,
@@ -152,7 +152,7 @@ _EvlogRequestShm (xReq *req, char *reply, int *len)
     case X_ShmPutImage:
         {
             xShmPutImageReq *stuff = (xShmPutImageReq *)req;
-            XDBG_REPLY (": XID(%lx) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
+            REPLY (": XID(%lx) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
                 stuff->drawable,
                 stuff->totalWidth,
                 stuff->totalHeight,
@@ -186,7 +186,7 @@ xDbgEvlogReqeust (EvlogInfo *evinfo, char *reply, int *len)
     if (!_EvlogRequestGetExtentionEntry ())
         return reply;
 
-    XDBG_REPLY ("%s", req.name);
+    REPLY ("%s", req.name);
 
     if (xReq->reqType < EXTENSION_BASE)
     {

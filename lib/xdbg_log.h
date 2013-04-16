@@ -103,6 +103,16 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 #define XDBG_GOTO_IF_FAIL(cond, dst)       {if (!(cond)) { ErrorF ("[%s] '%s' failed.\n", __FUNCTION__, #cond); goto dst; }}
 #define XDBG_GOTO_IF_ERRNO(cond, dst, errno)       {if (!(cond)) { ErrorF ("[%s] '%s' failed. (err=%s(%d))\n", __FUNCTION__, #cond, strerror(errno), errno); goto dst; }}
 
+#define XDBG_REPLY(fmt, ARG...)  \
+    do { \
+        if (reply && len && *len > 0) \
+        { \
+            int s = snprintf (reply, *len, fmt, ##ARG); \
+            reply += s; \
+            *len -= s; \
+        } \
+    } while (0)
+
 unsigned int xDbgLogGetModule (char *name);
 
 #define _C(b,s)             (((b) >> (s)) & 0xFF)

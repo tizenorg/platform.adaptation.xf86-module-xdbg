@@ -134,7 +134,7 @@ xDbgEvlogEvent (EvlogInfo *evinfo, char *reply, int *len)
     if (!_EvlogEventGetExtentionEntry ())
         return reply;
 
-    XDBG_REPLY ("%s", ev.name);
+    REPLY ("%s", ev.name);
 
 #ifdef XDBG_CLIENT
     if (xEvt->u.u.type == damage_base + XDamageNotify)
@@ -143,7 +143,7 @@ xDbgEvlogEvent (EvlogInfo *evinfo, char *reply, int *len)
 #endif
     {
         xDamageNotifyEvent *damage_e = (xDamageNotifyEvent*)xEvt;
-        XDBG_REPLY (": XID(%lx) area(%d,%d %dx%d) geo(%d,%d %dx%d)",
+        REPLY (": XID(%lx) area(%d,%d %dx%d) geo(%d,%d %dx%d)",
             damage_e->drawable,
             damage_e->area.x,
             damage_e->area.y,

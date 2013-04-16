@@ -114,7 +114,7 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
 
         if (argc < 3)
         {
-            XDBG_REPLY ("Error : Too few arguments.\n");
+            REPLY ("Error : Too few arguments.\n");
             return FALSE;
         }
 
@@ -124,7 +124,7 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
             policy_type = DENY;
         else
         {
-            XDBG_REPLY ("Error : Unknown policy : [%s].\n          Policy should be ALLOW or DENY.\n", policy);
+            REPLY ("Error : Unknown policy : [%s].\n          Policy should be ALLOW or DENY.\n", policy);
             return FALSE;
         }
 
@@ -133,16 +133,16 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
         result = rulechecker_add_rule (rc, policy_type, rule);
         if (result == RC_ERR_TOO_MANY_RULES)
         {
-            XDBG_REPLY ("Error : Too many rules were added.\n");
+            REPLY ("Error : Too many rules were added.\n");
             return FALSE;
         }
         else if (result == RC_ERR_PARSE_ERROR)
         {
-            XDBG_REPLY ("Error : An error occured during parsing the rule [%s]\n", rule);
+            REPLY ("Error : An error occured during parsing the rule [%s]\n", rule);
             return FALSE;
         }
 
-        XDBG_REPLY ("The rule was successfully added.\n\n");
+        REPLY ("The rule was successfully added.\n\n");
         rulechecker_print_rule (rc, reply);
         return TRUE;
     }
@@ -153,7 +153,7 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
 
         if (argc < 2)
         {
-            XDBG_REPLY ("Error : Too few arguments.\n");
+            REPLY ("Error : Too few arguments.\n");
             return FALSE;
         }
 
@@ -165,15 +165,15 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
             {
                 rulechecker_destroy (rc);
                 rc = rulechecker_init();
-                XDBG_REPLY ("Every rules were successfully removed.\n");
+                REPLY ("Every rules were successfully removed.\n");
             }
             else
             {
                 int index = atoi (remove_idx);
                 if (isdigit (*remove_idx) && rulechecker_remove_rule (rc, index) == 0)
-                    XDBG_REPLY ("The rule [%d] was successfully removed.\n", index);
+                    REPLY ("The rule [%d] was successfully removed.\n", index);
                 else
-                    XDBG_REPLY ("Rule remove fail : No such rule [%s].\n", remove_idx);
+                    REPLY ("Rule remove fail : No such rule [%s].\n", remove_idx);
             }
         }
         rulechecker_print_rule (rc, reply);
@@ -186,11 +186,11 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
     }
     else if (!_strcasecmp (command, "help"))
     {
-        XDBG_REPLY ("%s", rulechecker_print_usage());
+        REPLY ("%s", rulechecker_print_usage());
         return TRUE;
     }
 
-    XDBG_REPLY ("%s\nUnknown command : [%s].\n\n", rulechecker_print_usage(), command);
+    REPLY ("%s\nUnknown command : [%s].\n\n", rulechecker_print_usage(), command);
 
     return TRUE;
 }
@@ -233,7 +233,7 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_dir) / sizeof (char*)));
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_type) / sizeof (char*)));
 
-    XDBG_REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %s",
+    REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %s",
                 evinfo->time / 1000.0,
                 evinfo->time - prev,
                 xDbgEvlogGetCmd (evinfo->client.command),
@@ -244,15 +244,15 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
 
     if (evinfo->type == REQUEST)
     {
-        XDBG_REPLY ("(");
+        REPLY ("(");
         reply = xDbgEvlogReqeust (evinfo, reply, len);
-        XDBG_REPLY (")");
+        REPLY (")");
     }
     else if (evinfo->type == EVENT)
     {
-        XDBG_REPLY ("(");
+        REPLY ("(");
         reply = xDbgEvlogEvent (evinfo, reply, len);
-        XDBG_REPLY (")");
+        REPLY (")");
     }
     else
     {
@@ -261,10 +261,10 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
             evlog_name = evinfo->req.name;
         else if (evinfo->type == EVENT)
             evlog_name = evinfo->evt.name;
-        XDBG_REPLY ("(%s)", evlog_name);
+        REPLY ("(%s)", evlog_name);
     }
 
-    XDBG_REPLY ("\n");
+    REPLY ("\n");
 
     prev = evinfo->time;
 }
