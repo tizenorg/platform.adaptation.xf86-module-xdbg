@@ -180,9 +180,6 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
 {
     EvlogInfo evinfo = {0,};
 
-    if (xev_trace_on == FALSE)
-        return;
-
     /* evinfo.type */
     evinfo.type = type;
 
@@ -279,12 +276,18 @@ _traceGetWindowName (ClientPtr client, Window window)
 static void
 _traceFlush (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 {
+    if (xev_trace_on == FALSE)
+        return;
+
     evtPrint (FLUSH, NULL, NULL);
 }
 
 static void
 _traceAReply (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 {
+    if (xev_trace_on == FALSE)
+        return;
+
     ReplyInfoRec *pri = (ReplyInfoRec*)calldata;
 
     evtPrint (REPLY, pri->client, NULL);
@@ -293,6 +296,9 @@ _traceAReply (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 static void
 _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 {
+    if (xev_trace_on == FALSE)
+        return;
+
     EventInfoRec *pei = (EventInfoRec*)calldata;
     ClientPtr pClient;
     ModuleClientInfo *info;
