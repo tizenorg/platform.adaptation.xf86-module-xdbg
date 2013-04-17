@@ -866,7 +866,7 @@ xDbgModuleEvlogPrintEvlog (XDbgModule *pMod, int pid, char *evlog_path, char *re
             XDBG_GOTO_IF_FAIL (read_len == sizeof (EvlogClientInfo), print_done);
             total += read_len;
 
-            if (mask & EVTDATA_MASK_CLIENT_REQ && evinfo.req_len > 0)
+            if ((mask & EVTDATA_MASK_CLIENT_REQ) && (evinfo.req_len > 0))
             {
                 requestBuffer = malloc (evinfo.req_len);
                 XDBG_GOTO_IF_FAIL (requestBuffer != NULL, print_done);
