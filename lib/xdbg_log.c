@@ -113,7 +113,7 @@ _LogModule (void * handle, int logoption, const char * file, int line, const cha
         int   remain = BUF_LEN;
         int   len = 0;
 
-        len = snprintf (buf, remain, "[%s]", name?name:"");
+        len = snprintf (buf, remain, "[%10.3f][%s]", GetTimeInMillis()/1000.0, name?name:"");
         buf += len;
         remain -= len;
 

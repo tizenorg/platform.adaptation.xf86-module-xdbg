@@ -383,6 +383,9 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 static void
 _traceACoreEvents (CallbackListPtr *pcbl, pointer unused, pointer calldata)
 {
+    if (xev_trace_on == FALSE)
+        return;
+
     XaceCoreDispatchRec *rec = calldata;
 
     XDBG_RETURN_IF_FAIL (rec != NULL);
@@ -393,6 +396,9 @@ _traceACoreEvents (CallbackListPtr *pcbl, pointer unused, pointer calldata)
 static void
 _traceAExtEvents (CallbackListPtr *pcbl, pointer unused, pointer calldata)
 {
+    if (xev_trace_on == FALSE)
+        return;
+
     XaceExtAccessRec *rec = calldata;
 
     XDBG_RETURN_IF_FAIL (rec != NULL);
