@@ -87,7 +87,7 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo)
         return;
     }
 
-    if (!eo->path_name)
+    if (strlen (eo->path_name) <= 0)
     {
         printf ("failed: no evlog path\n");
         return;
