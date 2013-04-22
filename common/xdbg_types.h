@@ -113,4 +113,17 @@ typedef struct _EvlogInfo
     CARD32       time;
 } EvlogInfo;
 
+
+typedef struct _ExtensionInfo ExtensionInfo;
+
+struct _ExtensionInfo
+{
+    void  (*get_base_func) (void *dpy, ExtensionInfo *extinfo);
+    int     opcode;
+    int     evt_base;
+    int     err_base;
+    char* (*req_func) (xReq *req, char *reply, int *len);
+    char* (*evt_func) (xEvent *evt, int first_base, char *reply, int *len);
+};
+
 #endif

@@ -29,27 +29,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_EVLOG_H__
-#define __XDBG_EVLOG_H__
+#ifndef __XDBG_EVLOG_RANDR_H__
+#define __XDBG_EVLOG_RANDR_H__
 
 #include "xdbg_types.h"
-#include "xdbg_evlog_request.h"
-#include "xdbg_evlog_event.h"
 
-#include "xdbg_evlog_core.h"
-#include "xdbg_evlog_dri2.h"
-#include "xdbg_evlog_composite.h"
-#include "xdbg_evlog_damage.h"
-#include "xdbg_evlog_gesture.h"
-#include "xdbg_evlog_xext.h"
-#include "xdbg_evlog_randr.h"
-#include "xdbg_evlog_xinput.h"
-#include "xdbg_evlog_xv.h"
-
-
-char*   xDbgEvlogGetCmd         (char *path);
-Bool    xDbgEvlogRuleSet        (const int argc, const char **argv, char *reply, int *len);
-Bool    xDbgEvlogRuleValidate   (EvlogInfo *evinfo);
-void    xDbgEvlogFillLog        (EvlogInfo *evinfo, char *reply, int *len);
+void    xDbgEvlogRandrGetBase (void *dpy, ExtensionInfo *extinfo);
 
 #endif

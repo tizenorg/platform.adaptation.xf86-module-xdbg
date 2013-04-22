@@ -39,6 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <fcntl.h>
 #include <unistd.h>
 #include <time.h>
+#include <X11/Xlib.h>
 
 #include "xdbg_types.h"
 #include "xdbg_evlog.h"
@@ -225,10 +226,107 @@ xDbgEvlogRuleValidate (EvlogInfo *evinfo)
                                       cmd);
 }
 
+
+ExtensionInfo Evlog_extensions[] = {
+    {xDbgEvlogCompositeGetBase, 0, 0, 0, NULL},
+    {xDbgEvlogDamageGetBase, 0, 0, 0, NULL},
+    {xDbgEvlogDri2GetBase, 0, 0, 0, NULL},
+    {xDbgEvlogGestureGetBase, 0, 0, 0, NULL},
+    {xDbgEvlogRandrGetBase, 0, 0, 0, NULL},
+    {xDbgEvlogXextDpmsGetBase, 0, 0, 0, NULL},
+    {xDbgEvlogXextShmGetBase, 0, 0, 0, NULL},
+    {xDbgEvlogXextSyncGetBase, 0, 0, 0, NULL},
+    {xDbgEvlogXextXtestGetBase, 0, 0, 0, NULL},
+    {xDbgEvlogXextXtestExt1GetBase, 0, 0, 0, NULL},
+    {xDbgEvlogXvGetBase, 0, 0, 0, NULL}
+};
+ExtensionInfo* Sorted_Evlog_extensions;
+
+static void
+_ExtensionsSwap(ExtensionInfo* first, ExtensionInfo* second)
+{
+    ExtensionInfo temp;
+
+    temp = *first ;
+    *first = *second ;
+    *second = temp ;
+}
+
+static Bool
+_SortEvlogExtensions ()
+{
+    int i,j;
+    int swap;
+
+    Sorted_Evlog_extensions = (ExtensionInfo*)malloc(sizeof(Evlog_extensions));
+    RETURN_VAL_IF_FAIL (Sorted_Evlog_extensions != NULL, FALSE);
+
+    memcpy(Sorted_Evlog_extensions, Evlog_extensions, sizeof(Evlog_extensions));
+
+    for (i = 0 ; i < sizeof (Evlog_extensions) / sizeof (ExtensionInfo) - 1 ; i++)
+    {
+        swap = 0;
+        for (j = 1 ; j < sizeof (Evlog_extensions) / sizeof (ExtensionInfo) - i ; j++)
+        {
+            if(Sorted_Evlog_extensions[j-1].evt_base > Sorted_Evlog_extensions[j].evt_base)
+            {
+                _ExtensionsSwap(&Sorted_Evlog_extensions[j-1], &Sorted_Evlog_extensions[j]);
+                swap = 1;
+            }
+        }
+        if (!swap) break;
+    }
+
+    return TRUE;
+}
+
+
+static Bool
+_EvlogGetExtentionEntry (int *return_extensions_size)
+{
+    static int init = 0;
+    static Bool success = FALSE;
+    Display *dpy = NULL;
+    int i;
+
+    if (init)
+        return success;
+
+    init = 1;
+
+#ifdef XDBG_CLIENT
+    dpy = XOpenDisplay (NULL);
+    if (!dpy)
+    {
+        fprintf (stderr, "failed: open display\n");
+        exit (-1);
+    }
+#endif
+
+    for (i = 0 ; i < sizeof (Evlog_extensions) / sizeof (ExtensionInfo); i++)
+    {
+        Evlog_extensions[i].get_base_func (dpy, Evlog_extensions + i);
+    }
+
+    if(!_SortEvlogExtensions ())
+        return FALSE;
+
+#ifdef XDBG_CLIENT
+    XCloseDisplay (dpy);
+#endif
+
+    *return_extensions_size = sizeof(Evlog_extensions);
+    success = TRUE;
+
+    return success;
+}
+
+
 void
 xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
 {
     static CARD32 prev;
+    static int Extensions_size = 0;
 
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_dir) / sizeof (char*)));
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_type) / sizeof (char*)));
@@ -242,16 +340,16 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
                 evt_dir[evinfo->type],
                 evt_type[evinfo->type]);
 
-    if (evinfo->type == REQUEST)
+    if (evinfo->type == REQUEST && _EvlogGetExtentionEntry (&Extensions_size))
     {
         REPLY ("(");
-        reply = xDbgEvlogReqeust (evinfo, reply, len);
+        reply = xDbgEvlogReqeust (evinfo, Extensions_size, reply, len);
         REPLY (")");
     }
-    else if (evinfo->type == EVENT)
+    else if (evinfo->type == EVENT && _EvlogGetExtentionEntry (&Extensions_size))
     {
         REPLY ("(");
-        reply = xDbgEvlogEvent (evinfo, reply, len);
+        reply = xDbgEvlogEvent (evinfo, Extensions_size, reply, len);
         REPLY (")");
     }
     else
@@ -268,3 +366,6 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
 
     prev = evinfo->time;
 }
+
+
+

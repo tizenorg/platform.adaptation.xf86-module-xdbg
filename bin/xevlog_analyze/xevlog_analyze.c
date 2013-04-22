@@ -114,6 +114,8 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo)
         char log[1024];
         int size = sizeof (log);
 
+        memset (&evinfo, 0, sizeof (EvlogInfo));
+
         total = read_len;
 
         read_len = read (fd, &evinfo.time, sizeof (CARD32));
@@ -142,15 +144,15 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo)
             GOTO_IF_FAIL (read_len == sizeof(EvlogRequest), print_done);
             total += read_len;
 
-            evinfo.req.ptr = malloc (sizeof(xReq));
+            evinfo.req.ptr = malloc (evinfo.req.length * 4);
             GOTO_IF_FAIL (evinfo.req.ptr != NULL, print_done);
 
-            read_len = read (fd, evinfo.req.ptr, sizeof (xReq));
-            GOTO_IF_FAIL (read_len == sizeof(xReq), print_done);
+            read_len = read (fd, evinfo.req.ptr, (evinfo.req.length * 4));
+            GOTO_IF_FAIL (read_len == (evinfo.req.length * 4), print_done);
             total += read_len;
         }
 
-        else if (evinfo.mask & EVLOG_MASK_EVENT)
+        if (evinfo.mask & EVLOG_MASK_EVENT)
         {
             read_len = read (fd, &evinfo.evt, sizeof(EvlogEvent));
             GOTO_IF_FAIL (read_len == sizeof(EvlogEvent), print_done);
@@ -174,7 +176,7 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo)
             evinfo.req.ptr = NULL;
         }
 
-        else if (evinfo.evt.ptr)
+        if (evinfo.evt.ptr)
         {
             free (evinfo.evt.ptr);
             evinfo.evt.ptr = NULL;
@@ -186,7 +188,7 @@ print_done:
     if (evinfo.req.ptr)
         free (evinfo.req.ptr);
 
-    else if (evinfo.evt.ptr)
+    if (evinfo.evt.ptr)
         free (evinfo.evt.ptr);
 
     if (cfd >= 0)

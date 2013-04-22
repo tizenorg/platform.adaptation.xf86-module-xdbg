@@ -49,111 +49,68 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xace.h>
 #include <xacestr.h>
 #include <X11/Xatom.h>
-#include <X11/extensions/damageproto.h>
-#include <X11/extensions/damagewire.h>
-#include <X11/extensions/XI2proto.h>
 #include <X11/Xlib.h>
 #include <windowstr.h>
-#include <X11/extensions/Xdamage.h>
 
 #include "xdbg_types.h"
+#include "xdbg_evlog.h"
 #include "xdbg_evlog_event.h"
 
 
 #define UNKNOWN_EVENT "<unknown>"
 
-#ifdef XDBG_CLIENT
-static int damage_base;
-static int damage_err_base;
-#else
-static ExtensionEntry *damage;
-#endif
-
-static Bool
-_EvlogEventGetExtentionEntry ()
-{
-#ifdef XDBG_CLIENT
-
-    static int init = 0;
-    static Bool success = FALSE;
-    Display *dpy;
-
-    if (init)
-        return success;
-
-    init = 1;
-
-    dpy = XOpenDisplay (NULL);
-    if (!dpy)
-    {
-        fprintf (stderr, "failed: open display\n");
-        exit (-1);
-    }
-
-    if (!XDamageQueryExtension(dpy, &damage_base, &damage_err_base))
-    {
-        fprintf (stderr, "[UTILX] no X Damage extension. \n");
-        return False;
-    }
-    success = TRUE;
-    XCloseDisplay (dpy);
-    return success;
-
-#else
-
-    static int init = 0;
-    static Bool success = FALSE;
-
-    if (init)
-        return success;
-
-    init = 1;
-    damage = CheckExtension (DAMAGE_NAME);
-    RETURN_VAL_IF_FAIL (damage != NULL, FALSE);
-
-    success = TRUE;
-
-    return success;
-
-#endif
-}
-
+extern ExtensionInfo* Sorted_Evlog_extensions;
 
 char *
-xDbgEvlogEvent (EvlogInfo *evinfo, char *reply, int *len)
+xDbgEvlogEvent (EvlogInfo *evinfo, int Extensions_size, char *reply, int *len)
 {
     EvlogEvent   ev;
     xEvent *xEvt = NULL;
+    int type;
 
     RETURN_VAL_IF_FAIL (evinfo != NULL, reply);
     RETURN_VAL_IF_FAIL (evinfo->type == EVENT, reply);
 
     ev = evinfo->evt;
     xEvt = ev.ptr;
-
-    if (!_EvlogEventGetExtentionEntry ())
-        return reply;
+    type = xEvt->u.u.type;
 
     REPLY ("%s", ev.name);
 
-#ifdef XDBG_CLIENT
-    if (xEvt->u.u.type == damage_base + XDamageNotify)
-#else
-    if (xEvt->u.u.type == damage->eventBase + XDamageNotify)
-#endif
+    if (type > 0x7F)
+        REPLY ("(U)");
+    else
+        REPLY ("(S)");
+
+    type &= 0x7F;
+
+    if (type < EXTENSION_EVENT_BASE)
     {
-        xDamageNotifyEvent *damage_e = (xDamageNotifyEvent*)xEvt;
-        REPLY (": XID(%lx) area(%d,%d %dx%d) geo(%d,%d %dx%d)",
-            damage_e->drawable,
-            damage_e->area.x,
-            damage_e->area.y,
-            damage_e->area.width,
-            damage_e->area.height,
-            damage_e->geometry.x,
-            damage_e->geometry.y,
-            damage_e->geometry.width,
-            damage_e->geometry.height);
-        return reply;
+        return xDbgEvlogEventCore (xEvt, reply, len);
     }
+    else
+    {
+        int i;
+
+        for (i = 0 ; i < Extensions_size / sizeof (ExtensionInfo); i++)
+        {
+            if (Sorted_Evlog_extensions[i].evt_base == 0)
+                continue;
+
+            if (i != Extensions_size / sizeof (ExtensionInfo) - 1)
+            {
+                if (type >= Sorted_Evlog_extensions[i].evt_base &&
+                     type < Sorted_Evlog_extensions[i+1].evt_base)
+                {
+                    return Sorted_Evlog_extensions[i].evt_func (xEvt, Sorted_Evlog_extensions[i].evt_base, reply, len);
+                }
+                continue;
+            }
+
+            return Sorted_Evlog_extensions[i].evt_func (xEvt, Sorted_Evlog_extensions[i].evt_base, reply, len);
+        }
+
+    }
+
     return reply;
 }

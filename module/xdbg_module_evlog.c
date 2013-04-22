@@ -80,85 +80,74 @@ static void evtRecord (int fd, EvlogInfo *evinfo)
     int write_len = 0;
 
     XDBG_RETURN_IF_FAIL (fd >= 0)
+    XDBG_RETURN_IF_FAIL (evinfo != NULL);
 
-    if (evinfo)
-    {
-        evinfo->mask = 0;
+    write_len = sizeof (int) +
+                sizeof (EvlogType) +
+                sizeof (int) +
+                sizeof (CARD32);
 
-        write_len = sizeof (int) +
-                    sizeof (EvlogType) +
-                    sizeof (int) +
-                    sizeof (CARD32);
-
-        evinfo->mask |= EVLOG_MASK_CLIENT;
+    if (evinfo->mask & EVLOG_MASK_CLIENT)
         write_len += sizeof (EvlogClient);
 
-        if (evinfo->type == REQUEST)
-        {
-            evinfo->mask |= EVLOG_MASK_REQUEST;
-            write_len += sizeof (EvlogRequest) + sizeof (xReq);
-        }
-        else if (evinfo->type == EVENT)
-        {
-            evinfo->mask |= EVLOG_MASK_EVENT;
-            write_len += sizeof (EvlogEvent) + sizeof (xEvent);
-        }
-    }
+    if (evinfo->mask & EVLOG_MASK_REQUEST)
+        write_len += (sizeof (EvlogRequest) + (evinfo->req.length * 4));
 
-    if (write (xev_trace_record_fd, &write_len, sizeof(int)) == -1)
+    if (evinfo->mask & EVLOG_MASK_EVENT)
+        write_len += (sizeof (EvlogEvent) + sizeof (xEvent));
+
+    if (write (fd, &write_len, sizeof(int)) == -1)
     {
         XDBG_ERROR (MXDBG, "failed: write write_len\n");
         return;
     }
-
-    if (evinfo)
+    if (write (fd, &evinfo->time, sizeof(CARD32)) == -1)
     {
-        if (write (xev_trace_record_fd, &evinfo->time, sizeof(CARD32)) == -1)
-        {
-            XDBG_ERROR (MXDBG, "failed: write msec\n");
-            return;
-        }
-        if (write (xev_trace_record_fd, &evinfo->type, sizeof(EvlogType)) == -1)
-        {
-            XDBG_ERROR (MXDBG, "failed: write type\n");
-            return;
-        }
-        if (write (xev_trace_record_fd, &evinfo->mask, sizeof(int)) == -1)
-        {
-            XDBG_ERROR (MXDBG, "failed: write mask\n");
-            return;
-        }
-        if (write (xev_trace_record_fd, &evinfo->client, sizeof (EvlogClient)) == -1)
+        XDBG_ERROR (MXDBG, "failed: write msec\n");
+        return;
+    }
+    if (write (fd, &evinfo->type, sizeof(EvlogType)) == -1)
+    {
+        XDBG_ERROR (MXDBG, "failed: write type\n");
+        return;
+    }
+    if (write (fd, &evinfo->mask, sizeof(int)) == -1)
+    {
+        XDBG_ERROR (MXDBG, "failed: write mask\n");
+        return;
+    }
+
+    if (evinfo->mask & EVLOG_MASK_CLIENT)
+        if (write (fd, &evinfo->client, sizeof (EvlogClient)) == -1)
         {
             XDBG_ERROR (MXDBG, "failed: write client\n");
             return;
         }
 
-        if (evinfo->type == REQUEST)
+    if (evinfo->mask & EVLOG_MASK_REQUEST)
+    {
+        if (write (fd, &evinfo->req, sizeof (EvlogRequest)) == -1)
         {
-            if (write (xev_trace_record_fd, &evinfo->req, sizeof (EvlogRequest)) == -1)
-            {
-                XDBG_ERROR (MXDBG, "failed: write request\n");
-                return;
-            }
-            if (write (xev_trace_record_fd, evinfo->req.ptr, sizeof (xReq)) == -1)
-            {
-                XDBG_ERROR (MXDBG, "failed: write request\n");
-                return;
-            }
+            XDBG_ERROR (MXDBG, "failed: write request\n");
+            return;
         }
-        else if (evinfo->type == EVENT)
+        if (write (fd, evinfo->req.ptr, (evinfo->req.length * 4)) == -1)
         {
-            if (write (xev_trace_record_fd, &evinfo->evt, sizeof (EvlogEvent)) == -1)
-            {
-                XDBG_ERROR (MXDBG, "failed: write event\n");
-                return;
-            }
-            if (write (xev_trace_record_fd, evinfo->evt.ptr, sizeof (xEvent)) == -1)
-            {
-                XDBG_ERROR (MXDBG, "failed: write event\n");
-                return;
-            }
+            XDBG_ERROR (MXDBG, "failed: write request\n");
+            return;
+        }
+    }
+    if (evinfo->mask & EVLOG_MASK_EVENT)
+    {
+        if (write (fd, &evinfo->evt, sizeof (EvlogEvent)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write event\n");
+            return;
+        }
+        if (write (fd, evinfo->evt.ptr, sizeof (xEvent)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write event\n");
+            return;
         }
     }
 }
@@ -465,9 +454,7 @@ xDbgModuleEvlogInstallHooks (XDbgModule *pMod)
 {
     int ret = TRUE;
 
-    ret &= AddCallback (&EventCallback, _traceEvent, NULL);
     ret &= AddCallback (&FlushCallback, _traceFlush, NULL);
-    ret &= AddCallback (&ReplyCallback, _traceAReply, NULL);
     ret &= XaceRegisterCallback (XACE_PROPERTY_ACCESS, _traceProperty, NULL);
     ret &= XaceRegisterCallback (XACE_RESOURCE_ACCESS, _traceResource, NULL);
 
@@ -494,9 +481,7 @@ xDbgModuleEvlogInstallHooks (XDbgModule *pMod)
 void
 xDbgModuleEvlogUninstallHooks (XDbgModule *pMod)
 {
-    DeleteCallback (&EventCallback, _traceEvent, NULL);
     DeleteCallback (&FlushCallback, _traceFlush, NULL);
-    DeleteCallback (&ReplyCallback, _traceAReply, NULL);
     XaceDeleteCallback (XACE_PROPERTY_ACCESS, _traceProperty, NULL);
     XaceDeleteCallback (XACE_RESOURCE_ACCESS, _traceResource, NULL);
 }
@@ -544,7 +529,8 @@ xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name,
             }
         }
 
-
+        ret &= AddCallback (&EventCallback, _traceEvent, NULL);
+        ret &= AddCallback (&ReplyCallback, _traceAReply, NULL);
         ret &= XaceRegisterCallback (XACE_CORE_DISPATCH, _traceACoreEvents, NULL);
         ret &= XaceRegisterCallback (XACE_EXT_DISPATCH, _traceAExtEvents, NULL);
 
@@ -556,6 +542,8 @@ xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name,
     }
     else
     {
+        DeleteCallback (&EventCallback, _traceEvent, NULL);
+        DeleteCallback (&ReplyCallback, _traceAReply, NULL);
         XaceDeleteCallback (XACE_CORE_DISPATCH, _traceACoreEvents, NULL);
         XaceDeleteCallback (XACE_EXT_DISPATCH, _traceAExtEvents, NULL);
     }

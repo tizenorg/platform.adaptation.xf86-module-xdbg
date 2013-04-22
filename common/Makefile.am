@@ -26,6 +26,15 @@ COMMON_SOURCE =  \
     xdbg_dbus_client.c \
     xdbg_evlog.c \
     xdbg_evlog_request.c \
+    xdbg_evlog_core.c \
+    xdbg_evlog_composite.c \
+    xdbg_evlog_dri2.c \
+    xdbg_evlog_damage.c \
+    xdbg_evlog_gesture.c \
+    xdbg_evlog_xext.c \
+    xdbg_evlog_randr.c \
+    xdbg_evlog_xinput.c \
+    xdbg_evlog_xv.c \
     xdbg_evlog_event.c \
     ds/bintree.c \
     ds/bool_exp_parser.c \
