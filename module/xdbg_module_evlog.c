@@ -296,9 +296,6 @@ _traceAReply (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 static void
 _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 {
-    if (xev_trace_on == FALSE)
-        return;
-
     EventInfoRec *pei = (EventInfoRec*)calldata;
     ClientPtr pClient;
     ModuleClientInfo *info;
@@ -376,7 +373,8 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
             }
         }
 
-        evtPrint (EVENT, pClient, pev);
+        if (xev_trace_on)
+            evtPrint (EVENT, pClient, pev);
     }
 }
 
