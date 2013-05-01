@@ -323,7 +323,7 @@ _EvlogGetExtentionEntry (int *return_extensions_size)
 
 
 void
-xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
+xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
 {
     static CARD32 prev;
     static int Extensions_size = 0;
@@ -331,7 +331,7 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_dir) / sizeof (char*)));
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_type) / sizeof (char*)));
 
-    REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %s",
+    REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %7s ",
                 evinfo->time / 1000.0,
                 evinfo->time - prev,
                 xDbgEvlogGetCmd (evinfo->client.command),
@@ -343,13 +343,13 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, char *reply, int *len)
     if (evinfo->type == REQUEST && _EvlogGetExtentionEntry (&Extensions_size))
     {
         REPLY ("(");
-        reply = xDbgEvlogReqeust (evinfo, Extensions_size, reply, len);
+        reply = xDbgEvlogReqeust (evinfo, on, Extensions_size, reply, len);
         REPLY (")");
     }
     else if (evinfo->type == EVENT && _EvlogGetExtentionEntry (&Extensions_size))
     {
         REPLY ("(");
-        reply = xDbgEvlogEvent (evinfo, Extensions_size, reply, len);
+        reply = xDbgEvlogEvent (evinfo, on, Extensions_size, reply, len);
         REPLY (")");
     }
     else

@@ -50,6 +50,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 char*   xDbgEvlogGetCmd         (char *path);
 Bool    xDbgEvlogRuleSet        (const int argc, const char **argv, char *reply, int *len);
 Bool    xDbgEvlogRuleValidate   (EvlogInfo *evinfo);
-void    xDbgEvlogFillLog        (EvlogInfo *evinfo, char *reply, int *len);
+void    xDbgEvlogFillLog        (EvlogInfo *evinfo, Bool on, char *reply, int *len);
 
 #endif

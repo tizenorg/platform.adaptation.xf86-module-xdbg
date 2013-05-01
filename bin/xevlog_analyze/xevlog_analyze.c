@@ -50,44 +50,48 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xdbg_types.h>
 #include <xdbg_evlog.h>
 
+#define LOG_SIZE 8192
+
 typedef struct _EvlogOption
 {
-    int pid;
-    Bool help_opt;
-    char command_name[PATH_MAX+1];
-    char path_name[PATH_MAX+1];
+    int    pid;
+    char   command_name[PATH_MAX+1];
+    char   path_name[PATH_MAX+1];
+    char** rule_argv;
+    int    rule_argc;
+    Bool   detail;
 } EvlogOption;
-
-#define BUF_SIZE 256
 
 
 static void
 _printUsage(char* name)
 {
-    fprintf(stderr, "Usage: %s [OPTION]...\n", name);
-    fprintf(stderr, "\n");
-    fprintf(stderr, " Options:\n");
-    fprintf(stderr, "       -f [File_Name]  File to save information\n");
-    fprintf(stderr, "\n");
-    fprintf(stderr, "       -h              Command Usage information\n");
-    fprintf(stderr, "\n");
+    printf("Usage: %s [OPTION]...\n", name);
+    printf("\n");
+    printf(" Options:\n");
+    printf("       -f [File_Name]      File to save information\n");
+    printf("\n");
+    printf("       -r [Rule]           Setting Rule to find information you want\n");
+    printf("\n");
+    printf("            -r help        Detail Usage of -r option\n");
+    printf("\n");
+    printf("       -d [OFF:0/ON:1]     To Print detail log of extensions\n");
+    printf("\n");
+    printf("       -h                  Usage of xevlog_anlayze\n");
+    printf("\n");
 }
 
 static void _xEvlogAnalyzePrint (EvlogOption *eo)
 {
+    int i;
     int fd = -1, cfd = -1;
     int total, read_len;
     int evlog_len;
     char fd_name[256];
     EvlogInfo evinfo={0,};
 
-    if (eo->help_opt)
-    {
-        _printUsage(eo->command_name);
-        return;
-    }
 
-    if (strlen (eo->path_name) <= 0)
+    if (!strlen(eo->path_name))
     {
         printf ("failed: no evlog path\n");
         return;
@@ -111,8 +115,23 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo)
 
     while ((read_len = read (fd, &evlog_len, sizeof (int))) == sizeof (int))
     {
-        char log[1024];
+        char log[LOG_SIZE];
         int size = sizeof (log);
+        static int init = 0;
+
+        if (!init)
+        {
+            int new_argc = 3;
+            char* new_argv[3] = {"add", "allow", "all"};
+
+            if(eo->rule_argc)
+                xDbgEvlogRuleSet ((const int) eo->rule_argc, (const char**) eo->rule_argv, log, &size);
+            else
+                xDbgEvlogRuleSet ((const int) new_argc, (const char**) new_argv, log, &size);
+
+            printf("%s", log);
+            init = 1;
+        }
 
         memset (&evinfo, 0, sizeof (EvlogInfo));
 
@@ -167,8 +186,11 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo)
         }
         GOTO_IF_FAIL (evlog_len == total, print_done);
 
-        xDbgEvlogFillLog(&evinfo, log, &size);
-        printf ("%s", log);
+        if (xDbgEvlogRuleValidate (&evinfo))
+        {
+            xDbgEvlogFillLog(&evinfo, eo->detail, log, &size);
+            printf ("%s", log);
+        }
 
         if (evinfo.req.ptr)
         {
@@ -191,12 +213,22 @@ print_done:
     if (evinfo.evt.ptr)
         free (evinfo.evt.ptr);
 
+    for (i = 0 ; i < eo->rule_argc ; i++)
+    {
+        if (eo->rule_argv[i])
+           free (eo->rule_argv[i]);
+    }
+    if (eo->rule_argv)
+       free (eo->rule_argv);
+
+
     if (cfd >= 0)
         close (cfd);
 
     if (fd >= 0)
         close (fd);
 }
+
 
 static void
 _checkOption(int argc, char** argv)
@@ -207,35 +239,89 @@ _checkOption(int argc, char** argv)
     EvlogOption eo = {0,};
 
     eo.pid = atoi (argv[0]);
-    eo.help_opt = TRUE;
+    eo.detail = TRUE;
     strncpy(eo.command_name, argv[1], PATH_MAX);
 
-    if (argc <= 2)
+    if (argc < 3)
     {
         _printUsage( eo.command_name );
         return;
     }
 
-    while ((c = getopt(argc, argv, "f:h")) != EOF)
+    while ((c = getopt(argc, argv, "f:r:d:h")) != EOF)
     {
         switch (c)
         {
 
             case 'f':
-                opt_str = optarg;
-                opt_str_len = strlen(opt_str);
-
-                if(opt_str_len > 0)
                 {
-                    eo.help_opt = FALSE;
-                    strncpy (eo.path_name, opt_str, opt_str_len);
+                    opt_str = optarg;
+                    opt_str_len = strlen(opt_str);
+
+                    if(opt_str_len > 0)
+                    {
+                        strncpy (eo.path_name, opt_str, PATH_MAX);
+                    }
+                    break;
                 }
-                break;
+
+            case 'r':
+                {
+                    opt_str = optarg;
+                    opt_str_len = strlen(opt_str);
+                    if(opt_str_len > 0)
+                    {
+                        int i;
+                        eo.rule_argc = 1;
+
+                        for (i = optind ; i < argc && argv[i][0] != '-' ; i++)
+                        {
+                            eo.rule_argc++;
+                        }
+
+                        eo.rule_argv = (char**)malloc (eo.rule_argc * sizeof (char*));
+                        if (!eo.rule_argv)
+                        {
+                            printf ("failed: malloc rule_argv\n");
+                            return;
+                        }
+
+                        for (i = 0 ; i < eo.rule_argc ; i++)
+                        {
+                            eo.rule_argv[i] = (char*)malloc (strlen(argv[optind - 1 + i]) + 1);
+                            if (!eo.rule_argv[i])
+                            {
+                                printf ("failed: malloc rule_argv[%d]\n", i);
+                                return;
+                            }
+
+                            strncpy (eo.rule_argv[i], argv[optind -1 + i], strlen(argv[optind - 1 + i]));
+                        }
+
+                    }
+
+                    break;
+                }
+
+            case 'd':
+                {
+                    opt_str = optarg;
+                    opt_str_len = strlen(opt_str);
+
+                    if(opt_str_len > 0)
+                    {
+                        eo.detail = (atoi(optarg))?TRUE:FALSE;
+                        printf ("detail %s\n", (eo.detail)?"ON":"OFF");
+                    }
+                    break;
+                }
 
             case 'h':
-                _printUsage( eo.command_name );
-                return;
-                break;
+                {
+                    _printUsage( eo.command_name );
+                    return;
+                    break;
+                }
 
             default:
                 break;
@@ -244,6 +330,7 @@ _checkOption(int argc, char** argv)
 
     _xEvlogAnalyzePrint(&eo);
 }
+
 
 
 int main(int argc, char** argv)
@@ -256,7 +343,7 @@ int main(int argc, char** argv)
     new_argv = (char**)malloc (new_argc * sizeof (char*));
     if (!new_argv)
     {
-        fprintf (stderr, "failed: malloc new argv\n");
+        printf ("failed: malloc new argv\n");
         exit (-1);
     }
 

@@ -62,7 +62,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 extern ExtensionInfo* Sorted_Evlog_extensions;
 
 char *
-xDbgEvlogEvent (EvlogInfo *evinfo, int Extensions_size, char *reply, int *len)
+xDbgEvlogEvent (EvlogInfo *evinfo, Bool on, int Extensions_size, char *reply, int *len)
 {
     EvlogEvent   ev;
     xEvent *xEvt = NULL;
@@ -83,6 +83,9 @@ xDbgEvlogEvent (EvlogInfo *evinfo, int Extensions_size, char *reply, int *len)
         REPLY ("(S)");
 
     type &= 0x7F;
+
+    if(!on)
+        return reply;
 
     if (type < EXTENSION_EVENT_BASE)
     {

@@ -157,7 +157,7 @@ static void evtPrintF (int fd, EvlogInfo *evinfo)
     char log[1024];
     int size = sizeof (log);
 
-    xDbgEvlogFillLog (evinfo, log, &size);
+    xDbgEvlogFillLog (evinfo, TRUE, log, &size);
 
     if (fd < 0)
         ErrorF ("%s", log);
