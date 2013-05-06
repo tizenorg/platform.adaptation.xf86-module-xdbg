@@ -561,9 +561,6 @@ Bool
 xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply, int *len)
 {
     char fd_name[XDBG_PATH_MAX];
-    char *temp[3] = {"/", "./", "../"};
-    Bool valid = FALSE;
-    int i;
 
     if (!path || strlen (path) <= 0)
     {
@@ -594,19 +591,6 @@ xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply,
         }
 
         return TRUE;
-    }
-
-    for (i = 0; i < sizeof (temp) / sizeof (char*); i++)
-        if (path == strstr (path, temp[i]))
-        {
-            valid = TRUE;
-            break;
-        }
-
-    if (!valid)
-    {
-        XDBG_REPLY ("failed: invalid path(%s)\n", path);
-        return FALSE;
     }
 
     if (path[0] == '/')

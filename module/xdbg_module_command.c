@@ -72,34 +72,15 @@ _CommandSetLogFile (int pid, char *path, char *reply, int *len, XDbgModule *pMod
         snprintf (fd_name, XDBG_PATH_MAX, "/proc/%d/fd/1", pid);
     else
     {
-        char *temp[3] = {"/", "./", "../"};
-        Bool valid = FALSE;
-        int i;
-
-        for (i = 0; i < sizeof (temp) / sizeof (char*); i++)
-            if (path == strstr (path, temp[i]))
-            {
-                valid = TRUE;
-                break;
-            }
-
-        if (valid)
-        {
-            if (path[0] == '/')
-                snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
-            else
-            {
-                char cwd[128];
-                if (getcwd (cwd, sizeof (cwd)))
-                    snprintf (fd_name, XDBG_PATH_MAX, "%s/%s", cwd, path);
-                else
-                    snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
-            }
-        }
+        if (path[0] == '/')
+            snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
         else
         {
-            XDBG_REPLY ("failed: invalid option(%s)\n", path);
-            return FALSE;
+            char cwd[128];
+            if (getcwd (cwd, sizeof (cwd)))
+                snprintf (fd_name, XDBG_PATH_MAX, "%s/%s", cwd, path);
+            else
+                snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
         }
     }
 
