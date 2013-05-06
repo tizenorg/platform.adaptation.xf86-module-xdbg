@@ -248,18 +248,9 @@ _checkOption(int argc, char** argv)
 
 int main(int argc, char** argv)
 {
-
-    Display *dpy;
     char **new_argv;
     int new_argc, i;
     char temp[128];
-
-    dpy = XOpenDisplay (NULL);
-    if (!dpy)
-    {
-        fprintf (stderr, "failed: open display\n");
-        exit (-1);
-    }
 
     new_argc = argc + 1;
     new_argv = (char**)malloc (new_argc * sizeof (char*));
@@ -278,8 +269,6 @@ int main(int argc, char** argv)
     _checkOption(new_argc, new_argv);
 
     free (new_argv);
-
-    XCloseDisplay (dpy);
 
     return 0;
 }

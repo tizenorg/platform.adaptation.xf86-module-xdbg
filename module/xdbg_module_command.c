@@ -240,7 +240,10 @@ _CommandSetEvlogPath (int pid, int argc, char **argv, char *reply, int *len, XDb
     }
 
     if (pMod->evlog_path)
+    {
         free (pMod->evlog_path);
+        pMod->evlog_path=NULL;
+    }
 
     if (!xDbgModuleEvlogSetEvlogPath (pMod, pid, argv[2], reply, len))
     {
