@@ -454,7 +454,7 @@ xDbgModuleEvlogInstallHooks (XDbgModule *pMod)
 {
     int ret = TRUE;
 
-    ret &= AddCallback (&FlushCallback, _traceFlush, NULL);
+    ret &= AddCallback (&EventCallback, _traceEvent, NULL);
     ret &= XaceRegisterCallback (XACE_PROPERTY_ACCESS, _traceProperty, NULL);
     ret &= XaceRegisterCallback (XACE_RESOURCE_ACCESS, _traceResource, NULL);
 
@@ -481,7 +481,7 @@ xDbgModuleEvlogInstallHooks (XDbgModule *pMod)
 void
 xDbgModuleEvlogUninstallHooks (XDbgModule *pMod)
 {
-    DeleteCallback (&FlushCallback, _traceFlush, NULL);
+    DeleteCallback (&EventCallback, _traceEvent, NULL);
     XaceDeleteCallback (XACE_PROPERTY_ACCESS, _traceProperty, NULL);
     XaceDeleteCallback (XACE_RESOURCE_ACCESS, _traceResource, NULL);
 }
@@ -529,7 +529,7 @@ xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name,
             }
         }
 
-        ret &= AddCallback (&EventCallback, _traceEvent, NULL);
+        ret &= AddCallback (&FlushCallback, _traceFlush, NULL);
         ret &= AddCallback (&ReplyCallback, _traceAReply, NULL);
         ret &= XaceRegisterCallback (XACE_CORE_DISPATCH, _traceACoreEvents, NULL);
         ret &= XaceRegisterCallback (XACE_EXT_DISPATCH, _traceAExtEvents, NULL);
@@ -542,7 +542,7 @@ xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name,
     }
     else
     {
-        DeleteCallback (&EventCallback, _traceEvent, NULL);
+        DeleteCallback (&FlushCallback, _traceFlush, NULL);
         DeleteCallback (&ReplyCallback, _traceAReply, NULL);
         XaceDeleteCallback (XACE_CORE_DISPATCH, _traceACoreEvents, NULL);
         XaceDeleteCallback (XACE_EXT_DISPATCH, _traceAExtEvents, NULL);
