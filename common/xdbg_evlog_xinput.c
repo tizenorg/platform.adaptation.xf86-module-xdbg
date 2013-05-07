@@ -647,7 +647,7 @@ xDbgEvlogXinputGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, INAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no Xinput extension. \n");
+        XDBG_LOG ("no Xinput extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestXinput;

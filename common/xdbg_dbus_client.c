@@ -60,7 +60,7 @@ _xDbgDBusClinetMsgFilter (DBusConnection *conn, DBusMessage *msg, void *data)
      * connection isn't valid at this point, so throw it out immediately. */
     if (dbus_message_is_signal (msg, DBUS_INTERFACE_LOCAL, "Disconnected"))
     {
-        fprintf (stderr, "[CLIENT:%s] disconnected by signal\n", info->client);
+        XDBG_LOG ("[CLIENT:%s] disconnected by signal\n", info->client);
         info->conn = NULL;
 
         return DBUS_HANDLER_RESULT_HANDLED;
@@ -81,12 +81,12 @@ _xDbgDBusClinetInit (XDbgDBusClientInfo *info)
     info->conn = dbus_bus_get (DBUS_BUS_SYSTEM, &err);
     if (dbus_error_is_set (&err))
     {
-        fprintf (stderr, "[CLIENT:%s] failed: connection (%s)\n", info->client, err.message);
+        XDBG_LOG ("[CLIENT:%s] failed: connection (%s)\n", info->client, err.message);
         goto err_get;
     }
     if (!info->conn)
     {
-        fprintf (stderr, "[CLIENT:%s] failed: connection NULL\n", info->client);
+        XDBG_LOG ("[CLIENT:%s] failed: connection NULL\n", info->client);
         goto err_get;
     }
 
@@ -94,7 +94,7 @@ _xDbgDBusClinetInit (XDbgDBusClientInfo *info)
 
     if (!dbus_connection_add_filter (info->conn, _xDbgDBusClinetMsgFilter, info, NULL))
     {
-        fprintf (stderr, "[CLIENT:%s] failed: add filter (%s)\n", info->client, err.message);
+        XDBG_LOG ("[CLIENT:%s] failed: add filter (%s)\n", info->client, err.message);
         goto err_get;
     }
 
@@ -102,18 +102,18 @@ _xDbgDBusClinetInit (XDbgDBusClientInfo *info)
                                  DBUS_NAME_FLAG_REPLACE_EXISTING , &err);
     if (dbus_error_is_set (&err))
     {
-        fprintf (stderr, "[CLIENT:%s] failed: request name (%s)\n", info->client, err.message);
+        XDBG_LOG ("[CLIENT:%s] failed: request name (%s)\n", info->client, err.message);
         goto err_request;
     }
     if (ret != DBUS_REQUEST_NAME_REPLY_PRIMARY_OWNER)
     {
-        fprintf (stderr, "[CLIENT:%s] failed: Not Primary Owner (%d)\n", info->client, ret);
+        XDBG_LOG ("[CLIENT:%s] failed: Not Primary Owner (%d)\n", info->client, ret);
         goto err_request;
     }
 
     dbus_error_free (&err);
 
-//    fprintf (stderr, "[CLIENT:%s] connected\n", info->client);
+//    XDBG_LOG ("[CLIENT:%s] connected\n", info->client);
 
     return TRUE;
 
@@ -144,14 +144,14 @@ _xDbgDBusClinetDeinit (XDbgDBusClientInfo *info)
     dbus_error_init (&err);
     dbus_bus_release_name (info->conn, info->reqname, &err);
     if (dbus_error_is_set (&err))
-        fprintf (stderr, "[CLIENT:%s] failed: release name (%s)\n", info->client, err.message);
+        XDBG_LOG ("[CLIENT:%s] failed: release name (%s)\n", info->client, err.message);
     dbus_error_free (&err);
 
     dbus_connection_remove_filter (info->conn, _xDbgDBusClinetMsgFilter, info);
     dbus_connection_unref (info->conn);
     info->conn = NULL;
 
-//    fprintf (stderr, "[CLIENT:%s] disconnected\n", info->client);
+//    XDBG_LOG ("[CLIENT:%s] disconnected\n", info->client);
 }
 
 XDbgDBusClientInfo*
@@ -213,7 +213,7 @@ xDbugDBusClientSendMessage (XDbgDBusClientInfo *info, int argc, char **argv)
     for (i = 0; i < argc; i++)
         if (!dbus_message_iter_append_basic (&iter, DBUS_TYPE_STRING, &argv[i]))
         {
-            fprintf (stderr, "[CLIENT:%s] failed: append\n", info->client);
+            XDBG_LOG ("[CLIENT:%s] failed: append\n", info->client);
             goto err_send;
         }
 
@@ -221,14 +221,14 @@ xDbugDBusClientSendMessage (XDbgDBusClientInfo *info, int argc, char **argv)
                                                            REPLY_TIME, &err);
     if (dbus_error_is_set (&err))
     {
-        fprintf (stderr, "[CLIENT:%s] failed: send (%s)\n", info->client, err.message);
+        XDBG_LOG ("[CLIENT:%s] failed: send (%s)\n", info->client, err.message);
         goto err_send;
     }
     GOTO_IF_FAIL (reply_msg != NULL, err_send);
 
     if (!dbus_message_iter_init (reply_msg, &iter))
     {
-        fprintf (stderr, "[CLIENT:%s] Message has no arguments\n", info->client);
+        XDBG_LOG ("[CLIENT:%s] Message has no arguments\n", info->client);
         goto err_send;
     }
 
@@ -238,18 +238,18 @@ xDbugDBusClientSendMessage (XDbgDBusClientInfo *info, int argc, char **argv)
 
         if (dbus_message_iter_get_arg_type (&iter) != DBUS_TYPE_STRING)
         {
-            fprintf (stderr, "[CLIENT:%s] Argument is not string!\n", info->client);
+            XDBG_LOG ("[CLIENT:%s] Argument is not string!\n", info->client);
             goto err_send;
         }
 
         dbus_message_iter_get_basic (&iter, &arg);
         if (!arg)
         {
-            fprintf (stderr, "[CLIENT:%s] arg is NULL\n", info->client);
+            XDBG_LOG ("[CLIENT:%s] arg is NULL\n", info->client);
             goto err_send;
         }
         else
-            fprintf (stderr, "%s\n", arg);
+            XDBG_LOG ("%s\n", arg);
     } while (dbus_message_iter_has_next (&iter) &&
            dbus_message_iter_next (&iter));
 

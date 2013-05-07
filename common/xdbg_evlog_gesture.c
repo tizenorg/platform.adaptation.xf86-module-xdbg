@@ -227,7 +227,7 @@ xDbgEvlogGestureGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, GESTURE_EXT_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no Gesture extension. \n");
+        XDBG_LOG ("no Gesture extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestGesture;

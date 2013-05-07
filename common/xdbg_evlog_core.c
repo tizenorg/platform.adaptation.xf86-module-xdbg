@@ -555,7 +555,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
     case ButtonRelease:
     case MotionNotify:
         {
-		REPLY (": Root(0x%lx %d,%d) Event(0x%lx %d,%d) Child(0x%lx)",
+            REPLY (": Root(0x%lx %d,%d) Event(0x%lx %d,%d) Child(0x%lx)",
                 evt->u.keyButtonPointer.root,
                 evt->u.keyButtonPointer.rootX,
                 evt->u.keyButtonPointer.rootY,
@@ -676,7 +676,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case MapRequest:
         {
-		REPLY (": Window(0x%lx) Parent(0x%lx)",
+            REPLY (": Window(0x%lx) Parent(0x%lx)",
                 evt->u.mapRequest.window,
                 evt->u.mapRequest.parent);
 
@@ -685,7 +685,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case ReparentNotify:
         {
-		REPLY (": Window(0x%lx) Event(0x%lx) parent(0x%lx) coord(%d,%d)",
+            REPLY (": Window(0x%lx) Event(0x%lx) parent(0x%lx) coord(%d,%d)",
                 evt->u.reparent.window,
                 evt->u.reparent.event,
                 evt->u.reparent.parent,
@@ -697,7 +697,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case ConfigureNotify:
         {
-		REPLY (": Window(0x%lx) Event(0x%lx) aboveSibling(0x%lx) size(%dx%d) coord(%d,%d) borderWidth(%d)",
+            REPLY (": Window(0x%lx) Event(0x%lx) aboveSibling(0x%lx) size(%dx%d) coord(%d,%d) borderWidth(%d)",
                 evt->u.configureNotify.window,
                 evt->u.configureNotify.event,
                 evt->u.configureNotify.aboveSibling,
@@ -712,7 +712,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case ConfigureRequest:
         {
-		REPLY (": Window(0x%lx) Parent(0x%lx) Sibling(0x%lx) size(%dx%d) coord(%d,%d) borderWidth(%d)",
+            REPLY (": Window(0x%lx) Parent(0x%lx) Sibling(0x%lx) size(%dx%d) coord(%d,%d) borderWidth(%d)",
                 evt->u.configureRequest.window,
                 evt->u.configureRequest.parent,
                 evt->u.configureRequest.sibling,
@@ -727,7 +727,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case GravityNotify:
         {
-		REPLY (": Window(0x%lx) Event(0x%lx) coord(%d,%d)",
+            REPLY (": Window(0x%lx) Event(0x%lx) coord(%d,%d)",
                 evt->u.gravity.window,
                 evt->u.gravity.event,
                 evt->u.gravity.x,
@@ -738,7 +738,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case ResizeRequest:
         {
-		REPLY (": Window(0x%lx) size(%dx%d)",
+            REPLY (": Window(0x%lx) size(%dx%d)",
                 evt->u.resizeRequest.window,
                 evt->u.resizeRequest.width,
                 evt->u.resizeRequest.height);
@@ -749,7 +749,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
     case CirculateNotify:
     case CirculateRequest:
         {
-		REPLY (": Window(0x%lx) Event(0x%lx) parent(0x%lx)",
+            REPLY (": Window(0x%lx) Event(0x%lx) parent(0x%lx)",
                 evt->u.circulate.window,
                 evt->u.circulate.event,
                 evt->u.circulate.parent);
@@ -759,7 +759,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case PropertyNotify:
         {
-		REPLY (": Window(0x%lx) atom(0x%lx)",
+            REPLY (": Window(0x%lx) atom(0x%lx)",
                 evt->u.property.window,
                 evt->u.property.atom);
 
@@ -768,7 +768,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case SelectionClear:
         {
-		REPLY (": Window(0x%lx) atom(0x%lx)",
+            REPLY (": Window(0x%lx) atom(0x%lx)",
                 evt->u.selectionClear.window,
                 evt->u.selectionClear.atom);
 
@@ -777,7 +777,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case SelectionRequest:
         {
-		REPLY (": Owner(0x%lx) Requestor(0x%lx) Selcection(0x%lx) Target(0x%lx) Property(0x%lx)",
+            REPLY (": Owner(0x%lx) Requestor(0x%lx) Selcection(0x%lx) Target(0x%lx) Property(0x%lx)",
                 evt->u.selectionRequest.owner,
                 evt->u.selectionRequest.requestor,
                 evt->u.selectionRequest.selection,
@@ -789,7 +789,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case SelectionNotify:
         {
-		REPLY (": Requestor(0x%lx) Selcection(0x%lx) Target(0x%lx) Property(0x%lx)",
+            REPLY (": Requestor(0x%lx) Selcection(0x%lx) Target(0x%lx) Property(0x%lx)",
                 evt->u.selectionNotify.requestor,
                 evt->u.selectionNotify.selection,
                 evt->u.selectionNotify.target,
@@ -800,7 +800,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case ColormapNotify:
         {
-		REPLY (": XID(0x%lx) Colormap(0x%lx)",
+            REPLY (": XID(0x%lx) Colormap(0x%lx)",
                 evt->u.colormap.window,
                 evt->u.colormap.colormap);
 
@@ -809,7 +809,7 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case ClientMessage:
         {
-		REPLY (": XID(0x%lx) Atom(0x%lx)",
+            REPLY (": XID(0x%lx) Atom(0x%lx)",
                 evt->u.clientMessage.window,
                 evt->u.clientMessage.u.b.type);
 

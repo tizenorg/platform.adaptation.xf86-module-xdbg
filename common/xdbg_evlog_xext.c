@@ -434,7 +434,7 @@ xDbgEvlogXextDpmsGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, DPMSExtensionName, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no Xext_DPMS extension. \n");
+        XDBG_LOG ("no Xext_DPMS extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestXextDpms;
@@ -463,7 +463,7 @@ xDbgEvlogXextShmGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, SHMNAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no XShm extension. \n");
+        XDBG_LOG ("no XShm extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestXextShm;
@@ -492,7 +492,7 @@ xDbgEvlogXextSyncGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, SYNC_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no Sync extension. \n");
+        XDBG_LOG ("no Sync extension. \n");
         return;
     }
 
@@ -523,7 +523,7 @@ xDbgEvlogXextXtestExt1GetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, XTestEXTENSION_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no XTestExt1 extension. \n");
+        XDBG_LOG ("no XTestExt1 extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestXextXtestExt1;
@@ -553,7 +553,7 @@ xDbgEvlogXextXtestGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, XTestExtensionName, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no Xext_Xtest extension. \n");
+        XDBG_LOG ("no Xext_Xtest extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestXextXtest;

@@ -210,7 +210,7 @@ xDbgEvlogDri2GetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, DRI2_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no DRI2 extension. \n");
+        XDBG_LOG ("no DRI2 extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestDri2;

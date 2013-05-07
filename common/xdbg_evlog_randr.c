@@ -328,7 +328,7 @@ xDbgEvlogRandrGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, RANDR_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no Randr extension. \n");
+        XDBG_LOG ("no Randr extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestRandr;

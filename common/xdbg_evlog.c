@@ -207,7 +207,7 @@ xDbgEvlogRuleValidate (EvlogInfo *evinfo)
 
     if (!rc)
     {
-        fprintf (stderr, "failed: create rulechecker\n");
+        XDBG_LOG ("failed: create rulechecker\n");
         return FALSE;
     }
 
@@ -298,7 +298,7 @@ _EvlogGetExtentionEntry (int *return_extensions_size)
     dpy = XOpenDisplay (NULL);
     if (!dpy)
     {
-        fprintf (stderr, "failed: open display\n");
+        XDBG_LOG ("failed: open display\n");
         exit (-1);
     }
 #endif

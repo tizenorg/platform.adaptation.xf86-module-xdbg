@@ -54,6 +54,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define GOTO_IF_ERRNO(cond, dst, errno) \
     {if (!(cond)) { fprintf (stderr, "[%s] '%s' failed. (err=%s(%d))\n", __FUNCTION__, #cond, strerror(errno), errno); goto dst; }}
 
+#define XDBG_LOG(fmt, ARG...)   { fprintf (stderr, fmt, ##ARG); }
+
 #define REPLY(fmt, ARG...)  \
     do { \
         if (reply && len && *len > 0) \

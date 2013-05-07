@@ -148,7 +148,7 @@ xDbgEvlogCompositeGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, COMPOSITE_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no Composite extension. \n");
+        XDBG_LOG ("no Composite extension. \n");
         return;
     }
     extinfo->req_func = _EvlogRequestComposite;

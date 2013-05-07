@@ -135,7 +135,7 @@ xDbgEvlogDamageGetBase (void *dpy, ExtensionInfo *extinfo)
 
     if (!XQueryExtension(d, DAMAGE_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
     {
-        fprintf (stderr, "[UTILX] no Damage extension. \n");
+        XDBG_LOG ("no Damage extension. \n");
         return;
     }
 
