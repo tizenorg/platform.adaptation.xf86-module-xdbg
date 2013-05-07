@@ -34,7 +34,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 
-char * xDbgEvlogRequestCore (xReq *req, char *reply, int *len);
-char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len);
+char * xDbgEvlogRequestCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len);
+char * xDbgEvlogEventCore     (void *dpy, EvlogInfo *evinfo, char *reply, int *len);
 
 #endif

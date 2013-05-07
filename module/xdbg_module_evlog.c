@@ -157,7 +157,9 @@ static void evtPrintF (int fd, EvlogInfo *evinfo)
     char log[1024];
     int size = sizeof (log);
 
-    xDbgEvlogFillLog (evinfo, TRUE, log, &size);
+
+
+    xDbgEvlogFillLog (NULL, evinfo, TRUE, log, &size);
 
     if (fd < 0)
         ErrorF ("%s", log);
@@ -184,6 +186,7 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
         evinfo.client.gid = info->gid;
         evinfo.client.uid = info->uid;
         strncpy (evinfo.client.command, info->command, strlen (info->command));
+        evinfo.client.pClient = (void*)client;
 
         /* evinfo.req */
         if (type == REQUEST)

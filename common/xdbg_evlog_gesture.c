@@ -57,13 +57,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 #include "xdbg_evlog_gesture.h"
+#include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestGesture(xReq *req, char *reply, int *len)
+_EvlogRequestGesture(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_GestureSelectEvents:
         {
@@ -113,11 +114,11 @@ _EvlogRequestGesture(xReq *req, char *reply, int *len)
 }
 
 static char *
-_EvlogEventGesture (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventGesture (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
     case GestureNotifyFlick:
         {

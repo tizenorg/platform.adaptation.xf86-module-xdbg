@@ -56,13 +56,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 #include "xdbg_evlog_composite.h"
+#include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestComposite(xReq *req, char *reply, int *len)
+_EvlogRequestComposite(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_CompositeRedirectWindow:
         {
@@ -122,11 +123,11 @@ _EvlogRequestComposite(xReq *req, char *reply, int *len)
 }
 
 static char *
-_EvlogEventComposite (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventComposite (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
 
     default:

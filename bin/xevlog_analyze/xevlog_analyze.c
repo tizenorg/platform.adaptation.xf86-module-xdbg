@@ -89,7 +89,8 @@ _printUsage(char* name)
     printf("\n");
 }
 
-static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
+
+static void _xEvlogAnalyzePrint (Display* dpy, EvlogOption *eo, char* reply, int* len)
 {
     int fd = -1, cfd = -1;
     int total, read_len;
@@ -192,7 +193,7 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
 
         if (xDbgEvlogRuleValidate (&evinfo))
         {
-            xDbgEvlogFillLog(&evinfo, eo->detail, log, &size);
+            xDbgEvlogFillLog(dpy, &evinfo, eo->detail, log, &size);
             printf ("%s", log);
         }
 
@@ -226,7 +227,7 @@ print_done:
 
 
 static void
-_checkOption(int argc, char** argv)
+_checkOption(Display* dpy, int argc, char** argv)
 {
     int c;
     int opt_str_len = 0;
@@ -353,7 +354,7 @@ _checkOption(int argc, char** argv)
         }
     }
 
-    _xEvlogAnalyzePrint(&eo, rule_log, &rule_size);
+    _xEvlogAnalyzePrint(dpy, &eo, rule_log, &rule_size);
 }
 
 
@@ -363,6 +364,14 @@ int main(int argc, char** argv)
     char **new_argv;
     int new_argc, i;
     char temp[128];
+    Display *dpy;
+
+    dpy = XOpenDisplay (NULL);
+    if (!dpy)
+    {
+        printf ("failed: open display\n");
+        exit (-1);
+    }
 
     new_argc = argc + 1;
     new_argv = (char**)malloc (new_argc * sizeof (char*));
@@ -378,9 +387,10 @@ int main(int argc, char** argv)
     for (i = 0; i < argc; i++)
         new_argv[i+1] = argv[i];
 
-    _checkOption(new_argc, new_argv);
+    _checkOption(dpy, new_argc, new_argv);
 
     free (new_argv);
+    XCloseDisplay (dpy);
 
     return 0;
 }

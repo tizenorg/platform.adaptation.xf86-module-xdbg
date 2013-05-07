@@ -55,12 +55,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 #include "xdbg_evlog_core.h"
+#include "xdbg_evlog.h"
 
-char * xDbgEvlogRequestCore (xReq *req, char *reply, int *len)
+char * xDbgEvlogRequestCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->reqType)
+    switch (req->reqType)
     {
     case X_CreateWindow:
         {
@@ -129,10 +130,13 @@ char * xDbgEvlogRequestCore (xReq *req, char *reply, int *len)
     case X_ChangeProperty:
         {
             xChangePropertyReq *stuff = (xChangePropertyReq *)req;
-            REPLY (": XID(0x%lx) Property(0x%lx) Type(0x%lx)",
-                stuff->window,
-                stuff->property,
-                stuff->type);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            REPLY (" Type");
+            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
 
             return reply;
         }
@@ -140,9 +144,11 @@ char * xDbgEvlogRequestCore (xReq *req, char *reply, int *len)
     case X_DeleteProperty:
         {
             xDeletePropertyReq *stuff = (xDeletePropertyReq *)req;
-            REPLY (": XID(0x%lx) Property(0x%lx)",
-                stuff->window,
-                stuff->property);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
 
             return reply;
         }
@@ -150,9 +156,11 @@ char * xDbgEvlogRequestCore (xReq *req, char *reply, int *len)
     case X_SetSelectionOwner:
         {
             xSetSelectionOwnerReq *stuff = (xSetSelectionOwnerReq *)req;
-            REPLY (": XID(0x%lx) Selection(0x%lx)",
-                stuff->window,
-                stuff->selection);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            REPLY (" Selection");
+            reply = xDbgGetAtom(dpy, stuff->selection, reply, len);
 
             return reply;
         }
@@ -160,11 +168,15 @@ char * xDbgEvlogRequestCore (xReq *req, char *reply, int *len)
     case X_ConvertSelection:
         {
             xConvertSelectionReq *stuff = (xConvertSelectionReq *)req;
-            REPLY (": XID(0x%lx) Selection(0x%lx) Target(0x%lx) Property(0x%lx)",
-                stuff->requestor,
-                stuff->selection,
-                stuff->target,
-                stuff->property);
+            REPLY (": XID(0x%lx)",
+                stuff->requestor);
+
+            REPLY (" Selection");
+            reply = xDbgGetAtom(dpy, stuff->selection, reply, len);
+            REPLY (" Target");
+            reply = xDbgGetAtom(dpy, stuff->target, reply, len);
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
 
             return reply;
         }
@@ -545,8 +557,10 @@ char * xDbgEvlogRequestCore (xReq *req, char *reply, int *len)
 }
 
 
-char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
+char * xDbgEvlogEventCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
+    xEvent *evt = evinfo->evt.ptr;
+
     switch (evt->u.u.type & 0x7F)
     {
     case KeyPress:
@@ -759,41 +773,52 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case PropertyNotify:
         {
-            REPLY (": Window(0x%lx) atom(0x%lx)",
-                evt->u.property.window,
-                evt->u.property.atom);
+            REPLY (": Window(0x%lx)",
+                evt->u.property.window);
 
+            REPLY (" Atom");
+            reply = xDbgGetAtom(dpy, evt->u.property.atom, reply, len);
             return reply;
 		}
 
     case SelectionClear:
         {
-            REPLY (": Window(0x%lx) atom(0x%lx)",
-                evt->u.selectionClear.window,
-                evt->u.selectionClear.atom);
+            REPLY (": Window(0x%lx)",
+                evt->u.selectionClear.window);
+
+            REPLY (" Atom");
+            reply = xDbgGetAtom(dpy, evt->u.selectionClear.atom, reply, len);
 
             return reply;
 		}
 
     case SelectionRequest:
         {
-            REPLY (": Owner(0x%lx) Requestor(0x%lx) Selcection(0x%lx) Target(0x%lx) Property(0x%lx)",
+            REPLY (": Owner(0x%lx) Requestor(0x%lx)",
                 evt->u.selectionRequest.owner,
-                evt->u.selectionRequest.requestor,
-                evt->u.selectionRequest.selection,
-                evt->u.selectionRequest.target,
-                evt->u.selectionRequest.property);
+                evt->u.selectionRequest.requestor);
+
+            REPLY (" selection");
+            reply = xDbgGetAtom(dpy, evt->u.selectionRequest.selection, reply, len);
+            REPLY (" Target");
+            reply = xDbgGetAtom(dpy, evt->u.selectionRequest.target, reply, len);
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, evt->u.selectionRequest.property, reply, len);
 
             return reply;
 		}
 
     case SelectionNotify:
         {
-            REPLY (": Requestor(0x%lx) Selcection(0x%lx) Target(0x%lx) Property(0x%lx)",
-                evt->u.selectionNotify.requestor,
-                evt->u.selectionNotify.selection,
-                evt->u.selectionNotify.target,
-                evt->u.selectionNotify.property);
+            REPLY (": Requestor(0x%lx)",
+                evt->u.selectionNotify.requestor);
+
+            REPLY (" selection");
+            reply = xDbgGetAtom(dpy, evt->u.selectionNotify.selection, reply, len);
+            REPLY (" Target");
+            reply = xDbgGetAtom(dpy, evt->u.selectionNotify.target, reply, len);
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, evt->u.selectionNotify.property, reply, len);
 
             return reply;
 		}
@@ -809,9 +834,11 @@ char * xDbgEvlogEventCore (xEvent *evt, char *reply, int *len)
 
     case ClientMessage:
         {
-            REPLY (": XID(0x%lx) Atom(0x%lx)",
-                evt->u.clientMessage.window,
-                evt->u.clientMessage.u.b.type);
+            REPLY (": XID(0x%lx)",
+                evt->u.clientMessage.window);
+
+            REPLY (" Type");
+            reply = xDbgGetAtom(dpy, evt->u.clientMessage.u.b.type, reply, len);
 
             return reply;
 		}

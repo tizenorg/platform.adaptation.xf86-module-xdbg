@@ -57,13 +57,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 #include "xdbg_evlog_dri2.h"
+#include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestDri2 (xReq *req, char *reply, int *len)
+_EvlogRequestDri2 (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_DRI2CreateDrawable:
         {
@@ -96,11 +97,13 @@ _EvlogRequestDri2 (xReq *req, char *reply, int *len)
     case X_DRI2CopyRegion:
         {
             xDRI2CopyRegionReq *stuff = (xDRI2CopyRegionReq *)req;
-            REPLY (": XID(0x%lx) Region(0x%lx) src(0x%lx) dst(0x%lx)",
+            REPLY (": XID(0x%lx) src(0x%lx) dst(0x%lx)",
                 stuff->drawable,
-                stuff->region,
                 stuff->src,
                 stuff->dest);
+
+            REPLY (" Region");
+            reply = xDbgGetRegion(dpy, evinfo, stuff->region, reply, len);
 
             return reply;
         }
@@ -144,9 +147,11 @@ _EvlogRequestDri2 (xReq *req, char *reply, int *len)
     case X_DRI2SwapBuffersWithRegion:
         {
             xDRI2SwapBuffersWithRegionReq *stuff = (xDRI2SwapBuffersWithRegionReq *)req;
-            REPLY (": XID(0x%lx) Region(0x%lx)",
-                stuff->drawable,
-                stuff->region);
+            REPLY (": XID(0x%lx)",
+                stuff->drawable);
+
+            REPLY (" Region");
+            reply = xDbgGetRegion(dpy, evinfo, stuff->region, reply, len);
 
             return reply;
         }
@@ -160,11 +165,11 @@ _EvlogRequestDri2 (xReq *req, char *reply, int *len)
 
 
 static char *
-_EvlogEventDri2 (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventDri2 (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
     case DRI2_BufferSwapComplete:
         {

@@ -44,6 +44,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_types.h"
 #include "xdbg_evlog.h"
 #include "bool_exp_rule_checker.h"
+#include <X11/Xlibint.h>
+
+#ifndef XDBG_CLIENT
+#include "resource.h"
+#include "region.h"
+#include "dix.h"
+#endif
 
 static char *evt_type[] = { "Event", "Request", "Reply", "Flush" };
 static char *evt_dir[]  = { "<====", "---->",   "<----", "*****" };
@@ -282,26 +289,16 @@ _SortEvlogExtensions ()
 
 
 static Bool
-_EvlogGetExtentionEntry (int *return_extensions_size)
+_EvlogGetExtentionEntry (void *dpy, int *return_extensions_size)
 {
     static int init = 0;
     static Bool success = FALSE;
-    Display *dpy = NULL;
     int i;
 
     if (init)
         return success;
 
     init = 1;
-
-#ifdef XDBG_CLIENT
-    dpy = XOpenDisplay (NULL);
-    if (!dpy)
-    {
-        XDBG_LOG ("failed: open display\n");
-        exit (-1);
-    }
-#endif
 
     for (i = 0 ; i < sizeof (Evlog_extensions) / sizeof (ExtensionInfo); i++)
     {
@@ -311,10 +308,6 @@ _EvlogGetExtentionEntry (int *return_extensions_size)
     if(!_SortEvlogExtensions ())
         return FALSE;
 
-#ifdef XDBG_CLIENT
-    XCloseDisplay (dpy);
-#endif
-
     *return_extensions_size = sizeof(Evlog_extensions);
     success = TRUE;
 
@@ -323,7 +316,7 @@ _EvlogGetExtentionEntry (int *return_extensions_size)
 
 
 void
-xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
+xDbgEvlogFillLog (void *dpy, EvlogInfo *evinfo, Bool on, char *reply, int *len)
 {
     static CARD32 prev;
     static int Extensions_size = 0;
@@ -340,16 +333,16 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
                 evt_dir[evinfo->type],
                 evt_type[evinfo->type]);
 
-    if (evinfo->type == REQUEST && _EvlogGetExtentionEntry (&Extensions_size))
+    if (evinfo->type == REQUEST && _EvlogGetExtentionEntry (dpy, &Extensions_size))
     {
         REPLY ("(");
-        reply = xDbgEvlogReqeust (evinfo, on, Extensions_size, reply, len);
+        reply = xDbgEvlogReqeust (dpy, evinfo, on, Extensions_size, reply, len);
         REPLY (")");
     }
-    else if (evinfo->type == EVENT && _EvlogGetExtentionEntry (&Extensions_size))
+    else if (evinfo->type == EVENT && _EvlogGetExtentionEntry (dpy, &Extensions_size))
     {
         REPLY ("(");
-        reply = xDbgEvlogEvent (evinfo, on, Extensions_size, reply, len);
+        reply = xDbgEvlogEvent (dpy, evinfo, on, Extensions_size, reply, len);
         REPLY (")");
     }
     else
@@ -369,3 +362,119 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
 
 
 
+#ifdef XDBG_CLIENT
+Bool get_error_caught;
+
+static int
+_get_error_handle (Display *dpy, XErrorEvent *ev)
+{
+    if (!dpy)
+        return 0;
+
+    get_error_caught = True;
+    return 0;
+}
+#endif
+
+char* xDbgGetAtom(void *dpy, Atom atom, char *reply, int *len)
+{
+#ifdef XDBG_CLIENT
+    Display *d = NULL;
+    XErrorHandler old_handler = NULL;
+
+    RETURN_VAL_IF_FAIL(dpy != NULL, reply);
+
+    get_error_caught = False;
+    d = (Display*)dpy;
+
+    XSync (d, 0);
+    old_handler = XSetErrorHandler (_get_error_handle);
+
+    if(XGetAtomName(d, atom))
+        REPLY("(%s)", XGetAtomName(d, atom));
+    else
+        REPLY("(0x%lx)", atom);
+
+    get_error_caught = False;
+    XSetErrorHandler (old_handler);
+#else
+    if (NameForAtom(atom))
+        REPLY("(%s)", (char*)NameForAtom(atom));
+    else
+        REPLY("(0x%lx)", atom);
+#endif
+
+    return reply;
+}
+
+char* xDbgGetRegion(void* dpy, EvlogInfo *evinfo, XserverRegion region, char *reply, int *len)
+{
+#ifdef XDBG_CLIENT
+    int nrect, i;
+    XRectangle *rects;
+    Display *d = (Display*)dpy;
+    XErrorHandler old_handler = NULL;
+
+    RETURN_VAL_IF_FAIL(dpy != NULL, reply);
+
+    get_error_caught = False;
+    d = (Display*)dpy;
+
+    XSync (d, 0);
+    old_handler = XSetErrorHandler (_get_error_handle);
+
+    rects = XFixesFetchRegion(d, region, &nrect);
+    if (!get_error_caught)
+    {
+        REPLY ("(");
+        for (i = 0; i < nrect; i++)
+        {
+            REPLY ("[%d,%d %dx%d]",
+                   rects[i].x,
+                   rects[i].y,
+                   rects[i].width,
+                   rects[i].height);
+            if(i != nrect - 1)
+                REPLY (",");
+        }
+        REPLY (")");
+    }
+    else
+        REPLY ("(0x%lx)", region);
+
+    get_error_caught = False;
+    XSetErrorHandler (old_handler);
+#else
+    extern _X_EXPORT RESTYPE RegionResType;
+    RegionPtr pRegion;
+    BoxPtr rects;
+    int nrect, i;
+
+    int err = dixLookupResourceByType((pointer *) &pRegion, region,
+                                       RegionResType, (ClientPtr)evinfo->client.pClient,
+                                       DixReadAccess);
+	if (err != Success)
+	{
+        REPLY ("(0x%lx)", region);
+	    return reply;
+	}
+
+    nrect = RegionNumRects(pRegion);
+    rects = RegionRects(pRegion);
+
+    REPLY ("(");
+    for (i = 0; i < nrect; i++)
+    {
+        REPLY ("[%d,%d %dx%d]",
+               rects[i].x1,
+               rects[i].y1,
+               rects[i].x2 - rects[i].x1,
+               rects[i].y2 - rects[i].y1);
+        if(i != nrect - 1)
+            REPLY (",");
+    }
+    REPLY (")");
+#endif
+
+    return reply;
+}

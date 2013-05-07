@@ -60,13 +60,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 #include "xdbg_evlog_xinput.h"
+#include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestXinput (xReq *req, char *reply, int *len)
+_EvlogRequestXinput (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_GrabDevice:
         {
@@ -366,13 +367,16 @@ _EvlogRequestXinput (xReq *req, char *reply, int *len)
     case X_XIChangeProperty:
         {
             xXIChangePropertyReq *stuff = (xXIChangePropertyReq *)req;
-            REPLY (": devID(%d) mode(%d) format(%d) property(0x%x) type(0x%x) numItems(%d)",
+            REPLY (": devID(%d) mode(%d) format(%d) numItems(%d)",
                 stuff->deviceid,
                 stuff->mode,
                 stuff->format,
-                stuff->property,
-                stuff->type,
                 stuff->num_items);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            REPLY (" Type");
+            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
 
             return reply;
         }
@@ -380,9 +384,11 @@ _EvlogRequestXinput (xReq *req, char *reply, int *len)
     case X_XIDeleteProperty:
         {
             xXIDeletePropertyReq *stuff = (xXIDeletePropertyReq *)req;
-            REPLY (": devID(%d) property(0x%x)",
-                stuff->deviceid,
-                stuff->property);
+            REPLY (": devID(%d)",
+                stuff->deviceid);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
 
             return reply;
         }
@@ -390,10 +396,13 @@ _EvlogRequestXinput (xReq *req, char *reply, int *len)
     case X_XIGetProperty:
         {
             xXIGetPropertyReq *stuff = (xXIGetPropertyReq *)req;
-            REPLY (": devID(%d) property(0x%x) type(0x%x)",
-                stuff->deviceid,
-                stuff->property,
-                stuff->type);
+            REPLY (": devID(%d)",
+                stuff->deviceid);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            REPLY (" Type");
+            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
 
             return reply;
         }
@@ -415,11 +424,11 @@ _EvlogRequestXinput (xReq *req, char *reply, int *len)
 }
 
 static char *
-_EvlogEventXinput (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventXinput (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
     case XI_DeviceValuator:
         {
@@ -623,8 +632,11 @@ _EvlogEventXinput (xEvent *evt, int first_base, char *reply, int *len)
     case XI_DevicePropertyNotify:
         {
             devicePropertyNotify *stuff = (devicePropertyNotify *) evt;
-            REPLY (": XID(0x%lx)",
-                stuff->atom);
+            REPLY (": deviceid(%d)",
+                stuff->deviceid);
+
+            REPLY (" Atom");
+            reply = xDbgGetAtom(dpy, stuff->atom, reply, len);
 
             return reply;
         }

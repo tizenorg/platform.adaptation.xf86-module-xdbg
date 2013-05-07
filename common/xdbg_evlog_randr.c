@@ -58,13 +58,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 #include "xdbg_evlog_randr.h"
+#include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestRandr (xReq *req, char *reply, int *len)
+_EvlogRequestRandr (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_RRGetScreenSizeRange:
         {
@@ -118,9 +119,11 @@ _EvlogRequestRandr (xReq *req, char *reply, int *len)
     case X_RRQueryOutputProperty:
         {
             xRRQueryOutputPropertyReq *stuff = (xRRQueryOutputPropertyReq *)req;
-            REPLY (": XID(0x%lx) Property(0x%lx)",
-                stuff->output,
-                stuff->property);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
 
             return reply;
         }
@@ -128,9 +131,11 @@ _EvlogRequestRandr (xReq *req, char *reply, int *len)
     case X_RRConfigureOutputProperty:
         {
             xRRConfigureOutputPropertyReq *stuff = (xRRConfigureOutputPropertyReq *)req;
-            REPLY (": XID(0x%lx) Property(0x%lx)",
-                stuff->output,
-                stuff->property);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
 
             return reply;
         }
@@ -138,12 +143,15 @@ _EvlogRequestRandr (xReq *req, char *reply, int *len)
     case X_RRChangeOutputProperty:
         {
             xRRChangeOutputPropertyReq *stuff = (xRRChangeOutputPropertyReq *)req;
-            REPLY (": XID(0x%lx) Property(0x%lx) Type(0x%lx) Format(%d) nUnits(%ld)",
+            REPLY (": XID(0x%lx) Format(%d) nUnits(%ld)",
                 stuff->output,
-                stuff->property,
-                stuff->type,
                 stuff->format,
                 stuff->nUnits);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            REPLY (" Type");
+            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
 
             return reply;
         }
@@ -151,9 +159,11 @@ _EvlogRequestRandr (xReq *req, char *reply, int *len)
     case X_RRDeleteOutputProperty:
         {
             xRRDeleteOutputPropertyReq *stuff = (xRRDeleteOutputPropertyReq *)req;
-            REPLY (": XID(0x%lx) Property(0x%lx)",
-                stuff->output,
-                stuff->property);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
 
             return reply;
         }
@@ -161,12 +171,15 @@ _EvlogRequestRandr (xReq *req, char *reply, int *len)
     case X_RRGetOutputProperty:
         {
             xRRGetOutputPropertyReq *stuff = (xRRGetOutputPropertyReq *)req;
-            REPLY (": XID(0x%lx) Property(0x%lx) Type(0x%lx) longOffset(%ld) longLength(%ld)",
+            REPLY (": XID(0x%lx) longOffset(%ld) longLength(%ld)",
                 stuff->output,
-                stuff->property,
-                stuff->type,
                 stuff->longOffset,
                 stuff->longLength);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            REPLY (" Type");
+            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
 
             return reply;
         }
@@ -210,11 +223,11 @@ _EvlogRequestRandr (xReq *req, char *reply, int *len)
 
 
 static char *
-_EvlogEventRandr (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventRandr (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
     case RRScreenChangeNotify:
         {
@@ -234,7 +247,7 @@ _EvlogEventRandr (xEvent *evt, int first_base, char *reply, int *len)
 
     case RRNotify:
         {
-            switch(stuff->u.u.detail)
+            switch(evt->u.u.detail)
             {
             case RRNotify_CrtcChange:
                 {
@@ -266,10 +279,12 @@ _EvlogEventRandr (xEvent *evt, int first_base, char *reply, int *len)
             case RRNotify_OutputProperty:
                 {
                     xRROutputPropertyNotifyEvent *stuff = (xRROutputPropertyNotifyEvent *) evt;
-                    REPLY (": XID(0x%lx) Output(0x%lx) Atom(0x%lx)",
+                    REPLY (": XID(0x%lx) Output(0x%lx)",
                         stuff->window,
-                        stuff->output,
-                        stuff->atom);
+                        stuff->output);
+
+                    REPLY (" Atom");
+                    reply = xDbgGetAtom(dpy, stuff->atom, reply, len);
 
                     return reply;
                 }
@@ -287,10 +302,12 @@ _EvlogEventRandr (xEvent *evt, int first_base, char *reply, int *len)
             case RRNotify_ProviderProperty:
                 {
                     xRRProviderPropertyNotifyEvent *stuff = (xRRProviderPropertyNotifyEvent *) evt;
-                    REPLY (": XID(0x%lx) Provider(0x%lx) Atom(0x%lx)",
+                    REPLY (": XID(0x%lx) Provider(0x%lx)",
                         stuff->window,
-                        stuff->provider,
-                        stuff->atom);
+                        stuff->provider);
+
+                    REPLY (" Atom");
+                    reply = xDbgGetAtom(dpy, stuff->atom, reply, len);
 
                     return reply;
                 }

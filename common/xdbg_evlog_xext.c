@@ -67,13 +67,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 #include "xdbg_evlog_xext.h"
+#include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestXextDpms(xReq *req, char *reply, int *len)
+_EvlogRequestXextDpms(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_DPMSSetTimeouts:
         {
@@ -104,11 +105,11 @@ _EvlogRequestXextDpms(xReq *req, char *reply, int *len)
 
 
 static char *
-_EvlogRequestXextShm (xReq *req, char *reply, int *len)
+_EvlogRequestXextShm (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_ShmPutImage:
         {
@@ -160,11 +161,11 @@ _EvlogRequestXextShm (xReq *req, char *reply, int *len)
 }
 
 static char *
-_EvlogRequestXextSync(xReq *req, char *reply, int *len)
+_EvlogRequestXextSync(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_SyncCreateCounter:
         {
@@ -225,11 +226,11 @@ _EvlogRequestXextSync(xReq *req, char *reply, int *len)
 }
 
 static char *
-_EvlogRequestXextXtestExt1(xReq *req, char *reply, int *len)
+_EvlogRequestXextXtestExt1(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_TestFakeInput:
         {
@@ -258,11 +259,11 @@ _EvlogRequestXextXtestExt1(xReq *req, char *reply, int *len)
 
 
 static char *
-_EvlogRequestXextXtest(xReq *req, char *reply, int *len)
+_EvlogRequestXextXtest(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case X_XTestGetVersion:
         {
@@ -313,11 +314,11 @@ _EvlogRequestXextXtest(xReq *req, char *reply, int *len)
 
 
 static char *
-_EvlogEventXextDpms (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventXextDpms (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
 
     default:
@@ -329,11 +330,11 @@ _EvlogEventXextDpms (xEvent *evt, int first_base, char *reply, int *len)
 
 
 static char *
-_EvlogEventXextShm (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventXextShm (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
     case ShmCompletion:
         {
@@ -353,11 +354,11 @@ _EvlogEventXextShm (xEvent *evt, int first_base, char *reply, int *len)
 
 
 static char *
-_EvlogEventXextSync (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventXextSync (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
     case XSyncCounterNotify:
         {
@@ -394,11 +395,11 @@ _EvlogEventXextSync (xEvent *evt, int first_base, char *reply, int *len)
 
 
 static char *
-_EvlogEventXextXtestExt1 (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventXextXtestExt1 (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
 
     default:
@@ -409,11 +410,11 @@ _EvlogEventXextXtestExt1 (xEvent *evt, int first_base, char *reply, int *len)
 }
 
 static char *
-_EvlogEventXextXtest (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventXextXtest (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
 
     default:

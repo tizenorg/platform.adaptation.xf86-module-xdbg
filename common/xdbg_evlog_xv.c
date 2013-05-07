@@ -58,13 +58,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 #include "xdbg_evlog_xv.h"
+#include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestXv(xReq *req, char *reply, int *len)
+_EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 {
-    xReq *stuff = req;
+    xReq *req = evinfo->req.ptr;
 
-    switch (stuff->data)
+    switch (req->data)
     {
     case xv_GrabPort:
         {
@@ -145,10 +146,24 @@ _EvlogRequestXv(xReq *req, char *reply, int *len)
     case xv_SetPortAttribute:
         {
             xvSetPortAttributeReq *stuff = (xvSetPortAttributeReq *)req;
-            REPLY (": XID(0x%lx) Attribute(0x%lx) value(0x%lx)",
+            REPLY (": XID(0x%lx) value(0x%lx)",
                 stuff->port,
-                stuff->attribute,
                 stuff->value);
+
+            REPLY (" Attribute");
+            reply = xDbgGetAtom(dpy, stuff->attribute, reply, len);
+
+            return reply;
+        }
+
+    case xv_GetPortAttribute:
+        {
+            xvGetPortAttributeReq *stuff = (xvGetPortAttributeReq *)req;
+            REPLY (": XID(0x%lx)",
+                stuff->port);
+
+            REPLY (" Attribute");
+            reply = xDbgGetAtom(dpy, stuff->attribute, reply, len);
 
             return reply;
         }
@@ -193,11 +208,11 @@ _EvlogRequestXv(xReq *req, char *reply, int *len)
 }
 
 static char *
-_EvlogEventXv (xEvent *evt, int first_base, char *reply, int *len)
+_EvlogEventXv (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
-    xEvent *stuff = evt;
+    xEvent *evt = evinfo->evt.ptr;
 
-    switch ((stuff->u.u.type & 0x7F) - first_base)
+    switch ((evt->u.u.type & 0x7F) - first_base)
     {
     case XvVideoNotify:
         {
@@ -213,10 +228,12 @@ _EvlogEventXv (xEvent *evt, int first_base, char *reply, int *len)
     case XvPortNotify:
         {
             XvPortNotifyEvent *stuff = (XvPortNotifyEvent *) evt;
-            REPLY (": XID(0x%lx) Attribute(%lx) Value(%ld)",
+            REPLY (": XID(0x%lx) Value(%ld)",
                 stuff->port_id,
-                stuff->attribute,
                 stuff->value);
+
+            REPLY (" Attribute");
+            reply = xDbgGetAtom(dpy, stuff->attribute, reply, len);
 
             return reply;
         }

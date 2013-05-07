@@ -62,7 +62,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 extern ExtensionInfo Evlog_extensions[];
 
 char *
-xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, int Extensions_size, char *reply, int *len)
+xDbgEvlogReqeust (void *dpy, EvlogInfo *evinfo, Bool on, int Extensions_size, char *reply, int *len)
 {
     EvlogRequest req;
     xReq *xReq = NULL;
@@ -73,14 +73,14 @@ xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, int Extensions_size, char *reply, 
     req = evinfo->req;
     xReq = req.ptr;
 
-    REPLY ("%s", req.name);
+    REPLY ("%s", evinfo->req.name);
 
     if(!on)
         return reply;
 
     if (xReq->reqType < EXTENSION_BASE)
     {
-        return xDbgEvlogRequestCore (xReq, reply, len);
+        return xDbgEvlogRequestCore (dpy, evinfo, reply, len);
     }
     else
     {
@@ -90,7 +90,7 @@ xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, int Extensions_size, char *reply, 
         {
             if (xReq->reqType == Evlog_extensions[i].opcode)
             {
-                return Evlog_extensions[i].req_func (xReq, reply, len);
+                return Evlog_extensions[i].req_func (dpy, evinfo, reply, len);
             }
         }
     }

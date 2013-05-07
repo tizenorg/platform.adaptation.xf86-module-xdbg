@@ -34,6 +34,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <xf86.h>
 #include <X11/Xdefs.h>	/* for Bool */
+#include <X11/Xlib.h>
+#include <X11/extensions/Xfixes.h>
+
 
 #define XDBG_PATH_MAX        1024
 
@@ -87,6 +90,7 @@ typedef struct _EvlogClient
     int     gid;
     int     uid;
     char    command[PATH_MAX+1];
+    void*   pClient;
 } EvlogClient;
 
 typedef struct _EvlogRequest
@@ -124,8 +128,8 @@ struct _ExtensionInfo
     int     opcode;
     int     evt_base;
     int     err_base;
-    char* (*req_func) (xReq *req, char *reply, int *len);
-    char* (*evt_func) (xEvent *evt, int first_base, char *reply, int *len);
+    char* (*req_func) (void *dpy, EvlogInfo *evinfo, char *reply, int *len);
+    char* (*evt_func) (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len);
 };
 
 #endif
