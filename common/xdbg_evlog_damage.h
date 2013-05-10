@@ -34,6 +34,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 
-void     xDbgEvlogDamageGetBase (void *dpy, ExtensionInfo *extinfo);
+void     xDbgEvlogDamageGetBase (ExtensionInfo *extinfo);
 
 #endif

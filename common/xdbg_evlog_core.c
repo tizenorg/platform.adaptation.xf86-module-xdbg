@@ -57,7 +57,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog_core.h"
 #include "xdbg_evlog.h"
 
-char * xDbgEvlogRequestCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+char * xDbgEvlogRequestCore (EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -134,9 +134,10 @@ char * xDbgEvlogRequestCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len
                 stuff->window);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
+
             REPLY (" Type");
-            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
+            reply = xDbgGetAtom(stuff->type, evinfo, reply, len);
 
             return reply;
         }
@@ -148,7 +149,7 @@ char * xDbgEvlogRequestCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len
                 stuff->window);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
 
             return reply;
         }
@@ -160,7 +161,7 @@ char * xDbgEvlogRequestCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len
                 stuff->window);
 
             REPLY (" Selection");
-            reply = xDbgGetAtom(dpy, stuff->selection, reply, len);
+            reply = xDbgGetAtom(stuff->selection, evinfo, reply, len);
 
             return reply;
         }
@@ -172,11 +173,11 @@ char * xDbgEvlogRequestCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len
                 stuff->requestor);
 
             REPLY (" Selection");
-            reply = xDbgGetAtom(dpy, stuff->selection, reply, len);
+            reply = xDbgGetAtom(stuff->selection, evinfo, reply, len);
             REPLY (" Target");
-            reply = xDbgGetAtom(dpy, stuff->target, reply, len);
+            reply = xDbgGetAtom(stuff->target, evinfo, reply, len);
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
 
             return reply;
         }
@@ -557,7 +558,7 @@ char * xDbgEvlogRequestCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len
 }
 
 
-char * xDbgEvlogEventCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+char * xDbgEvlogEventCore (EvlogInfo *evinfo, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -777,7 +778,8 @@ char * xDbgEvlogEventCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 evt->u.property.window);
 
             REPLY (" Atom");
-            reply = xDbgGetAtom(dpy, evt->u.property.atom, reply, len);
+            reply = xDbgGetAtom(evt->u.property.atom, evinfo, reply, len);
+
             return reply;
 		}
 
@@ -787,7 +789,7 @@ char * xDbgEvlogEventCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 evt->u.selectionClear.window);
 
             REPLY (" Atom");
-            reply = xDbgGetAtom(dpy, evt->u.selectionClear.atom, reply, len);
+            reply = xDbgGetAtom(evt->u.selectionClear.atom, evinfo, reply, len);
 
             return reply;
 		}
@@ -799,11 +801,11 @@ char * xDbgEvlogEventCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 evt->u.selectionRequest.requestor);
 
             REPLY (" selection");
-            reply = xDbgGetAtom(dpy, evt->u.selectionRequest.selection, reply, len);
+            reply = xDbgGetAtom(evt->u.selectionRequest.selection, evinfo, reply, len);
             REPLY (" Target");
-            reply = xDbgGetAtom(dpy, evt->u.selectionRequest.target, reply, len);
+            reply = xDbgGetAtom(evt->u.selectionRequest.target, evinfo, reply, len);
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, evt->u.selectionRequest.property, reply, len);
+            reply = xDbgGetAtom(evt->u.selectionRequest.property, evinfo, reply, len);
 
             return reply;
 		}
@@ -814,11 +816,11 @@ char * xDbgEvlogEventCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 evt->u.selectionNotify.requestor);
 
             REPLY (" selection");
-            reply = xDbgGetAtom(dpy, evt->u.selectionNotify.selection, reply, len);
+            reply = xDbgGetAtom(evt->u.selectionNotify.selection, evinfo, reply, len);
             REPLY (" Target");
-            reply = xDbgGetAtom(dpy, evt->u.selectionNotify.target, reply, len);
+            reply = xDbgGetAtom(evt->u.selectionNotify.target, evinfo, reply, len);
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, evt->u.selectionNotify.property, reply, len);
+            reply = xDbgGetAtom(evt->u.selectionNotify.property, evinfo, reply, len);
 
             return reply;
 		}
@@ -838,7 +840,7 @@ char * xDbgEvlogEventCore (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 evt->u.clientMessage.window);
 
             REPLY (" Type");
-            reply = xDbgGetAtom(dpy, evt->u.clientMessage.u.b.type, reply, len);
+            reply = xDbgGetAtom(evt->u.clientMessage.u.b.type, evinfo, reply, len);
 
             return reply;
 		}

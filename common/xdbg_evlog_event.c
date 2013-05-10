@@ -59,12 +59,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define UNKNOWN_EVENT "<unknown>"
 
-extern ExtensionInfo* Sorted_Evlog_extensions;
 
 char *
-xDbgEvlogEvent (void *dpy, EvlogInfo *evinfo, Bool on, int Extensions_size, char *reply, int *len)
+xDbgEvlogEvent (EvlogInfo *evinfo, Bool on, char *reply, int *len)
 {
-    EvlogEvent   ev;
+    extern ExtensionInfo* Sorted_Evlog_extensions;
+    extern int Extensions_size;
+    EvlogEvent ev;
     xEvent *xEvt = NULL;
     int type;
 
@@ -89,28 +90,28 @@ xDbgEvlogEvent (void *dpy, EvlogInfo *evinfo, Bool on, int Extensions_size, char
 
     if (type < EXTENSION_EVENT_BASE)
     {
-        return xDbgEvlogEventCore (dpy, evinfo, reply, len);
+        return xDbgEvlogEventCore (evinfo, reply, len);
     }
     else
     {
         int i;
 
-        for (i = 0 ; i < Extensions_size / sizeof (ExtensionInfo); i++)
+        for (i = 0 ; i < Extensions_size ; i++)
         {
             if (Sorted_Evlog_extensions[i].evt_base == 0)
                 continue;
 
-            if (i != Extensions_size / sizeof (ExtensionInfo) - 1)
+            if (i != Extensions_size - 1)
             {
                 if (type >= Sorted_Evlog_extensions[i].evt_base &&
                      type < Sorted_Evlog_extensions[i+1].evt_base)
                 {
-                    return Sorted_Evlog_extensions[i].evt_func (dpy, evinfo, Sorted_Evlog_extensions[i].evt_base, reply, len);
+                    return Sorted_Evlog_extensions[i].evt_func (evinfo, Sorted_Evlog_extensions[i].evt_base, reply, len);
                 }
                 continue;
             }
 
-            return Sorted_Evlog_extensions[i].evt_func (dpy, evinfo, Sorted_Evlog_extensions[i].evt_base, reply, len);
+            return Sorted_Evlog_extensions[i].evt_func (evinfo, Sorted_Evlog_extensions[i].evt_base, reply, len);
         }
 
     }

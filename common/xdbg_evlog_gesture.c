@@ -60,7 +60,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestGesture(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestGesture(EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -114,7 +114,7 @@ _EvlogRequestGesture(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogEventGesture (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventGesture (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -219,23 +219,17 @@ _EvlogEventGesture (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, i
 
 
 void
-xDbgEvlogGestureGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogGestureGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
+    RETURN_IF_FAIL (extinfo != NULL);
 
-    RETURN_IF_FAIL (d != NULL);
-
-    if (!XQueryExtension(d, GESTURE_EXT_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no Gesture extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestGesture;
     extinfo->evt_func = _EvlogEventGesture;
 #else
     ExtensionEntry *xext = CheckExtension (GESTURE_EXT_NAME);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;

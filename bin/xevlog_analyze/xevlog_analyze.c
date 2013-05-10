@@ -90,13 +90,14 @@ _printUsage(char* name)
 }
 
 
-static void _xEvlogAnalyzePrint (Display* dpy, EvlogOption *eo, char* reply, int* len)
+static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
 {
     int fd = -1, cfd = -1;
     int total, read_len;
     int evlog_len;
     char fd_name[256];
     EvlogInfo evinfo={0,};
+    int i;
 
     if (!strlen(eo->path_name))
     {
@@ -126,21 +127,49 @@ static void _xEvlogAnalyzePrint (Display* dpy, EvlogOption *eo, char* reply, int
         int size = sizeof (log);
         static int init = 0;
 
+        memset (&evinfo, 0, sizeof (EvlogInfo));
+        total = read_len;
+
         if (!init)
         {
+            extern ExtensionInfo Evlog_extensions[];
+            extern int Extensions_size;
             int new_argc = 3;
             char* new_argv[3] = {"add", "allow", "all"};
+            int i;
 
             if(!eo->isRule)
                 xDbgEvlogRuleSet ((const int) new_argc, (const char**) new_argv, reply, len);
 
             printf("%s\n", reply);
+
+            read_len = read (fd, &Extensions_size, sizeof (int));
+            GOTO_IF_FAIL (read_len == sizeof (int), print_done);
+            total += read_len;
+
+            for (i = 0 ; i < Extensions_size ; i++)
+            {
+                read_len = read (fd, &Evlog_extensions[i].opcode, sizeof (int));
+                GOTO_IF_FAIL (read_len == sizeof (int), print_done);
+                total += read_len;
+
+                read_len = read (fd, &Evlog_extensions[i].evt_base, sizeof (int));
+                GOTO_IF_FAIL (read_len == sizeof (int), print_done);
+                total += read_len;
+
+                read_len = read (fd, &Evlog_extensions[i].err_base, sizeof (int));
+                GOTO_IF_FAIL (read_len == sizeof (int), print_done);
+                total += read_len;
+            }
+
+            if (!xDbgEvlogGetExtensionEntry ())
+            {
+                printf ("failed: get extentions\n");
+                goto print_done;
+            }
+
             init = 1;
         }
-
-        memset (&evinfo, 0, sizeof (EvlogInfo));
-
-        total = read_len;
 
         read_len = read (fd, &evinfo.time, sizeof (CARD32));
         GOTO_IF_FAIL (read_len == sizeof (CARD32), print_done);
@@ -182,18 +211,74 @@ static void _xEvlogAnalyzePrint (Display* dpy, EvlogOption *eo, char* reply, int
             GOTO_IF_FAIL (read_len == sizeof(EvlogEvent), print_done);
             total += read_len;
 
-            evinfo.evt.ptr = malloc (sizeof(xEvent));
+            evinfo.evt.ptr = malloc (evinfo.evt.size);
             GOTO_IF_FAIL (evinfo.evt.ptr != NULL, print_done);
 
-            read_len = read (fd, evinfo.evt.ptr, sizeof (xEvent));
-            GOTO_IF_FAIL (read_len == sizeof(xEvent), print_done);
+            WARNING_IF_FAIL (evinfo.evt.size > 0);
+
+            read_len = read (fd, evinfo.evt.ptr, evinfo.evt.size);
+            GOTO_IF_FAIL (read_len == evinfo.evt.size, print_done);
             total += read_len;
         }
+
+        if (evinfo.mask & EVLOG_MASK_ATOM)
+        {
+            EvlogAtomTable *table;
+
+            read_len = read (fd, &evinfo.evatom.size, sizeof (int));
+            GOTO_IF_FAIL (read_len == sizeof(int), print_done);
+            total += read_len;
+
+            for (i = 0 ; i < evinfo.evatom.size ; i++)
+            {
+                table = malloc (sizeof(EvlogAtomTable));
+                GOTO_IF_FAIL (table != NULL, print_done);
+
+                if (!evinfo.evatom.init)
+                {
+                    xorg_list_init(&evinfo.evatom.list);
+                    evinfo.evatom.init = 1;
+                }
+                read_len = read (fd, table, sizeof (EvlogAtomTable));
+                GOTO_IF_FAIL (read_len == sizeof(EvlogAtomTable), print_done);
+                total += read_len;
+
+                xorg_list_add(&table->link, &evinfo.evatom.list);
+            }
+        }
+
+        if (evinfo.mask & EVLOG_MASK_REGION)
+        {
+            EvlogRegionTable *table;
+
+            read_len = read (fd, &evinfo.evregion.size, sizeof (int));
+            GOTO_IF_FAIL (read_len == sizeof(int), print_done);
+            total += read_len;
+
+            for (i = 0 ; i < evinfo.evregion.size ; i++)
+            {
+                table = malloc (sizeof(EvlogRegionTable));
+                GOTO_IF_FAIL (table != NULL, print_done);
+
+                if (!evinfo.evregion.init)
+                {
+                    xorg_list_init(&evinfo.evregion.list);
+                    evinfo.evregion.init = 1;
+                }
+
+                read_len = read (fd, table, sizeof (EvlogRegionTable));
+                GOTO_IF_FAIL (read_len == sizeof(EvlogRegionTable), print_done);
+                total += read_len;
+
+                xorg_list_add(&table->link, &evinfo.evregion.list);
+            }
+        }
+
         GOTO_IF_FAIL (evlog_len == total, print_done);
 
         if (xDbgEvlogRuleValidate (&evinfo))
         {
-            xDbgEvlogFillLog(dpy, &evinfo, eo->detail, log, &size);
+            xDbgEvlogFillLog(&evinfo, eo->detail, log, &size);
             printf ("%s", log);
         }
 
@@ -208,6 +293,9 @@ static void _xEvlogAnalyzePrint (Display* dpy, EvlogOption *eo, char* reply, int
             free (evinfo.evt.ptr);
             evinfo.evt.ptr = NULL;
         }
+
+        xDbgDistroyAtomList(&evinfo);
+        xDbgDistroyRegionList(&evinfo);
     }
 
 
@@ -218,6 +306,9 @@ print_done:
     if (evinfo.evt.ptr)
         free (evinfo.evt.ptr);
 
+    xDbgDistroyAtomList(&evinfo);
+    xDbgDistroyRegionList(&evinfo);
+
     if (cfd >= 0)
         close (cfd);
 
@@ -227,7 +318,7 @@ print_done:
 
 
 static void
-_checkOption(Display* dpy, int argc, char** argv)
+_checkOption(int argc, char** argv)
 {
     int c;
     int opt_str_len = 0;
@@ -354,7 +445,7 @@ _checkOption(Display* dpy, int argc, char** argv)
         }
     }
 
-    _xEvlogAnalyzePrint(dpy, &eo, rule_log, &rule_size);
+    _xEvlogAnalyzePrint(&eo, rule_log, &rule_size);
 }
 
 
@@ -364,14 +455,6 @@ int main(int argc, char** argv)
     char **new_argv;
     int new_argc, i;
     char temp[128];
-    Display *dpy;
-
-    dpy = XOpenDisplay (NULL);
-    if (!dpy)
-    {
-        printf ("failed: open display\n");
-        exit (-1);
-    }
 
     new_argc = argc + 1;
     new_argv = (char**)malloc (new_argc * sizeof (char*));
@@ -387,10 +470,9 @@ int main(int argc, char** argv)
     for (i = 0; i < argc; i++)
         new_argv[i+1] = argv[i];
 
-    _checkOption(dpy, new_argc, new_argv);
+    _checkOption(new_argc, new_argv);
 
     free (new_argv);
-    XCloseDisplay (dpy);
 
     return 0;
 }

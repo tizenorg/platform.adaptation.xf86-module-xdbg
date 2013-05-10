@@ -63,7 +63,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestXinput (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXinput (EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -374,9 +374,9 @@ _EvlogRequestXinput (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->num_items);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
             REPLY (" Type");
-            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
+            reply = xDbgGetAtom(stuff->type, evinfo, reply, len);
 
             return reply;
         }
@@ -388,7 +388,7 @@ _EvlogRequestXinput (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->deviceid);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
 
             return reply;
         }
@@ -400,9 +400,9 @@ _EvlogRequestXinput (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->deviceid);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
             REPLY (" Type");
-            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
+            reply = xDbgGetAtom(stuff->type, evinfo, reply, len);
 
             return reply;
         }
@@ -424,7 +424,7 @@ _EvlogRequestXinput (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogEventXinput (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -636,7 +636,7 @@ _EvlogEventXinput (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, in
                 stuff->deviceid);
 
             REPLY (" Atom");
-            reply = xDbgGetAtom(dpy, stuff->atom, reply, len);
+            reply = xDbgGetAtom(stuff->atom, evinfo, reply, len);
 
             return reply;
         }
@@ -649,24 +649,17 @@ _EvlogEventXinput (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, in
 }
 
 void
-xDbgEvlogXinputGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogXinputGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, INAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no Xinput extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestXinput;
     extinfo->evt_func = _EvlogEventXinput;
 #else
     ExtensionEntry *xext = CheckExtension (INAME);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;

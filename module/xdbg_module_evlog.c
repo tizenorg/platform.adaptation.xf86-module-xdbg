@@ -74,10 +74,14 @@ static int  xev_trace_fd = -1;
 static int  xev_trace_record_fd = -1;
 static Atom atom_rotate = None;
 static Atom atom_client_pid = None;
+static int  init = 0;
 
 static void evtRecord (int fd, EvlogInfo *evinfo)
 {
+    extern ExtensionInfo Evlog_extensions[];
+    extern int Extensions_size;
     int write_len = 0;
+    int i;
 
     XDBG_RETURN_IF_FAIL (fd >= 0)
     XDBG_RETURN_IF_FAIL (evinfo != NULL);
@@ -94,13 +98,56 @@ static void evtRecord (int fd, EvlogInfo *evinfo)
         write_len += (sizeof (EvlogRequest) + (evinfo->req.length * 4));
 
     if (evinfo->mask & EVLOG_MASK_EVENT)
-        write_len += (sizeof (EvlogEvent) + sizeof (xEvent));
+        write_len += (sizeof (EvlogEvent) + evinfo->evt.size);
+
+    if (evinfo->mask & EVLOG_MASK_ATOM)
+        write_len += (sizeof (int) +
+                     (sizeof (EvlogAtomTable) * evinfo->evatom.size));
+
+    if (evinfo->mask & EVLOG_MASK_REGION)
+        write_len += (sizeof (int) +
+                     (sizeof (EvlogRegionTable) * evinfo->evregion.size));
+
+    if (!init)
+        write_len += (sizeof (int) +
+                    ((sizeof (int) * 3) * Extensions_size));
 
     if (write (fd, &write_len, sizeof(int)) == -1)
     {
         XDBG_ERROR (MXDBG, "failed: write write_len\n");
         return;
     }
+
+    if (!init)
+    {
+        if (write (fd, &Extensions_size, sizeof(int)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write Extensions_size\n");
+            return;
+        }
+
+        for (i = 0 ; i < Extensions_size ; i++)
+        {
+            if (write (fd, &Evlog_extensions[i].opcode, sizeof(int)) == -1)
+            {
+                XDBG_ERROR (MXDBG, "failed: write Evlog_extensions[%d] opcode\n", i);
+                return;
+            }
+            if (write (fd, &Evlog_extensions[i].evt_base, sizeof(int)) == -1)
+            {
+                XDBG_ERROR (MXDBG, "failed: write Evlog_extensions[%d] evt_base\n", i);
+                return;
+            }
+            if (write (fd, &Evlog_extensions[i].err_base, sizeof(int)) == -1)
+            {
+                XDBG_ERROR (MXDBG, "failed: write Evlog_extensions[%d] err_base\n", i);
+                return;
+            }
+        }
+
+        init = 1;
+    }
+
     if (write (fd, &evinfo->time, sizeof(CARD32)) == -1)
     {
         XDBG_ERROR (MXDBG, "failed: write msec\n");
@@ -144,23 +191,52 @@ static void evtRecord (int fd, EvlogInfo *evinfo)
             XDBG_ERROR (MXDBG, "failed: write event\n");
             return;
         }
-        if (write (fd, evinfo->evt.ptr, sizeof (xEvent)) == -1)
+
+        XDBG_WARNING_IF_FAIL (evinfo->evt.size > 0);
+        if (write (fd, evinfo->evt.ptr, evinfo->evt.size) == -1)
         {
             XDBG_ERROR (MXDBG, "failed: write event\n");
             return;
         }
     }
+
+    if (evinfo->mask & EVLOG_MASK_ATOM)
+    {
+        EvlogAtomTable *table;
+
+        if (write (fd, &evinfo->evatom.size, sizeof (int)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write atom size\n");
+            return;
+        }
+        xorg_list_for_each_entry(table, &evinfo->evatom.list, link)
+            if (write (fd, table, sizeof (EvlogAtomTable)) == -1)
+            {
+                XDBG_ERROR (MXDBG, "failed: write atom table\n");
+                return;
+            }
+    }
+
+    if (evinfo->mask & EVLOG_MASK_REGION)
+    {
+        EvlogRegionTable *table;
+
+        if (write (fd, &evinfo->evregion.size, sizeof (int)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write region size\n");
+            return;
+        }
+        xorg_list_for_each_entry(table, &evinfo->evregion.list, link)
+            if (write (fd, table, sizeof (EvlogRegionTable)) == -1)
+            {
+                XDBG_ERROR (MXDBG, "failed: write region table\n");
+                return;
+            }
+    }
 }
 
-static void evtPrintF (int fd, EvlogInfo *evinfo)
+static void evtPrintF (int fd, EvlogInfo *evinfo, char *log)
 {
-    char log[1024];
-    int size = sizeof (log);
-
-
-
-    xDbgEvlogFillLog (NULL, evinfo, TRUE, log, &size);
-
     if (fd < 0)
         ErrorF ("%s", log);
     else
@@ -170,6 +246,7 @@ static void evtPrintF (int fd, EvlogInfo *evinfo)
 static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
 {
     EvlogInfo evinfo = {0,};
+    static int EntryInit = 0;
 
     /* evinfo.type */
     evinfo.type = type;
@@ -221,14 +298,32 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
     /* evinfo.time */
     evinfo.time = GetTimeInMillis ();
 
+    /* get extension entry */
+    if (!EntryInit && !xDbgEvlogGetExtensionEntry (NULL))
+        return;
+
+    EntryInit = 1;
+
     if (!xDbgEvlogRuleValidate (&evinfo))
         return;
 
     if (xev_trace_record_fd >= 0)
+    {
+        xDbgEvlogFillLog (&evinfo, TRUE, NULL, NULL);
         evtRecord (xev_trace_record_fd, &evinfo);
+    }
     else
-        evtPrintF (xev_trace_fd, &evinfo);
+    {
+        char log[1024];
+        int size = sizeof (log);
 
+        xDbgEvlogFillLog (&evinfo, TRUE, log, &size);
+        evtPrintF (xev_trace_fd, &evinfo, log);
+    }
+
+    /* evatom initialize */
+    xDbgDistroyAtomList(&evinfo);
+    xDbgDistroyRegionList(&evinfo);
 }
 
 static const char*
@@ -564,6 +659,7 @@ Bool
 xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply, int *len)
 {
     char fd_name[XDBG_PATH_MAX];
+    int  fd_check = -1;
 
     if (!path || strlen (path) <= 0)
     {
@@ -606,6 +702,12 @@ xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply,
         else
             snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
     }
+
+    fd_check = open (fd_name, O_RDONLY);
+    if(fd_check < 0)
+        init = 0;
+    else
+        close (fd_check);
 
     xev_trace_record_fd = open (fd_name, O_CREAT|O_RDWR|O_APPEND, 0755);
     if (xev_trace_record_fd < 0)

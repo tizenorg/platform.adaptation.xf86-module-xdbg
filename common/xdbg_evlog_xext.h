@@ -34,10 +34,10 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 
-void    xDbgEvlogXextDpmsGetBase (void *dpy, ExtensionInfo *extinfo);
-void    xDbgEvlogXextShmGetBase (void *dpy, ExtensionInfo *extinfo);
-void    xDbgEvlogXextSyncGetBase (void *dpy, ExtensionInfo *extinfo);
-void    xDbgEvlogXextXtestExt1GetBase (void *dpy, ExtensionInfo *extinfo);
-void    xDbgEvlogXextXtestGetBase (void *dpy, ExtensionInfo *extinfo);
+void    xDbgEvlogXextDpmsGetBase (ExtensionInfo *extinfo);
+void    xDbgEvlogXextShmGetBase (ExtensionInfo *extinfo);
+void    xDbgEvlogXextSyncGetBase (ExtensionInfo *extinfo);
+void    xDbgEvlogXextXtestExt1GetBase (ExtensionInfo *extinfo);
+void    xDbgEvlogXextXtestGetBase (ExtensionInfo *extinfo);
 
 #endif

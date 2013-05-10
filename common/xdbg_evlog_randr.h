@@ -34,6 +34,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include "xdbg_types.h"
 
-void    xDbgEvlogRandrGetBase (void *dpy, ExtensionInfo *extinfo);
+void    xDbgEvlogRandrGetBase (ExtensionInfo *extinfo);
 
 #endif

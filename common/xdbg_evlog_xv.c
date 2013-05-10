@@ -61,7 +61,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXv(EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -212,7 +212,7 @@ _EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->value);
 
             REPLY (" Attribute");
-            reply = xDbgGetAtom(dpy, stuff->attribute, reply, len);
+            reply = xDbgGetAtom(stuff->attribute, evinfo, reply, len);
 
             return reply;
         }
@@ -224,7 +224,7 @@ _EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->port);
 
             REPLY (" Attribute");
-            reply = xDbgGetAtom(dpy, stuff->attribute, reply, len);
+            reply = xDbgGetAtom(stuff->attribute, evinfo, reply, len);
 
             return reply;
         }
@@ -282,7 +282,7 @@ _EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogEventXv (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXv (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -307,7 +307,7 @@ _EvlogEventXv (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *l
                 stuff->value);
 
             REPLY (" Attribute");
-            reply = xDbgGetAtom(dpy, stuff->attribute, reply, len);
+            reply = xDbgGetAtom(stuff->attribute, evinfo, reply, len);
 
             return reply;
         }
@@ -320,24 +320,17 @@ _EvlogEventXv (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *l
 }
 
 void
-xDbgEvlogXvGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogXvGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, XvName, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no Xv extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestXv;
     extinfo->evt_func = _EvlogEventXv;
 #else
     ExtensionEntry *xext = CheckExtension (XvName);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;

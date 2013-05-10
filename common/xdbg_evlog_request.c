@@ -59,13 +59,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define UNKNOWN_EVENT "<unknown>"
 
-extern ExtensionInfo Evlog_extensions[];
 
 char *
-xDbgEvlogReqeust (void *dpy, EvlogInfo *evinfo, Bool on, int Extensions_size, char *reply, int *len)
+xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, char *reply, int *len)
 {
+    extern ExtensionInfo Evlog_extensions[];
+    extern int Extensions_size;
     EvlogRequest req;
     xReq *xReq = NULL;
+
 
     RETURN_VAL_IF_FAIL (evinfo != NULL, reply);
     RETURN_VAL_IF_FAIL (evinfo->type == REQUEST, reply);
@@ -80,17 +82,17 @@ xDbgEvlogReqeust (void *dpy, EvlogInfo *evinfo, Bool on, int Extensions_size, ch
 
     if (xReq->reqType < EXTENSION_BASE)
     {
-        return xDbgEvlogRequestCore (dpy, evinfo, reply, len);
+        return xDbgEvlogRequestCore (evinfo, reply, len);
     }
     else
     {
         int i;
 
-        for (i = 0 ; i < Extensions_size / sizeof (ExtensionInfo); i++)
+        for (i = 0 ; i < Extensions_size ; i++)
         {
             if (xReq->reqType == Evlog_extensions[i].opcode)
             {
-                return Evlog_extensions[i].req_func (dpy, evinfo, reply, len);
+                return Evlog_extensions[i].req_func (evinfo, reply, len);
             }
         }
     }

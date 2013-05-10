@@ -59,7 +59,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestComposite(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestComposite(EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -123,7 +123,7 @@ _EvlogRequestComposite(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogEventComposite (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventComposite (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -139,24 +139,17 @@ _EvlogEventComposite (void *dpy, EvlogInfo *evinfo, int first_base, char *reply,
 
 
 void
-xDbgEvlogCompositeGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogCompositeGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, COMPOSITE_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no Composite extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestComposite;
     extinfo->evt_func = _EvlogEventComposite;
 #else
     ExtensionEntry *xext = CheckExtension (COMPOSITE_NAME);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;

@@ -70,7 +70,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestXextDpms(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextDpms(EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -105,7 +105,7 @@ _EvlogRequestXextDpms(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogRequestXextShm (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextShm (EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -161,7 +161,7 @@ _EvlogRequestXextShm (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogRequestXextSync(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextSync(EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -226,7 +226,7 @@ _EvlogRequestXextSync(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogRequestXextXtestExt1(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextXtestExt1(EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -259,7 +259,7 @@ _EvlogRequestXextXtestExt1(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogRequestXextXtest(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextXtest(EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -314,7 +314,7 @@ _EvlogRequestXextXtest(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogEventXextDpms (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextDpms (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -330,7 +330,7 @@ _EvlogEventXextDpms (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, 
 
 
 static char *
-_EvlogEventXextShm (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextShm (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -354,7 +354,7 @@ _EvlogEventXextShm (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, i
 
 
 static char *
-_EvlogEventXextSync (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextSync (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -395,7 +395,7 @@ _EvlogEventXextSync (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, 
 
 
 static char *
-_EvlogEventXextXtestExt1 (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextXtestExt1 (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -410,7 +410,7 @@ _EvlogEventXextXtestExt1 (void *dpy, EvlogInfo *evinfo, int first_base, char *re
 }
 
 static char *
-_EvlogEventXextXtest (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextXtest (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -425,24 +425,17 @@ _EvlogEventXextXtest (void *dpy, EvlogInfo *evinfo, int first_base, char *reply,
 }
 
 void
-xDbgEvlogXextDpmsGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogXextDpmsGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, DPMSExtensionName, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no Xext_DPMS extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestXextDpms;
     extinfo->evt_func = _EvlogEventXextDpms;
 #else
     ExtensionEntry *xext = CheckExtension (DPMSExtensionName);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;
@@ -454,24 +447,17 @@ xDbgEvlogXextDpmsGetBase (void *dpy, ExtensionInfo *extinfo)
 
 
 void
-xDbgEvlogXextShmGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogXextShmGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, SHMNAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no XShm extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestXextShm;
     extinfo->evt_func = _EvlogEventXextShm;
 #else
     ExtensionEntry *xext = CheckExtension (SHMNAME);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;
@@ -483,25 +469,17 @@ xDbgEvlogXextShmGetBase (void *dpy, ExtensionInfo *extinfo)
 
 
 void
-xDbgEvlogXextSyncGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogXextSyncGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
-
-    if (!XQueryExtension(d, SYNC_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no Sync extension. \n");
-        return;
-    }
 
     extinfo->req_func = _EvlogRequestXextSync;
     extinfo->evt_func = _EvlogEventXextSync;
 #else
     ExtensionEntry *xext = CheckExtension (SYNC_NAME);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;
@@ -514,24 +492,17 @@ xDbgEvlogXextSyncGetBase (void *dpy, ExtensionInfo *extinfo)
 
 
 void
-xDbgEvlogXextXtestExt1GetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogXextXtestExt1GetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, XTestEXTENSION_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no XTestExt1 extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestXextXtestExt1;
     extinfo->evt_func = _EvlogEventXextXtestExt1;
 #else
     ExtensionEntry *xext = CheckExtension (XTestEXTENSION_NAME);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;
@@ -544,24 +515,17 @@ xDbgEvlogXextXtestExt1GetBase (void *dpy, ExtensionInfo *extinfo)
 
 
 void
-xDbgEvlogXextXtestGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogXextXtestGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, XTestExtensionName, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no Xext_Xtest extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestXextXtest;
     extinfo->evt_func = _EvlogEventXextXtest;
 #else
     ExtensionEntry *xext = CheckExtension (XTestExtensionName);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;

@@ -248,6 +248,7 @@ ExtensionInfo Evlog_extensions[] = {
     {xDbgEvlogXvGetBase, 0, 0, 0, NULL}
 };
 ExtensionInfo* Sorted_Evlog_extensions;
+int Extensions_size = 0;
 
 static void
 _ExtensionsSwap(ExtensionInfo* first, ExtensionInfo* second)
@@ -270,10 +271,10 @@ _SortEvlogExtensions ()
 
     memcpy(Sorted_Evlog_extensions, Evlog_extensions, sizeof(Evlog_extensions));
 
-    for (i = 0 ; i < sizeof (Evlog_extensions) / sizeof (ExtensionInfo) - 1 ; i++)
+    for (i = 0 ; i < Extensions_size - 1 ; i++)
     {
         swap = 0;
-        for (j = 1 ; j < sizeof (Evlog_extensions) / sizeof (ExtensionInfo) - i ; j++)
+        for (j = 1 ; j < Extensions_size - i ; j++)
         {
             if(Sorted_Evlog_extensions[j-1].evt_base > Sorted_Evlog_extensions[j].evt_base)
             {
@@ -288,8 +289,8 @@ _SortEvlogExtensions ()
 }
 
 
-static Bool
-_EvlogGetExtentionEntry (void *dpy, int *return_extensions_size)
+Bool
+xDbgEvlogGetExtensionEntry ()
 {
     static int init = 0;
     static Bool success = FALSE;
@@ -299,16 +300,17 @@ _EvlogGetExtentionEntry (void *dpy, int *return_extensions_size)
         return success;
 
     init = 1;
+    Extensions_size = sizeof(Evlog_extensions) / sizeof (ExtensionInfo);
 
-    for (i = 0 ; i < sizeof (Evlog_extensions) / sizeof (ExtensionInfo); i++)
+    for (i = 0 ; i < Extensions_size ; i++)
     {
-        Evlog_extensions[i].get_base_func (dpy, Evlog_extensions + i);
+        Evlog_extensions[i].get_base_func (Evlog_extensions + i);
     }
 
     if(!_SortEvlogExtensions ())
         return FALSE;
 
-    *return_extensions_size = sizeof(Evlog_extensions);
+
     success = TRUE;
 
     return success;
@@ -316,10 +318,9 @@ _EvlogGetExtentionEntry (void *dpy, int *return_extensions_size)
 
 
 void
-xDbgEvlogFillLog (void *dpy, EvlogInfo *evinfo, Bool on, char *reply, int *len)
+xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
 {
     static CARD32 prev;
-    static int Extensions_size = 0;
 
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_dir) / sizeof (char*)));
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_type) / sizeof (char*)));
@@ -333,16 +334,17 @@ xDbgEvlogFillLog (void *dpy, EvlogInfo *evinfo, Bool on, char *reply, int *len)
                 evt_dir[evinfo->type],
                 evt_type[evinfo->type]);
 
-    if (evinfo->type == REQUEST && _EvlogGetExtentionEntry (dpy, &Extensions_size))
+    if (evinfo->type == REQUEST)
     {
         REPLY ("(");
-        reply = xDbgEvlogReqeust (dpy, evinfo, on, Extensions_size, reply, len);
+        reply = xDbgEvlogReqeust (evinfo, on, reply, len);
         REPLY (")");
     }
-    else if (evinfo->type == EVENT && _EvlogGetExtentionEntry (dpy, &Extensions_size))
+    else if (evinfo->type == EVENT)
     {
+        evinfo->evt.size = sizeof (xEvent);
         REPLY ("(");
-        reply = xDbgEvlogEvent (dpy, evinfo, on, Extensions_size, reply, len);
+        reply = xDbgEvlogEvent (evinfo, on, reply, len);
         REPLY (")");
     }
     else
@@ -361,120 +363,143 @@ xDbgEvlogFillLog (void *dpy, EvlogInfo *evinfo, Bool on, char *reply, int *len)
 }
 
 
-
-#ifdef XDBG_CLIENT
-Bool get_error_caught;
-
-static int
-_get_error_handle (Display *dpy, XErrorEvent *ev)
+void xDbgDistroyAtomList (EvlogInfo *evinfo)
 {
-    if (!dpy)
-        return 0;
+    EvlogAtomTable *cur, *next;
 
-    get_error_caught = True;
-    return 0;
+    if (!evinfo->evatom.init)
+        return;
+
+    xorg_list_for_each_entry_safe(cur, next, &evinfo->evatom.list, link)
+    {
+        xorg_list_del(&cur->link);
+        free (cur);
+        cur = NULL;
+    }
+    evinfo->evatom.init = 0;
+    evinfo->evatom.size = 0;
 }
-#endif
 
-char* xDbgGetAtom(void *dpy, Atom atom, char *reply, int *len)
+void xDbgDistroyRegionList (EvlogInfo *evinfo)
 {
-#ifdef XDBG_CLIENT
-    Display *d = NULL;
-    XErrorHandler old_handler = NULL;
+    EvlogRegionTable *cur, *next;
 
-    RETURN_VAL_IF_FAIL(dpy != NULL, reply);
+    if (!evinfo->evregion.init)
+        return;
 
-    get_error_caught = False;
-    d = (Display*)dpy;
+    xorg_list_for_each_entry_safe(cur, next, &evinfo->evregion.list, link)
+    {
+        xorg_list_del(&cur->link);
+        free (cur);
+        cur = NULL;
+    }
+    evinfo->evregion.init = 0;
+    evinfo->evregion.size = 0;
+}
 
-    XSync (d, 0);
-    old_handler = XSetErrorHandler (_get_error_handle);
+char* xDbgGetAtom(Atom atom, EvlogInfo *evinfo, char *reply, int *len)
+{
+    EvlogAtomTable *table;
+#ifndef XDBG_CLIENT
+    table = malloc (sizeof(EvlogAtomTable));
+    if (!table)
+        return reply;
 
-    if(XGetAtomName(d, atom))
-        REPLY("(%s)", XGetAtomName(d, atom));
-    else
-        REPLY("(0x%lx)", atom);
+    evinfo->mask |= EVLOG_MASK_ATOM;
+    table->xid = atom;
 
-    get_error_caught = False;
-    XSetErrorHandler (old_handler);
-#else
+    if (!evinfo->evatom.init)
+    {
+        xorg_list_init(&evinfo->evatom.list);
+        evinfo->evatom.init = 1;
+    }
+
     if (NameForAtom(atom))
-        REPLY("(%s)", (char*)NameForAtom(atom));
+        snprintf (table->buf, XDBG_BUF_SIZE, "%s", (char*)NameForAtom(atom));
     else
-        REPLY("(0x%lx)", atom);
+        snprintf (table->buf, XDBG_BUF_SIZE, "0x%lx", atom);
+
+    xorg_list_add(&table->link, &evinfo->evatom.list);
+    evinfo->evatom.size++;
 #endif
+    xorg_list_for_each_entry(table, &evinfo->evatom.list, link)
+        if(table->xid == atom)
+        {
+            REPLY ("(%s)", table->buf);
+            break;
+        }
 
     return reply;
 }
 
-char* xDbgGetRegion(void* dpy, EvlogInfo *evinfo, XserverRegion region, char *reply, int *len)
+char* xDbgGetRegion(XserverRegion region, EvlogInfo *evinfo, char *reply, int *len)
 {
-#ifdef XDBG_CLIENT
-    int nrect, i;
-    XRectangle *rects;
-    Display *d = (Display*)dpy;
-    XErrorHandler old_handler = NULL;
-
-    RETURN_VAL_IF_FAIL(dpy != NULL, reply);
-
-    get_error_caught = False;
-    d = (Display*)dpy;
-
-    XSync (d, 0);
-    old_handler = XSetErrorHandler (_get_error_handle);
-
-    rects = XFixesFetchRegion(d, region, &nrect);
-    if (!get_error_caught)
-    {
-        REPLY ("(");
-        for (i = 0; i < nrect; i++)
-        {
-            REPLY ("[%d,%d %dx%d]",
-                   rects[i].x,
-                   rects[i].y,
-                   rects[i].width,
-                   rects[i].height);
-            if(i != nrect - 1)
-                REPLY (",");
-        }
-        REPLY (")");
-    }
-    else
-        REPLY ("(0x%lx)", region);
-
-    get_error_caught = False;
-    XSetErrorHandler (old_handler);
-#else
+    EvlogRegionTable *table;
+#ifndef XDBG_CLIENT
     extern _X_EXPORT RESTYPE RegionResType;
     RegionPtr pRegion;
     BoxPtr rects;
     int nrect, i;
-
+    int s;
     int err = dixLookupResourceByType((pointer *) &pRegion, region,
                                        RegionResType, (ClientPtr)evinfo->client.pClient,
                                        DixReadAccess);
+
+    evinfo->mask |= EVLOG_MASK_REGION;
+
+    if (!evinfo->evregion.init)
+    {
+        xorg_list_init(&evinfo->evregion.list);
+        evinfo->evregion.init = 1;
+    }
+
 	if (err != Success)
 	{
-        REPLY ("(0x%lx)", region);
-	    return reply;
-	}
+        table = malloc (sizeof(EvlogAtomTable));
+        if (!table)
+            return reply;
 
-    nrect = RegionNumRects(pRegion);
-    rects = RegionRects(pRegion);
+        table->xid = region;
 
-    REPLY ("(");
-    for (i = 0; i < nrect; i++)
-    {
-        REPLY ("[%d,%d %dx%d]",
-               rects[i].x1,
-               rects[i].y1,
-               rects[i].x2 - rects[i].x1,
-               rects[i].y2 - rects[i].y1);
-        if(i != nrect - 1)
-            REPLY (",");
+        snprintf (table->buf, XDBG_BUF_SIZE, "0x%lx", region);
+        xorg_list_add(&table->link, &evinfo->evregion.list);
+        evinfo->evregion.size++;
     }
-    REPLY (")");
+    else
+    {
+        nrect = RegionNumRects(pRegion);
+        rects = RegionRects(pRegion);
+
+        for (i = 0; i < nrect; i++)
+        {
+            table = malloc (sizeof(EvlogAtomTable));
+            if (!table)
+                return reply;
+
+            table->xid = region;
+
+            s = 0;
+            s += snprintf (table->buf + s, XDBG_BUF_SIZE - s,
+                           "[%d,%d %dx%d]",
+                               rects[i].x1,
+                               rects[i].y1,
+                               rects[i].x2 - rects[i].x1,
+                               rects[i].y2 - rects[i].y1);
+            xorg_list_add(&table->link, &evinfo->evregion.list);
+            evinfo->evregion.size++;
+        }
+    }
+
 #endif
+    REPLY("(");
+    xorg_list_for_each_entry(table, &evinfo->evregion.list, link)
+        if(table->xid == region)
+        {
+            REPLY ("%s", table->buf);
+            if(table != xorg_list_last_entry(&evinfo->evregion.list, EvlogRegionTable, link))
+                REPLY (", ");
+        }
+    REPLY(")");
 
     return reply;
 }

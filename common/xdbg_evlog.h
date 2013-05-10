@@ -45,14 +45,18 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog_randr.h"
 #include "xdbg_evlog_xinput.h"
 #include "xdbg_evlog_xv.h"
+#include <list.h>
 
 
 char*  xDbgEvlogGetCmd         (char *path);
 Bool   xDbgEvlogRuleSet        (const int argc, const char **argv, char *reply, int *len);
 Bool   xDbgEvlogRuleValidate   (EvlogInfo *evinfo);
-void   xDbgEvlogFillLog        (void* dpy, EvlogInfo *evinfo, Bool on, char *reply, int *len);
+Bool   xDbgEvlogGetExtensionEntry ();
+void   xDbgEvlogFillLog        (EvlogInfo *evinfo, Bool on, char *reply, int *len);
 
-char*  xDbgGetAtom       (void* dpy, Atom atom, char *reply, int *len);
-char*  xDbgGetRegion    (void* dpy, EvlogInfo *evinfo, XserverRegion region, char *reply, int *len);
+void   xDbgDistroyAtomList  (EvlogInfo *evinfo);
+void   xDbgDistroyRegionList (EvlogInfo *evinfo);
+char*  xDbgGetAtom              (Atom atom, EvlogInfo *evinfo, char *reply, int *len);
+char*  xDbgGetRegion          (XserverRegion region, EvlogInfo *evinfo, char *reply, int *len);
 
 #endif

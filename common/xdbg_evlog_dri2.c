@@ -60,7 +60,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestDri2 (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestDri2 (EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -103,7 +103,7 @@ _EvlogRequestDri2 (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->dest);
 
             REPLY (" Region");
-            reply = xDbgGetRegion(dpy, evinfo, stuff->region, reply, len);
+            reply = xDbgGetRegion(stuff->region, evinfo, reply, len);
 
             return reply;
         }
@@ -151,7 +151,7 @@ _EvlogRequestDri2 (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->drawable);
 
             REPLY (" Region");
-            reply = xDbgGetRegion(dpy, evinfo, stuff->region, reply, len);
+            reply = xDbgGetRegion(stuff->region, evinfo, reply, len);
 
             return reply;
         }
@@ -165,7 +165,7 @@ _EvlogRequestDri2 (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogEventDri2 (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventDri2 (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -182,6 +182,8 @@ _EvlogEventDri2 (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int 
                 stuff->msc_lo,
                 stuff->sbc_hi,
                 stuff->sbc_lo);
+
+            evinfo->evt.size = sizeof (xDRI2BufferSwapComplete);
 
             return reply;
         }
@@ -205,24 +207,17 @@ _EvlogEventDri2 (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int 
 
 
 void
-xDbgEvlogDri2GetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogDri2GetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, DRI2_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no DRI2 extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestDri2;
     extinfo->evt_func = _EvlogEventDri2;
 #else
     ExtensionEntry *xext = CheckExtension (DRI2_NAME);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;

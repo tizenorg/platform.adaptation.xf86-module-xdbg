@@ -36,9 +36,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xdefs.h>	/* for Bool */
 #include <X11/Xlib.h>
 #include <X11/extensions/Xfixes.h>
+#include <list.h>
 
 
 #define XDBG_PATH_MAX        1024
+#define XDBG_BUF_SIZE        64
 
 #define MAX(a,b) (((a) > (b)) ? (a) : (b))
 #define MIN(a,b) (((a) < (b)) ? (a) : (b))
@@ -82,6 +84,23 @@ typedef enum
 #define EVLOG_MASK_CLIENT    (1<<0)
 #define EVLOG_MASK_REQUEST   (1<<1)
 #define EVLOG_MASK_EVENT     (1<<2)
+#define EVLOG_MASK_ATOM      (1<<3)
+#define EVLOG_MASK_REGION    (1<<4)
+
+
+typedef struct _EvlogTable
+{
+    CARD32           xid;
+    char             buf[XDBG_BUF_SIZE];
+    struct xorg_list link;
+} EvlogAtomTable, EvlogRegionTable;
+
+typedef struct _EvlogList
+{
+    struct xorg_list list;
+    int              init;
+    int              size;
+} EvlogAtom, EvlogRegion;
 
 typedef struct _EvlogClient
 {
@@ -104,19 +123,22 @@ typedef struct _EvlogRequest
 typedef struct _EvlogEvent
 {
     xEvent *ptr;
+    int     size;
     char    name[PATH_MAX+1];
 } EvlogEvent;
 
 typedef struct _EvlogInfo
 {
-    EvlogType    type;
+    EvlogType     type;
 
-    int          mask;
-    EvlogClient  client;
-    EvlogRequest req;
-    EvlogEvent   evt;
+    int           mask;
+    EvlogClient   client;
+    EvlogRequest  req;
+    EvlogEvent    evt;
+    EvlogAtom     evatom;
+    EvlogRegion   evregion;
 
-    CARD32       time;
+    CARD32        time;
 } EvlogInfo;
 
 
@@ -124,12 +146,12 @@ typedef struct _ExtensionInfo ExtensionInfo;
 
 struct _ExtensionInfo
 {
-    void  (*get_base_func) (void *dpy, ExtensionInfo *extinfo);
+    void  (*get_base_func) (ExtensionInfo *extinfo);
     int     opcode;
     int     evt_base;
     int     err_base;
-    char* (*req_func) (void *dpy, EvlogInfo *evinfo, char *reply, int *len);
-    char* (*evt_func) (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len);
+    char* (*req_func) (EvlogInfo *evinfo, char *reply, int *len);
+    char* (*evt_func) (EvlogInfo *evinfo, int first_base, char *reply, int *len);
 };
 
 #endif

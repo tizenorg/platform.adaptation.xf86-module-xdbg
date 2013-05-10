@@ -61,7 +61,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestRandr (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestRandr (EvlogInfo *evinfo, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -123,7 +123,7 @@ _EvlogRequestRandr (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->output);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
 
             return reply;
         }
@@ -135,7 +135,7 @@ _EvlogRequestRandr (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->output);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
 
             return reply;
         }
@@ -149,9 +149,9 @@ _EvlogRequestRandr (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->nUnits);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
             REPLY (" Type");
-            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
+            reply = xDbgGetAtom(stuff->type, evinfo, reply, len);
 
             return reply;
         }
@@ -163,7 +163,7 @@ _EvlogRequestRandr (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->output);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
 
             return reply;
         }
@@ -177,9 +177,9 @@ _EvlogRequestRandr (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
                 stuff->longLength);
 
             REPLY (" Property");
-            reply = xDbgGetAtom(dpy, stuff->property, reply, len);
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
             REPLY (" Type");
-            reply = xDbgGetAtom(dpy, stuff->type, reply, len);
+            reply = xDbgGetAtom(stuff->type, evinfo, reply, len);
 
             return reply;
         }
@@ -223,7 +223,7 @@ _EvlogRequestRandr (void *dpy, EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogEventRandr (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventRandr (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -284,7 +284,7 @@ _EvlogEventRandr (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int
                         stuff->output);
 
                     REPLY (" Atom");
-                    reply = xDbgGetAtom(dpy, stuff->atom, reply, len);
+                    reply = xDbgGetAtom(stuff->atom, evinfo, reply, len);
 
                     return reply;
                 }
@@ -307,7 +307,7 @@ _EvlogEventRandr (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int
                         stuff->provider);
 
                     REPLY (" Atom");
-                    reply = xDbgGetAtom(dpy, stuff->atom, reply, len);
+                    reply = xDbgGetAtom(stuff->atom, evinfo, reply, len);
 
                     return reply;
                 }
@@ -335,24 +335,17 @@ _EvlogEventRandr (void *dpy, EvlogInfo *evinfo, int first_base, char *reply, int
 
 
 void
-xDbgEvlogRandrGetBase (void *dpy, ExtensionInfo *extinfo)
+xDbgEvlogRandrGetBase (ExtensionInfo *extinfo)
 {
 #ifdef XDBG_CLIENT
-    Display *d = (Display*)dpy;
-
-    RETURN_IF_FAIL (d != NULL);
     RETURN_IF_FAIL (extinfo != NULL);
 
-    if (!XQueryExtension(d, RANDR_NAME, &extinfo->opcode, &extinfo->evt_base, &extinfo->err_base))
-    {
-        XDBG_LOG ("no Randr extension. \n");
-        return;
-    }
     extinfo->req_func = _EvlogRequestRandr;
     extinfo->evt_func = _EvlogEventRandr;
 #else
     ExtensionEntry *xext = CheckExtension (RANDR_NAME);
     RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
 
     extinfo->opcode = xext->base;
     extinfo->evt_base = xext->eventBase;
