@@ -85,17 +85,78 @@ _EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
             return reply;
         }
 
-    case xv_GetStill:
+    case xv_PutStill:
         {
-            xvGetStillReq *stuff = (xvGetStillReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d) Drw(%d,%d)",
+            xvPutStillReq *stuff = (xvPutStillReq *)req;
+            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
                 stuff->port,
                 stuff->drawable,
                 stuff->gc,
                 stuff->vid_x,
                 stuff->vid_y,
+                stuff->vid_w,
+                stuff->vid_h,
                 stuff->drw_x,
-                stuff->drw_y);
+                stuff->drw_y,
+                stuff->drw_w,
+                stuff->drw_h);
+
+            return reply;
+        }
+
+    case xv_GetStill:
+        {
+            xvGetStillReq *stuff = (xvGetStillReq *)req;
+            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
+                stuff->port,
+                stuff->drawable,
+                stuff->gc,
+                stuff->vid_x,
+                stuff->vid_y,
+                stuff->vid_w,
+                stuff->vid_h,
+                stuff->drw_x,
+                stuff->drw_y,
+                stuff->drw_w,
+                stuff->drw_h);
+
+            return reply;
+        }
+
+    case xv_PutVideo:
+        {
+            xvPutVideoReq *stuff = (xvPutVideoReq *)req;
+            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
+                stuff->port,
+                stuff->drawable,
+                stuff->gc,
+                stuff->vid_x,
+                stuff->vid_y,
+                stuff->vid_w,
+                stuff->vid_h,
+                stuff->drw_x,
+                stuff->drw_y,
+                stuff->drw_w,
+                stuff->drw_h);
+
+            return reply;
+        }
+
+    case xv_GetVideo:
+        {
+            xvGetVideoReq *stuff = (xvGetVideoReq *)req;
+            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
+                stuff->port,
+                stuff->drawable,
+                stuff->gc,
+                stuff->vid_x,
+                stuff->vid_y,
+                stuff->vid_w,
+                stuff->vid_h,
+                stuff->drw_x,
+                stuff->drw_y,
+                stuff->drw_w,
+                stuff->drw_h);
 
             return reply;
         }
@@ -146,7 +207,7 @@ _EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
     case xv_SetPortAttribute:
         {
             xvSetPortAttributeReq *stuff = (xvSetPortAttributeReq *)req;
-            REPLY (": XID(0x%lx) value(0x%lx)",
+            REPLY (": XID(0x%lx) value(%ld)",
                 stuff->port,
                 stuff->value);
 
@@ -171,15 +232,21 @@ _EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
     case xv_PutImage:
         {
             xvPutImageReq *stuff = (xvPutImageReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) ID(0x%lx) src(%d,%d) drw(%d,%d)",
+            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) ID(%lx) buf(%dx%d) src(%d,%d %dx%d) drw(%d,%d %dx%d)",
                 stuff->port,
                 stuff->drawable,
                 stuff->gc,
                 stuff->id,
+                stuff->width,
+                stuff->height,
                 stuff->src_x,
                 stuff->src_y,
+                stuff->src_w,
+                stuff->src_h,
                 stuff->drw_x,
-                stuff->drw_y);
+                stuff->drw_y,
+                stuff->drw_w,
+                stuff->drw_h);
 
             return reply;
         }
@@ -187,15 +254,22 @@ _EvlogRequestXv(void *dpy, EvlogInfo *evinfo, char *reply, int *len)
     case xv_ShmPutImage:
         {
             xvShmPutImageReq *stuff = (xvShmPutImageReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) ID(0x%lx) src(%d,%d) drw(%d,%d)",
+            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) ID(%lx) buf(%dx%d) src(%d,%d %dx%d) drw(%d,%d %dx%d) sendevent(%d)",
                 stuff->port,
                 stuff->drawable,
                 stuff->gc,
                 stuff->id,
+                stuff->width,
+                stuff->height,
                 stuff->src_x,
                 stuff->src_y,
+                stuff->src_w,
+                stuff->src_h,
                 stuff->drw_x,
-                stuff->drw_y);
+                stuff->drw_y,
+                stuff->drw_w,
+                stuff->drw_h,
+                stuff->send_event);
 
             return reply;
         }
