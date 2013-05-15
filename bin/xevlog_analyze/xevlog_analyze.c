@@ -70,6 +70,15 @@ _printUsage(char* name)
     printf(" Options:\n");
     printf("       -f [File_Name]      File to save information\n");
     printf("\n");
+    printf("       -r [Rule_File_Name] Setting Rule of certain policy read in File to find information you want\n");
+    printf("\n");
+    printf("              [How To write Rule file form]\n");
+    printf("                ------------------------\n");
+    printf("                | allow [RULE]          |\n");
+    printf("                | deny [RULE]           |\n");
+    printf("                ------------------------\n");
+    printf("           * It is possible to write multiple policies.\n");
+    printf("\n");
     printf("       -a [Add Rule]       Setting Rule of 'Add' policy to find information you want\n");
     printf("\n");
     printf("       -n [Deny Rule]      Setting Rule of 'Deny' policy to find information you want\n");
@@ -83,12 +92,13 @@ _printUsage(char* name)
     printf("               xevlog_analyze -a \"(type=request) && (major == X11 and (minor = SendEvent or minor = ReceiveEvent))\"\n");
     printf("               xevlog_analyze -n cmd!=ls\n");
     printf("\n");
+    printf("           * WARNING : If you set both -a and -n option, must set -a option first. Otherwise Logs you DO NOT want can be printed.\n");
+    printf("\n");
     printf("       -d [OFF:0/ON:1]     To Print detail log of extensions\n");
     printf("\n");
     printf("       -h                  Usage of xevlog_anlayze\n");
     printf("\n");
 }
-
 
 static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
 {
@@ -338,7 +348,7 @@ _checkOption(int argc, char** argv)
         return;
     }
 
-    while ((c = getopt(argc, argv, "f:a:n:d:h")) != EOF)
+    while ((c = getopt(argc, argv, "f:a:n:r:d:h")) != EOF)
     {
         switch (c)
         {
@@ -416,6 +426,127 @@ _checkOption(int argc, char** argv)
                         free (new_argv[2]);
                     }
 
+                    break;
+                }
+
+            case 'r':
+                {
+                    opt_str = optarg;
+                    opt_str_len = strlen(opt_str);
+
+                    if(opt_str_len > 0)
+                    {
+                        int   fd = -1;
+                        char  fs[1024];
+                        char *pfs;
+                        int   len;
+
+                        fd = open (opt_str, O_RDONLY);
+                        if (fd < 0)
+                        {
+                            printf ("failed: open '%s'. (%s)\n", opt_str, strerror(errno));
+                            return;
+                        }
+
+                        len = read(fd, fs, sizeof(fs));
+                        pfs = fs;
+
+                        while (pfs != NULL)
+                        {
+                            int   new_argc = 3;
+                            char *new_argv[3] = {"add", };
+                            char *policy[2] = {"allow", "deny"};
+                            char  tstring[1024] = {0,};
+                            int   pflag, i;
+
+                            if (strstr(pfs, policy[0]) && strstr(pfs, policy[1]))
+                                if (strstr(pfs,policy[0]) > strstr(pfs,policy[1]))
+                                {
+                                    pfs = strstr(pfs,policy[1]);
+                                    pflag = 1;
+                                }
+                                else
+                                {
+                                    pfs = strstr(pfs,policy[0]);
+                                    pflag = 0;
+                                }
+                            else if (strstr(pfs, policy[0]) && !strstr(pfs, policy[1]))
+                            {
+                                pfs = strstr(pfs, policy[0]);
+                                pflag = 0;
+                            }
+                            else if (!strstr(pfs, policy[0]) && strstr(pfs, policy[1]))
+                            {
+                                pfs = strstr(pfs, policy[1]);
+                                pflag = 1;
+                            }
+                            else
+                                break;
+
+                            if (pflag == 0)
+                            {
+                                new_argv[1] = (char*)malloc (strlen(policy[0]) + 1);
+
+                                if(!new_argv[1])
+                                {
+                                    printf ("failed: malloc new_argv[1]\n");
+                                    return;
+                                }
+                                memset(new_argv[1], 0, strlen(policy[0]) + 1);
+                                strncpy(new_argv[1], policy[0], strlen(policy[0]));
+                                pfs += (strlen(policy[0]) + 1);
+                            }
+                            else if (pflag == 1)
+                            {
+                                new_argv[1] = (char*)malloc (strlen(policy[1]) + 1);
+
+                                if(!new_argv[1])
+                                {
+                                    printf ("failed: malloc new_argv[1]\n");
+                                    return;
+                                }
+                                memset(new_argv[1], 0, strlen(policy[1]) + 1);
+                                strncpy(new_argv[1], policy[1], strlen(policy[1]));
+                                pfs += (strlen(policy[1]) + 1);
+                            }
+
+                            for (i = 0 ; pfs[i] != '\n' ; i++)
+                                tstring[i] = pfs[i];
+
+                            new_argv[2] = (char*)malloc (strlen(tstring) + 1);
+                            if(!new_argv[2])
+                            {
+                                printf ("failed: malloc new_argv[2]\n");
+                                return;
+                            }
+                            memset(new_argv[2], 0, strlen(tstring) + 1);
+                            strncpy(new_argv[2], tstring, strlen(tstring));
+
+                            if(!xDbgEvlogRuleSet ((const int) new_argc,
+                                                  (const char**) new_argv,
+                                                   rule_log, &rule_size))
+                            {
+                                printf("%s\n", rule_log);
+                                return;
+                            }
+
+                            if (new_argv[1])
+                            {
+                                free (new_argv[1]);
+                                new_argv[1] = NULL;
+                            }
+                            if (new_argv[2])
+                            {
+                                free (new_argv[2]);
+                                new_argv[2] = NULL;
+                            }
+                        }
+
+                        eo.isRule = TRUE;
+
+                        if (fd >= 0)
+                            close (fd);
+                    }
                     break;
                 }
 
