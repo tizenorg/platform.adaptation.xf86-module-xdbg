@@ -54,7 +54,7 @@ int main(int argc, char ** argv)
     char **new_argv;
     int new_argc, i;
     char temp[128];
-
+    char cwd[128];
     dpy = XOpenDisplay (NULL);
     if (!dpy)
     {
@@ -69,7 +69,7 @@ int main(int argc, char ** argv)
         exit (-1);
     }
 
-    new_argc = argc + 1;
+    new_argc = argc + 2;
     new_argv = (char**)malloc (new_argc * sizeof (char*));
     if (!new_argv)
     {
@@ -80,8 +80,11 @@ int main(int argc, char ** argv)
     snprintf (temp, sizeof(temp), "%d", getpid ());
     new_argv[0] = temp;
 
+    if (getcwd (cwd, sizeof(cwd)))
+        new_argv[1] = cwd;
+
     for (i = 0; i < argc; i++)
-        new_argv[i+1] = argv[i];
+        new_argv[i+2] = argv[i];
 
     xDbugDBusClientSendMessage (dbus_info, new_argc, new_argv);
 

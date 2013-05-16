@@ -76,9 +76,8 @@ _CommandSetLogFile (int pid, char *path, char *reply, int *len, XDbgModule *pMod
             snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
         else
         {
-            char cwd[128];
-            if (getcwd (cwd, sizeof (cwd)))
-                snprintf (fd_name, XDBG_PATH_MAX, "%s/%s", cwd, path);
+            if (pMod->cwd)
+                snprintf (fd_name, XDBG_PATH_MAX, "%s/%s", pMod->cwd, path);
             else
                 snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
         }
@@ -234,7 +233,10 @@ _CommandSetEvlogPath (int pid, int argc, char **argv, char *reply, int *len, XDb
 
     pMod->evlog_path = strdup (argv[2]);
 
-    XDBG_REPLY ("evlog path: %s\n", pMod->evlog_path);
+    if (pMod->evlog_path[0] == '/')
+        XDBG_REPLY ("evlog path: %s\n", pMod->evlog_path);
+    else
+        XDBG_REPLY ("evlog path: %s/%s\n", pMod->cwd, pMod->evlog_path);
 }
 
 static void
@@ -378,8 +380,9 @@ xDbgModuleCommand (void *data, int argc, char **argv, char *reply, int *len)
     char **new_argv;
 
     pid = atoi (argv[0]);
+    pMod->cwd = strdup (argv[1]);
 
-    new_argc = argc - 1;
+    new_argc = argc - 2;
     new_argv = (char**)malloc (new_argc * sizeof (char*));
     if (!new_argv)
     {
@@ -388,9 +391,9 @@ xDbgModuleCommand (void *data, int argc, char **argv, char *reply, int *len)
     }
 
     for (i = 0; i < new_argc; i++)
-        new_argv[i] = argv[i+1];
+        new_argv[i] = argv[i+2];
 
-    if (argc < 3)
+    if (argc < 4)
     {
         _CommandPrintUsage (reply, len, new_argv[0]);
         free (new_argv);

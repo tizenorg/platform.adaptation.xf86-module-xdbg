@@ -696,9 +696,8 @@ xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply,
         snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
     else
     {
-        char cwd[128];
-        if (getcwd (cwd, sizeof (cwd)))
-            snprintf (fd_name, XDBG_PATH_MAX, "%s/%s", cwd, path);
+        if (pMod->cwd)
+            snprintf (fd_name, XDBG_PATH_MAX, "%s/%s", pMod->cwd, path);
         else
             snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
     }
