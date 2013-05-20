@@ -59,6 +59,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define UNKNOWN_EVENT "<unknown>"
 
+char *conn[] = {"Initial Connect", "Establich Connect"};
 
 char *
 xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, char *reply, int *len)
@@ -67,7 +68,7 @@ xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, char *reply, int *len)
     extern int Extensions_size;
     EvlogRequest req;
     xReq *xReq = NULL;
-
+    int i;
 
     RETURN_VAL_IF_FAIL (evinfo != NULL, reply);
     RETURN_VAL_IF_FAIL (evinfo->type == REQUEST, reply);
@@ -80,14 +81,16 @@ xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, char *reply, int *len)
     if(!on)
         return reply;
 
+    for (i = 0 ; i < sizeof(conn) / sizeof(char *) ; i++)
+        if (!strcmp(evinfo->req.name, conn[i]))
+            return reply;
+
     if (xReq->reqType < EXTENSION_BASE)
     {
         return xDbgEvlogRequestCore (evinfo, reply, len);
     }
     else
     {
-        int i;
-
         for (i = 0 ; i < Extensions_size ; i++)
         {
             if (xReq->reqType == Evlog_extensions[i].opcode)

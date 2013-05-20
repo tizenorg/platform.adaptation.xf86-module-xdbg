@@ -268,6 +268,8 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
         /* evinfo.req */
         if (type == REQUEST)
         {
+            extern char *conn[];
+
             REQUEST (xReq);
 
             evinfo.mask |= EVLOG_MASK_REQUEST;
@@ -275,12 +277,19 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
             evinfo.req.length = client->req_len;
             evinfo.req.ptr = client->requestBuffer;
 
-            if (stuff->reqType < EXTENSION_BASE)
-                snprintf (evinfo.req.name, sizeof (evinfo.req.name), "%s",
-                          LookupRequestName (stuff->reqType, 0));
+            if (client->requestVector == InitialVector && stuff->reqType == 1)
+                snprintf (evinfo.req.name, sizeof (evinfo.req.name), "%s", conn[0]);
+            else if (client->requestVector == InitialVector  && stuff->reqType == 2)
+                snprintf (evinfo.req.name, sizeof (evinfo.req.name), "%s", conn[1]);
             else
-                snprintf (evinfo.req.name, sizeof (evinfo.req.name), "%s",
-                          LookupRequestName (stuff->reqType, stuff->data));
+            {
+                if (stuff->reqType < EXTENSION_BASE)
+                    snprintf (evinfo.req.name, sizeof (evinfo.req.name), "%s",
+                              LookupRequestName (stuff->reqType, 0));
+                else
+                    snprintf (evinfo.req.name, sizeof (evinfo.req.name), "%s",
+                              LookupRequestName (stuff->reqType, stuff->data));
+            }
         }
     }
 

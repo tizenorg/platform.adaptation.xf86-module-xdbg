@@ -344,7 +344,7 @@ const char * rulechecker_print_usage()
         "######################################################################\n"
         "###     RuleChecker 1.0 for XDBG EvLog filtering.                  ###\n"
         "###                 Designed and developed by                      ###\n"
-        "###                 Boram Park <boram1288.park@samsung.com>        ###\n"
+        "###                 YoungHoon Jung <yhoon.jung@samsung.com>        ###\n"
         "######################################################################\n"
         "\n"
         "-----------------------------------------------------------------\n"
