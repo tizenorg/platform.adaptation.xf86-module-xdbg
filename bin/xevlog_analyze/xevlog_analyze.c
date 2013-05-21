@@ -112,6 +112,7 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
     if (!strlen(eo->path_name))
     {
         printf ("failed: no evlog path\n");
+        _printUsage(eo->command_name);
         return;
     }
 
@@ -451,76 +452,33 @@ _checkOption(int argc, char** argv)
                         len = read(fd, fs, sizeof(fs));
                         pfs = fs;
 
-                        while (pfs != NULL)
+                        while (pfs - fs < len)
                         {
                             int   new_argc = 3;
                             char *new_argv[3] = {"add", };
-                            char *policy[2] = {"allow", "deny"};
-                            char  tstring[1024] = {0,};
-                            int   pflag, i;
+                            char  policy[64] = {0, };
+                            char  rule[1024] = {0, };
+                            int   i;
 
-                            if (strstr(pfs, policy[0]) && strstr(pfs, policy[1]))
-                                if (strstr(pfs,policy[0]) > strstr(pfs,policy[1]))
-                                {
-                                    pfs = strstr(pfs,policy[1]);
-                                    pflag = 1;
-                                }
-                                else
-                                {
-                                    pfs = strstr(pfs,policy[0]);
-                                    pflag = 0;
-                                }
-                            else if (strstr(pfs, policy[0]) && !strstr(pfs, policy[1]))
+                            if (pfs[0] == ' ' || pfs[0] == '\n')
                             {
-                                pfs = strstr(pfs, policy[0]);
-                                pflag = 0;
+                                pfs++;
+                                continue;
                             }
-                            else if (!strstr(pfs, policy[0]) && strstr(pfs, policy[1]))
-                            {
-                                pfs = strstr(pfs, policy[1]);
-                                pflag = 1;
-                            }
-                            else
-                                break;
+                            for (i = 0 ; pfs[i] != ' ' ; i++)
+                                policy[i] = pfs[i];
 
-                            if (pflag == 0)
-                            {
-                                new_argv[1] = (char*)malloc (strlen(policy[0]) + 1);
+                            new_argv[1] = policy;
+                            pfs += (strlen(new_argv[1]) + 1);
 
-                                if(!new_argv[1])
-                                {
-                                    printf ("failed: malloc new_argv[1]\n");
-                                    return;
-                                }
-                                memset(new_argv[1], 0, strlen(policy[0]) + 1);
-                                strncpy(new_argv[1], policy[0], strlen(policy[0]));
-                                pfs += (strlen(policy[0]) + 1);
-                            }
-                            else if (pflag == 1)
-                            {
-                                new_argv[1] = (char*)malloc (strlen(policy[1]) + 1);
-
-                                if(!new_argv[1])
-                                {
-                                    printf ("failed: malloc new_argv[1]\n");
-                                    return;
-                                }
-                                memset(new_argv[1], 0, strlen(policy[1]) + 1);
-                                strncpy(new_argv[1], policy[1], strlen(policy[1]));
-                                pfs += (strlen(policy[1]) + 1);
-                            }
-
+                            memset(rule, 0, sizeof(rule));
                             for (i = 0 ; pfs[i] != '\n' ; i++)
-                                tstring[i] = pfs[i];
+                                rule[i] = pfs[i];
 
-                            new_argv[2] = (char*)malloc (strlen(tstring) + 1);
-                            if(!new_argv[2])
-                            {
-                                printf ("failed: malloc new_argv[2]\n");
-                                return;
-                            }
-                            memset(new_argv[2], 0, strlen(tstring) + 1);
-                            strncpy(new_argv[2], tstring, strlen(tstring));
+                            new_argv[2] = rule;
+
+                            pfs += (strlen(new_argv[2]) + 1);
+
 
                             if(!xDbgEvlogRuleSet ((const int) new_argc,
                                                   (const char**) new_argv,
@@ -530,16 +488,6 @@ _checkOption(int argc, char** argv)
                                 return;
                             }
 
-                            if (new_argv[1])
-                            {
-                                free (new_argv[1]);
-                                new_argv[1] = NULL;
-                            }
-                            if (new_argv[2])
-                            {
-                                free (new_argv[2]);
-                                new_argv[2] = NULL;
-                            }
                         }
 
                         eo.isRule = TRUE;

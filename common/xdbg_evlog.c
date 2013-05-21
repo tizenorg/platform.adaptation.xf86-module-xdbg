@@ -119,6 +119,7 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
         RC_RESULT_TYPE result;
         const char * policy = argv[1];
         char rule[8192];
+        int i;
 
         if (argc < 3)
         {
@@ -137,6 +138,10 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
         }
 
         _mergeArgs (rule, argc - 2, &(argv[2]));
+
+        for (i = 0 ; i < strlen(rule) ; i++)
+            if(rule[i] == '\"' || rule[i] == '\'')
+                rule[i] = ' ';
 
         result = rulechecker_add_rule (rc, policy_type, rule);
         if (result == RC_ERR_TOO_MANY_RULES)
