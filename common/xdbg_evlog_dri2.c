@@ -204,7 +204,60 @@ _EvlogEventDri2 (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     return reply;
 }
 
+static char *
+_EvlogReplyDri2 (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
 
+    switch (evinfo->rep.reqData)
+    {
+    case X_DRI2GetBuffers:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xDRI2GetBuffersReply *stuff = (xDRI2GetBuffersReply *)rep;
+                REPLY (": size(%ldx%ld) Count(%ld)",
+                    stuff->width,
+                    stuff->height,
+                    stuff->count);
+            }
+            else
+            {
+                xDRI2Buffer *stuff = (xDRI2Buffer *)rep;
+
+                REPLY ("attachment(0x%lx) Name(0x%lx) pitch(0x%lx) cpp(0x%lx)",
+                    stuff->attachment,
+                    stuff->name,
+                    stuff->pitch,
+                    stuff->cpp);
+            }
+
+            return reply;
+        }
+
+    case X_DRI2SwapBuffers:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xDRI2SwapBuffersReply *stuff = (xDRI2SwapBuffersReply *)rep;
+                REPLY (": swap(%ld/%ld)",
+                    stuff->swap_hi,
+                    stuff->swap_lo);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
 
 void
 xDbgEvlogDri2GetBase (ExtensionInfo *extinfo)
@@ -214,6 +267,7 @@ xDbgEvlogDri2GetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestDri2;
     extinfo->evt_func = _EvlogEventDri2;
+    extinfo->rep_func = _EvlogReplyDri2;
 #else
     ExtensionEntry *xext = CheckExtension (DRI2_NAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -224,5 +278,6 @@ xDbgEvlogDri2GetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestDri2;
     extinfo->evt_func = _EvlogEventDri2;
+    extinfo->rep_func = _EvlogReplyDri2;
 #endif
 }

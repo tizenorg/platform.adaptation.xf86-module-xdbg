@@ -424,6 +424,161 @@ _EvlogEventXextXtest (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     return reply;
 }
 
+
+static char *
+_EvlogReplyXextDpms (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+    case X_DPMSSetTimeouts:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xDPMSGetTimeoutsReply *stuff = (xDPMSGetTimeoutsReply *)rep;
+                REPLY (": Standby(%d) Suspend(%d) off(%d)",
+                    stuff->standby,
+                    stuff->suspend,
+                    stuff->off);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
+
+static char *
+_EvlogReplyXextShm (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+    case X_ShmGetImage:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xShmGetImageReply *stuff = (xShmGetImageReply *)rep;
+                REPLY (": Visual(0x%lx) size(%ld)",
+                    stuff->visual,
+                    stuff->size);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
+
+static char *
+_EvlogReplyXextSync (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+        case X_SyncQueryCounter:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xSyncQueryCounterReply *stuff = (xSyncQueryCounterReply *)rep;
+                REPLY (": Value(0x%lx/0x%lx)",
+                    stuff->value_hi,
+                    stuff->value_lo);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
+
+static char *
+_EvlogReplyXextXtestExt1 (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+        case X_TestQueryInputSize:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xTestQueryInputSizeReply *stuff = (xTestQueryInputSizeReply *)rep;
+                REPLY (": sizeReturn(0x%lx)",
+                    stuff->size_return);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
+
+static char *
+_EvlogReplyXextXtest (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+    case X_XTestGetVersion:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXTestGetVersionReply *stuff = (xXTestGetVersionReply *)rep;
+                REPLY (": MinorVersion(%d)",
+                    stuff->minorVersion);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
+
 void
 xDbgEvlogXextDpmsGetBase (ExtensionInfo *extinfo)
 {
@@ -432,6 +587,7 @@ xDbgEvlogXextDpmsGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestXextDpms;
     extinfo->evt_func = _EvlogEventXextDpms;
+    extinfo->rep_func = _EvlogReplyXextDpms;
 #else
     ExtensionEntry *xext = CheckExtension (DPMSExtensionName);
     RETURN_IF_FAIL (xext != NULL);
@@ -442,6 +598,7 @@ xDbgEvlogXextDpmsGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestXextDpms;
     extinfo->evt_func = _EvlogEventXextDpms;
+    extinfo->rep_func = _EvlogReplyXextDpms;
 #endif
 }
 
@@ -454,6 +611,7 @@ xDbgEvlogXextShmGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestXextShm;
     extinfo->evt_func = _EvlogEventXextShm;
+    extinfo->rep_func = _EvlogReplyXextShm;
 #else
     ExtensionEntry *xext = CheckExtension (SHMNAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -464,6 +622,7 @@ xDbgEvlogXextShmGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestXextShm;
     extinfo->evt_func = _EvlogEventXextShm;
+    extinfo->rep_func = _EvlogReplyXextShm;
 #endif
 }
 
@@ -476,6 +635,7 @@ xDbgEvlogXextSyncGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestXextSync;
     extinfo->evt_func = _EvlogEventXextSync;
+    extinfo->rep_func = _EvlogReplyXextSync;
 #else
     ExtensionEntry *xext = CheckExtension (SYNC_NAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -486,6 +646,7 @@ xDbgEvlogXextSyncGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestXextSync;
     extinfo->evt_func = _EvlogEventXextSync;
+    extinfo->rep_func = _EvlogReplyXextSync;
 #endif
 
 }
@@ -499,6 +660,7 @@ xDbgEvlogXextXtestExt1GetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestXextXtestExt1;
     extinfo->evt_func = _EvlogEventXextXtestExt1;
+    extinfo->rep_func = _EvlogReplyXextXtestExt1;
 #else
     ExtensionEntry *xext = CheckExtension (XTestEXTENSION_NAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -509,6 +671,7 @@ xDbgEvlogXextXtestExt1GetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestXextXtestExt1;
     extinfo->evt_func = _EvlogEventXextXtestExt1;
+    extinfo->rep_func = _EvlogReplyXextXtestExt1;
 #endif
 
 }
@@ -522,6 +685,7 @@ xDbgEvlogXextXtestGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestXextXtest;
     extinfo->evt_func = _EvlogEventXextXtest;
+    extinfo->rep_func = _EvlogReplyXextXtest;
 #else
     ExtensionEntry *xext = CheckExtension (XTestExtensionName);
     RETURN_IF_FAIL (xext != NULL);
@@ -532,6 +696,7 @@ xDbgEvlogXextXtestGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestXextXtest;
     extinfo->evt_func = _EvlogEventXextXtest;
+    extinfo->rep_func = _EvlogReplyXextXtest;
 #endif
 
 }

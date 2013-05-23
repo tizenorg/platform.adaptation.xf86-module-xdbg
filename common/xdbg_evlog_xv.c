@@ -319,6 +319,37 @@ _EvlogEventXv (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     return reply;
 }
 
+static char *
+_EvlogReplyXv (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+        case xv_QueryBestSize:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xvQueryBestSizeReply *stuff = (xvQueryBestSizeReply *)rep;
+                REPLY (": actualSize(%dx%d)",
+                    stuff->actual_width,
+                    stuff->actual_height);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
+
 void
 xDbgEvlogXvGetBase (ExtensionInfo *extinfo)
 {
@@ -327,6 +358,7 @@ xDbgEvlogXvGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestXv;
     extinfo->evt_func = _EvlogEventXv;
+    extinfo->rep_func = _EvlogReplyXv;
 #else
     ExtensionEntry *xext = CheckExtension (XvName);
     RETURN_IF_FAIL (xext != NULL);
@@ -337,6 +369,7 @@ xDbgEvlogXvGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestXv;
     extinfo->evt_func = _EvlogEventXv;
+    extinfo->rep_func = _EvlogReplyXv;
 
 #endif
 }

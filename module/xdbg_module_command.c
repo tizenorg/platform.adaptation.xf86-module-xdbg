@@ -233,7 +233,9 @@ _CommandSetEvlogPath (int pid, int argc, char **argv, char *reply, int *len, XDb
 
     pMod->evlog_path = strdup (argv[2]);
 
-    if (pMod->evlog_path[0] == '/')
+    if (!strcmp (pMod->evlog_path, "console"))
+        XDBG_REPLY ("/proc/%d/fd/1", pid);
+    else if (pMod->evlog_path[0] == '/')
         XDBG_REPLY ("evlog path: %s\n", pMod->evlog_path);
     else
         XDBG_REPLY ("evlog path: %s/%s\n", pMod->cwd, pMod->evlog_path);

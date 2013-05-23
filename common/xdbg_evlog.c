@@ -52,8 +52,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "dix.h"
 #endif
 
-static char *evt_type[] = { "Event", "Request", "Reply", "Flush" };
-static char *evt_dir[]  = { "<====", "---->",   "<----", "*****" };
+static char *evt_type[] = { "Event", "Request", "Reply", "Flush", "Error" };
+static char *evt_dir[]  = { "<====", "---->",   "<----", "*****", "<----"};
 
 static RULE_CHECKER rc = NULL;
 
@@ -140,8 +140,18 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
         _mergeArgs (rule, argc - 2, &(argv[2]));
 
         for (i = 0 ; i < strlen(rule) ; i++)
+        {
+            static int apply = 0;
             if(rule[i] == '\"' || rule[i] == '\'')
                 rule[i] = ' ';
+            if(rule[i] == '+')
+            {
+                rule[i] = ' ';
+                if (apply == 0)
+                   strcat(rule, "|| type=reply || type=error");
+                apply = 1;
+            }
+        }
 
         result = rulechecker_add_rule (rc, policy_type, rule);
         if (result == RC_ERR_TOO_MANY_RULES)
@@ -229,6 +239,8 @@ xDbgEvlogRuleValidate (EvlogInfo *evinfo)
         evlog_name = evinfo->req.name;
     else if (evinfo->type == EVENT)
         evlog_name = evinfo->evt.name;
+    else if (evinfo ->type == REPLY)
+        evlog_name = evinfo->rep.name;
 
     return rulechecker_validate_rule (rc,
                                       evinfo->type,
@@ -240,17 +252,18 @@ xDbgEvlogRuleValidate (EvlogInfo *evinfo)
 
 
 ExtensionInfo Evlog_extensions[] = {
-    {xDbgEvlogCompositeGetBase, 0, 0, 0, NULL},
-    {xDbgEvlogDamageGetBase, 0, 0, 0, NULL},
-    {xDbgEvlogDri2GetBase, 0, 0, 0, NULL},
-    {xDbgEvlogGestureGetBase, 0, 0, 0, NULL},
-    {xDbgEvlogRandrGetBase, 0, 0, 0, NULL},
-    {xDbgEvlogXextDpmsGetBase, 0, 0, 0, NULL},
-    {xDbgEvlogXextShmGetBase, 0, 0, 0, NULL},
-    {xDbgEvlogXextSyncGetBase, 0, 0, 0, NULL},
-    {xDbgEvlogXextXtestGetBase, 0, 0, 0, NULL},
-    {xDbgEvlogXextXtestExt1GetBase, 0, 0, 0, NULL},
-    {xDbgEvlogXvGetBase, 0, 0, 0, NULL}
+    {xDbgEvlogCompositeGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogDamageGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogDri2GetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogGestureGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogXinputGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogRandrGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogXextDpmsGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogXextShmGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogXextSyncGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogXextXtestGetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogXextXtestExt1GetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogXvGetBase, 0, 0, 0, NULL, NULL}
 };
 ExtensionInfo* Sorted_Evlog_extensions;
 int Extensions_size = 0;
@@ -330,14 +343,22 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_dir) / sizeof (char*)));
     RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_type) / sizeof (char*)));
 
-    REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %7s ",
-                evinfo->time / 1000.0,
-                evinfo->time - prev,
-                xDbgEvlogGetCmd (evinfo->client.command),
-                evinfo->client.index,
-                evinfo->client.pid,
-                evt_dir[evinfo->type],
-                evt_type[evinfo->type]);
+    if (evinfo->type == REPLY && !evinfo->rep.isStart)
+    {
+        if (on) // detail option is on
+            REPLY ("%67s"," ");
+        else
+            return;
+    }
+    else
+        REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %7s ",
+                    evinfo->time / 1000.0,
+                    evinfo->time - prev,
+                    xDbgEvlogGetCmd (evinfo->client.command),
+                    evinfo->client.index,
+                    evinfo->client.pid,
+                    evt_dir[evinfo->type],
+                    evt_type[evinfo->type]);
 
     if (evinfo->type == REQUEST)
     {
@@ -352,6 +373,20 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
         reply = xDbgEvlogEvent (evinfo, on, reply, len);
         REPLY (")");
     }
+    else if (evinfo->type == REPLY)
+    {
+        REPLY ("(");
+        reply = xDbgEvlogReply (evinfo, on, reply, len);
+        REPLY (")");
+    }
+    else if (evinfo->type == ERROR)
+    {
+        REPLY("(ErrorCode(0x%02x) resourceID(0x%lx) majorCode(%d) minorCode(%d))",
+            evinfo->err.errorCode,
+            evinfo->err.resourceID,
+            evinfo->err.majorCode,
+            evinfo->err.minorCode);
+    }
     else
     {
         const char *evlog_name = "";
@@ -359,6 +394,8 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
             evlog_name = evinfo->req.name;
         else if (evinfo->type == EVENT)
             evlog_name = evinfo->evt.name;
+        else if (evinfo->type == REPLY)
+            evlog_name = evinfo->rep.name;
         REPLY ("(%s)", evlog_name);
     }
 

@@ -137,6 +137,22 @@ _EvlogEventComposite (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     return reply;
 }
 
+static char *
+_EvlogReplyComposite (EvlogInfo *evinfo, char *reply, int *len)
+{
+#if 0
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+
+    default:
+            break;
+    }
+
+#endif
+    return reply;
+}
 
 void
 xDbgEvlogCompositeGetBase (ExtensionInfo *extinfo)
@@ -146,6 +162,7 @@ xDbgEvlogCompositeGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestComposite;
     extinfo->evt_func = _EvlogEventComposite;
+    extinfo->rep_func = _EvlogReplyComposite;
 #else
     ExtensionEntry *xext = CheckExtension (COMPOSITE_NAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -156,5 +173,6 @@ xDbgEvlogCompositeGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestComposite;
     extinfo->evt_func = _EvlogEventComposite;
+    extinfo->rep_func = _EvlogReplyComposite;
 #endif
 }

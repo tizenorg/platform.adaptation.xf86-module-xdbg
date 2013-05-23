@@ -333,6 +333,364 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     return reply;
 }
 
+static char *
+_EvlogReplyRandr (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+        case X_RRGetScreenSizeRange:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xRRGetScreenSizeRangeReply *stuff = (xRRGetScreenSizeRangeReply *)rep;
+                REPLY (": minSize(%dx%d) maxSize(%dx%d)",
+                    stuff->minWidth,
+                    stuff->minHeight,
+                    stuff->maxWidth,
+                    stuff->maxHeight);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+        case X_RRGetScreenResources:
+        {
+            static int nCrtcs, nOutputs, nModes, nbytesNames;
+
+            if (evinfo->rep.isStart)
+            {
+                xRRGetScreenResourcesReply *stuff = (xRRGetScreenResourcesReply *)rep;
+                REPLY (": Timestamp(%ldms) ConfigTimestamp(%ldms) nCrtcs(%d) nOutputs(%d) nModes(%d) nbytesNames(%d)",
+                    stuff->timestamp,
+                    stuff->configTimestamp,
+                    stuff->nCrtcs,
+                    stuff->nOutputs,
+                    stuff->nModes,
+                    stuff->nbytesNames);
+
+                nCrtcs = stuff->nCrtcs;
+                nOutputs = stuff->nOutputs;
+                nModes = stuff->nModes;
+                nbytesNames = stuff->nbytesNames;
+            }
+            else
+            {
+                RRCrtc *crtcs = (RRCrtc *)rep;
+                RROutput *outputs = (RROutput *)(crtcs + nCrtcs);
+                xRRModeInfo *modeinfos = (xRRModeInfo *)(outputs + nOutputs);
+                CARD8 *names = (CARD8 *)(modeinfos + nModes);
+                char temp[64] = {0, };
+                int i;
+
+                REPLY ("Crtcs");
+                REPLY ("(");
+                for (i = 0 ; i < nCrtcs ; i++)
+                {
+                    REPLY ("0x%lx", crtcs[i]);
+                    if(i != nCrtcs - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Outputs");
+                REPLY ("(");
+                for (i = 0 ; i < nOutputs ; i++)
+                {
+                    REPLY ("0x%lx", outputs[i]);
+                    if(i != nOutputs - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Modes");
+                REPLY ("(");
+                for (i = 0 ; i < nModes ; i++)
+                {
+                    REPLY ("0x%lx %dx%d", modeinfos[i].id, modeinfos[i].width, modeinfos[i].height);
+                    if(i != nModes - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Names");
+
+                strncpy (temp, (char *)names, nbytesNames);
+
+                REPLY ("(");
+                REPLY ("%s", temp);
+                REPLY (")");
+
+            }
+
+            return reply;
+        }
+
+        case X_RRGetOutputInfo:
+        {
+            static int nCrtcs, nModes, nPreferred, nClones;
+            if (evinfo->rep.isStart)
+            {
+                xRRGetOutputInfoReply *stuff = (xRRGetOutputInfoReply *)rep;
+                REPLY (": Timestamp(%ldms) Crtc(0x%lx) mmSize(%ldx%ld) nCrtcs(%d) nModes(%d) nPreferred(%d) nClones(%d)",
+                    stuff->timestamp,
+                    stuff->crtc,
+                    stuff->mmWidth,
+                    stuff->mmHeight,
+                    stuff->nCrtcs,
+                    stuff->nModes,
+                    stuff->nPreferred,
+                    stuff->nClones);
+
+                nCrtcs = stuff->nCrtcs;
+                nModes = stuff->nModes;
+                nPreferred = stuff->nPreferred;
+                nClones = stuff->nClones;
+            }
+            else
+            {
+                RRCrtc *crtcs = (RRCrtc *) rep;
+                RRMode *modes = (RRMode *) (crtcs + nCrtcs);
+                RROutput *clones = (RROutput *) (modes + nModes);
+                char *name = (char *) (clones + nClones);
+                int i;
+
+                REPLY ("Crtcs");
+                REPLY ("(");
+                for (i = 0 ; i < nCrtcs ; i++)
+                {
+                    REPLY ("0x%lx", crtcs[i]);
+                    if(i != nCrtcs - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Modes");
+                REPLY ("(");
+                for (i = 0 ; i < nModes ; i++)
+                {
+                    REPLY ("0x%lx", modes[i]);
+                    if(i != nModes - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Clone");
+                REPLY ("(");
+                for (i = 0 ; i < nClones ; i++)
+                {
+                    REPLY ("0x%lx", clones[i]);
+                    if(i != nClones - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Name");
+                REPLY ("(");
+                REPLY ("%s", name);
+                REPLY (")");
+            }
+
+            return reply;
+        }
+
+        case X_RRListOutputProperties:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xRRListOutputPropertiesReply *stuff = (xRRListOutputPropertiesReply *)rep;
+                REPLY (": nAtoms(%d)",
+                    stuff->nAtoms);
+            }
+            else
+            {
+                Atom *stuff = (Atom *)rep;
+                int i;
+
+                REPLY ("Properties:");
+                for (i = 0 ; i < evinfo->rep.size / sizeof(Atom) ; i++)
+                {
+                    reply = xDbgGetAtom(stuff[i], evinfo, reply, len);
+                    if(i != evinfo->rep.size / sizeof(Atom) - 1)
+                        REPLY (", ");
+                }
+            }
+
+            return reply;
+        }
+
+        case X_RRGetOutputProperty:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xRRGetOutputPropertyReply *stuff = (xRRGetOutputPropertyReply *)rep;
+                REPLY (": Atoms");
+                reply = xDbgGetAtom(stuff->propertyType, evinfo, reply, len);
+
+                REPLY (" bytesAfter(%ld) nItems(%ld)",
+                    stuff->bytesAfter,
+                    stuff->nItems);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+        case X_RRGetCrtcInfo:
+        {
+            static int nOutput, nPossibleOutput;
+
+            if (evinfo->rep.isStart)
+            {
+                xRRGetCrtcInfoReply *stuff = (xRRGetCrtcInfoReply *)rep;
+                REPLY (" Timestamp(%ldms) coord(%d,%d %dx%d) RRmode(0x%lx) rot(%d) rots(%d) nOutput(%d) nPossibleOutput(%d)",
+                    stuff->timestamp,
+                    stuff->x,
+                    stuff->y,
+                    stuff->width,
+                    stuff->height,
+                    stuff->mode,
+                    stuff->rotation,
+                    stuff->rotations,
+                    stuff->nOutput,
+                    stuff->nPossibleOutput);
+
+                nOutput = stuff->nOutput;
+                nPossibleOutput = stuff->nPossibleOutput;
+            }
+            else
+            {
+                RROutput *outputs = (RROutput *) rep;
+                RROutput *possible = (RROutput *) (outputs + nOutput);
+                int i;
+
+                REPLY ("Outputs");
+                REPLY ("(");
+                for (i = 0 ; i < nOutput ; i++)
+                {
+                    REPLY ("0x%lx", outputs[i]);
+                    if(i != nOutput - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Possible");
+                REPLY ("(");
+                for (i = 0 ; i < nPossibleOutput ; i++)
+                {
+                    REPLY ("0x%lx", possible[i]);
+                    if(i != nPossibleOutput - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+            }
+
+            return reply;
+        }
+
+        case X_RRSetCrtcConfig:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xRRSetCrtcConfigReply *stuff = (xRRSetCrtcConfigReply *)rep;
+
+                REPLY (" newTimestamp(%ldms)",
+                    stuff->newTimestamp);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+        case X_RRGetScreenResourcesCurrent:
+        {
+            static int nCrtcs, nOutputs, nModes, nbytesNames;
+
+            if (evinfo->rep.isStart)
+            {
+                xRRGetScreenResourcesReply *stuff = (xRRGetScreenResourcesReply *)rep;
+
+                REPLY (" Timestamp(%ldms) ConfigTimestamp(%ldms) nCrtcs(%d) nOutputs(%d) nModes(%d) nbytesNames(%d)",
+                    stuff->timestamp,
+                    stuff->configTimestamp,
+                    stuff->nCrtcs,
+                    stuff->nOutputs,
+                    stuff->nModes,
+                    stuff->nbytesNames);
+
+                nCrtcs = stuff->nCrtcs;
+                nOutputs = stuff->nOutputs;
+                nModes = stuff->nModes;
+                nbytesNames = stuff->nbytesNames;
+            }
+            else
+            {
+                RRCrtc *crtcs = (RRCrtc *)rep;
+                RROutput *outputs = (RROutput *)(crtcs + nCrtcs);
+                xRRModeInfo *modeinfos = (xRRModeInfo *)(outputs + nOutputs);
+                CARD8 *names = (CARD8 *)(modeinfos + nModes);
+                char temp[64] = {0, };
+                int i;
+
+                REPLY ("Crtcs");
+                REPLY ("(");
+                for (i = 0 ; i < nCrtcs ; i++)
+                {
+                    REPLY ("0x%lx", crtcs[i]);
+                    if(i != nCrtcs - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Outputs");
+                REPLY ("(");
+                for (i = 0 ; i < nOutputs ; i++)
+                {
+                    REPLY ("0x%lx", outputs[i]);
+                    if(i != nOutputs - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Modes");
+                REPLY ("(");
+                for (i = 0 ; i < nModes ; i++)
+                {
+                    REPLY ("0x%lx %dx%d", modeinfos[i].id, modeinfos[i].width, modeinfos[i].height);
+                    if(i != nModes - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                REPLY (" Names");
+
+                strncpy (temp, (char *)names, nbytesNames);
+
+                REPLY ("(");
+                REPLY ("%s", temp);
+                REPLY (")");
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
 
 void
 xDbgEvlogRandrGetBase (ExtensionInfo *extinfo)
@@ -342,6 +700,7 @@ xDbgEvlogRandrGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestRandr;
     extinfo->evt_func = _EvlogEventRandr;
+    extinfo->rep_func = _EvlogReplyRandr;
 #else
     ExtensionEntry *xext = CheckExtension (RANDR_NAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -352,5 +711,6 @@ xDbgEvlogRandrGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestRandr;
     extinfo->evt_func = _EvlogEventRandr;
+    extinfo->rep_func = _EvlogReplyRandr;
 #endif
 }

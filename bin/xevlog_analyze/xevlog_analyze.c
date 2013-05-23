@@ -188,7 +188,7 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
 
         read_len = read (fd, &evinfo.type, sizeof (EvlogType));
         GOTO_IF_FAIL (read_len == sizeof (EvlogType), print_done);
-        GOTO_IF_FAIL (evinfo.type >= EVENT && evinfo.type <= FLUSH, print_done);
+        GOTO_IF_FAIL (evinfo.type >= EVENT && evinfo.type <= ERROR, print_done);
         total += read_len;
 
         read_len = read (fd, &evinfo.mask, sizeof (int));
@@ -229,6 +229,29 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
 
             read_len = read (fd, evinfo.evt.ptr, evinfo.evt.size);
             GOTO_IF_FAIL (read_len == evinfo.evt.size, print_done);
+            total += read_len;
+        }
+
+        if (evinfo.mask & EVLOG_MASK_REPLY)
+        {
+            read_len = read (fd, &evinfo.rep, sizeof(EvlogReply));
+            GOTO_IF_FAIL (read_len == sizeof(EvlogReply), print_done);
+            total += read_len;
+
+            evinfo.rep.ptr = malloc (evinfo.rep.size);
+            GOTO_IF_FAIL (evinfo.rep.ptr != NULL, print_done);
+
+            WARNING_IF_FAIL (evinfo.rep.size > 0);
+
+            read_len = read (fd, evinfo.rep.ptr, evinfo.rep.size);
+            GOTO_IF_FAIL (read_len == evinfo.rep.size, print_done);
+            total += read_len;
+        }
+
+        if (evinfo.mask & EVLOG_MASK_ERROR)
+        {
+            read_len = read (fd, &evinfo.err, sizeof(EvlogError));
+            GOTO_IF_FAIL (read_len == sizeof(EvlogError), print_done);
             total += read_len;
         }
 
@@ -438,7 +461,7 @@ _checkOption(int argc, char** argv)
                     if(opt_str_len > 0)
                     {
                         int   fd = -1;
-                        char  fs[1024];
+                        char  fs[8096];
                         char *pfs;
                         int   len;
 

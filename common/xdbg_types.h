@@ -78,14 +78,17 @@ typedef enum
     EVENT,
     REQUEST,
     REPLY,
-    FLUSH
+    FLUSH,
+    ERROR
 } EvlogType;
 
 #define EVLOG_MASK_CLIENT    (1<<0)
 #define EVLOG_MASK_REQUEST   (1<<1)
 #define EVLOG_MASK_EVENT     (1<<2)
-#define EVLOG_MASK_ATOM      (1<<3)
-#define EVLOG_MASK_REGION    (1<<4)
+#define EVLOG_MASK_REPLY     (1<<3)
+#define EVLOG_MASK_ERROR     (1<<4)
+#define EVLOG_MASK_ATOM      (1<<5)
+#define EVLOG_MASK_REGION    (1<<6)
 
 
 typedef struct _EvlogTable
@@ -127,6 +130,24 @@ typedef struct _EvlogEvent
     char    name[PATH_MAX+1];
 } EvlogEvent;
 
+typedef struct _EvlogReply
+{
+    xGenericReply  *ptr;
+    int             size;
+    char            name[PATH_MAX+1];
+    int             reqType;
+    int             reqData;
+    Bool            isStart;
+} EvlogReply;
+
+typedef struct _EvlogError
+{
+    BYTE    errorCode;
+    CARD32  resourceID;
+    CARD16  minorCode;
+    CARD8   majorCode;
+} EvlogError;
+
 typedef struct _EvlogInfo
 {
     EvlogType     type;
@@ -135,6 +156,8 @@ typedef struct _EvlogInfo
     EvlogClient   client;
     EvlogRequest  req;
     EvlogEvent    evt;
+    EvlogReply    rep;
+    EvlogError    err;
     EvlogAtom     evatom;
     EvlogRegion   evregion;
 
@@ -152,6 +175,7 @@ struct _ExtensionInfo
     int     err_base;
     char* (*req_func) (EvlogInfo *evinfo, char *reply, int *len);
     char* (*evt_func) (EvlogInfo *evinfo, int first_base, char *reply, int *len);
+    char* (*rep_func) (EvlogInfo *evinfo, char *reply, int *len);
 };
 
 #endif

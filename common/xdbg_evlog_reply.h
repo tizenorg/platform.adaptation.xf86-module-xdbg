@@ -29,35 +29,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_EVLOG_H__
-#define __XDBG_EVLOG_H__
+#ifndef __XDBG_EVLOG_REPLY_H__
+#define __XDBG_EVLOG_REPLY_H__
 
 #include "xdbg_types.h"
-#include "xdbg_evlog_request.h"
-#include "xdbg_evlog_event.h"
-#include "xdbg_evlog_reply.h"
 
-#include "xdbg_evlog_core.h"
-#include "xdbg_evlog_dri2.h"
-#include "xdbg_evlog_composite.h"
-#include "xdbg_evlog_damage.h"
-#include "xdbg_evlog_gesture.h"
-#include "xdbg_evlog_xext.h"
-#include "xdbg_evlog_randr.h"
-#include "xdbg_evlog_xinput.h"
-#include "xdbg_evlog_xv.h"
-#include <list.h>
-
-
-char*  xDbgEvlogGetCmd         (char *path);
-Bool   xDbgEvlogRuleSet        (const int argc, const char **argv, char *reply, int *len);
-Bool   xDbgEvlogRuleValidate   (EvlogInfo *evinfo);
-Bool   xDbgEvlogGetExtensionEntry ();
-void   xDbgEvlogFillLog        (EvlogInfo *evinfo, Bool on, char *reply, int *len);
-
-void   xDbgDistroyAtomList  (EvlogInfo *evinfo);
-void   xDbgDistroyRegionList (EvlogInfo *evinfo);
-char*  xDbgGetAtom              (Atom atom, EvlogInfo *evinfo, char *reply, int *len);
-char*  xDbgGetRegion          (XserverRegion region, EvlogInfo *evinfo, char *reply, int *len);
+char *  xDbgEvlogReply (EvlogInfo *evinfo, Bool on, char *reply, int *len);
 
 #endif

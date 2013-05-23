@@ -36,6 +36,7 @@ COMMON_SOURCE =  \
     xdbg_evlog_xinput.c \
     xdbg_evlog_xv.c \
     xdbg_evlog_event.c \
+    xdbg_evlog_reply.c \
     ds/bintree.c \
     ds/bool_exp_parser.c \
     ds/bool_exp_rule_checker.c \

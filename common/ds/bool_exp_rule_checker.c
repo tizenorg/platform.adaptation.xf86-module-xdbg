@@ -205,6 +205,8 @@ static int validate_func (BINARY_TREE tree, BINARY_TREE_NODE node, BINARY_TREE_N
                 type_string = "REPLY";
             else if (args->type == 3)
                 type_string = "FLUSH";
+            else if (args->type == 4)
+                type_string = "ERROR";
             else
             {
                 fprintf (stderr, "Invalid type %d\n", args->type);

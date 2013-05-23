@@ -125,6 +125,22 @@ _EvlogEventDamage (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     return reply;
 }
 
+static char *
+_EvlogReplyDamage (EvlogInfo *evinfo, char *reply, int *len)
+{
+#if 0
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+
+    default:
+            break;
+    }
+#endif
+    return reply;
+}
+
 void
 xDbgEvlogDamageGetBase (ExtensionInfo *extinfo)
 {
@@ -133,6 +149,7 @@ xDbgEvlogDamageGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestDamage;
     extinfo->evt_func = _EvlogEventDamage;
+    extinfo->rep_func = _EvlogReplyDamage;
 #else
     ExtensionEntry *xext = CheckExtension (DAMAGE_NAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -143,5 +160,6 @@ xDbgEvlogDamageGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestDamage;
     extinfo->evt_func = _EvlogEventDamage;
+    extinfo->rep_func = _EvlogReplyDamage;
 #endif
 }

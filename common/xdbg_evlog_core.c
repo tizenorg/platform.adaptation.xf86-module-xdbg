@@ -154,6 +154,21 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, char *reply, int *len)
             return reply;
         }
 
+    case X_GetProperty:
+        {
+            xGetPropertyReq *stuff = (xGetPropertyReq *)req;
+
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            REPLY (" Property");
+            reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
+            REPLY (" Type");
+            reply = xDbgGetAtom(stuff->type, evinfo, reply, len);
+
+            return reply;
+        }
+
     case X_SetSelectionOwner:
         {
             xSetSelectionOwnerReq *stuff = (xSetSelectionOwnerReq *)req;
@@ -530,6 +545,7 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, char *reply, int *len)
             return reply;
         }
 
+    case X_ListProperties:
     case X_DestroyWindow:
     case X_DestroySubwindows:
     case X_MapWindow:
@@ -556,7 +572,6 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, char *reply, int *len)
 
     return reply;
 }
-
 
 char * xDbgEvlogEventCore (EvlogInfo *evinfo, char *reply, int *len)
 {
@@ -849,6 +864,179 @@ char * xDbgEvlogEventCore (EvlogInfo *evinfo, char *reply, int *len)
     case GenericEvent:
     default:
             break;
+    }
+
+    return reply;
+}
+
+char * xDbgEvlogReplyCore (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqType)
+    {
+    case X_GetGeometry:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xGetGeometryReply *stuff = (xGetGeometryReply *)rep;
+
+                REPLY (": XID(0x%lx) coord(%d,%d %dx%d) borderWidth(%d)",
+                    stuff->root,
+                    stuff->x,
+                    stuff->y,
+                    stuff->width,
+                    stuff->height,
+                    stuff->borderWidth);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_QueryTree:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xQueryTreeReply *stuff = (xQueryTreeReply *)rep;
+
+                REPLY (": XID(0x%lx) Parent(0x%lx) ChildrenNum(%d)",
+                    stuff->root,
+                    stuff->parent,
+                    stuff->nChildren);
+            }
+            else
+            {
+                Window *stuff = (Window *)rep;
+                int i;
+
+                REPLY ("childIDs");
+                REPLY ("(");
+                for (i = 0 ; i < evinfo->rep.size / sizeof(Window) ; i++)
+                {
+                    REPLY("0x%lx", stuff[i]);
+                    if(i != evinfo->rep.size / sizeof(Window) - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+            }
+
+            return reply;
+        }
+
+    case X_GetProperty:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xGetPropertyReply *stuff = (xGetPropertyReply *)rep;
+
+                REPLY (": PropertyType");
+                reply = xDbgGetAtom(stuff->propertyType, evinfo, reply, len);
+
+                REPLY (" bytesAfter(0x%lx) ItemNum(%ld)",
+                    stuff->bytesAfter,
+                    stuff->nItems);
+            }
+            else
+            {
+                return reply;
+            }
+
+
+            return reply;
+        }
+
+    case X_ListProperties:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xListPropertiesReply *stuff = (xListPropertiesReply *)rep;
+
+                REPLY (" PropertieNum(%d)",
+                    stuff->nProperties);
+            }
+            else
+            {
+                Atom *stuff = (Atom *)rep;
+                int i;
+
+                REPLY ("Properties");
+                REPLY ("(");
+                for (i = 0 ; i < evinfo->rep.size / sizeof(Atom) ; i ++)
+                {
+                    reply = xDbgGetAtom(stuff[i], evinfo, reply, len);
+                    if(i != evinfo->rep.size / sizeof(Atom) - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+            }
+
+
+
+            return reply;
+        }
+
+    case X_GetImage:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xGetImageReply *stuff = (xGetImageReply *)rep;
+
+                REPLY (": XID(0x%lx)",
+                    stuff->visual);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_GetKeyboardControl:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xGetKeyboardControlReply *stuff = (xGetKeyboardControlReply *)rep;
+
+                REPLY (": keyClickPercent(%d) bellPercent(%d), bellPitch(%d) bellDuration(%d)",
+                    stuff->keyClickPercent,
+                    stuff->bellPercent,
+                    stuff->bellPitch,
+                    stuff->bellDuration);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_GetPointerControl:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xGetPointerControlReply *stuff = (xGetPointerControlReply *)rep;
+
+                REPLY (": accelNumerator(%d) accelDenominator(%d), threshold(%d)",
+                    stuff->accelNumerator,
+                    stuff->accelDenominator,
+                    stuff->threshold);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+        break;
     }
 
     return reply;

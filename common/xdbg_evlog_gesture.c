@@ -217,6 +217,21 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     return reply;
 }
 
+static char *
+_EvlogReplyGesture (EvlogInfo *evinfo, char *reply, int *len)
+{
+#if 0
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+
+    default:
+            break;
+    }
+#endif
+    return reply;
+}
 
 void
 xDbgEvlogGestureGetBase (ExtensionInfo *extinfo)
@@ -226,6 +241,7 @@ xDbgEvlogGestureGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestGesture;
     extinfo->evt_func = _EvlogEventGesture;
+    extinfo->rep_func = _EvlogReplyGesture;
 #else
     ExtensionEntry *xext = CheckExtension (GESTURE_EXT_NAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -236,5 +252,6 @@ xDbgEvlogGestureGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestGesture;
     extinfo->evt_func = _EvlogEventGesture;
+    extinfo->rep_func = _EvlogReplyGesture;
 #endif
 }

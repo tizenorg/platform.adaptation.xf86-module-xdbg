@@ -29,35 +29,71 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __XDBG_EVLOG_H__
-#define __XDBG_EVLOG_H__
+#ifdef HAVE_CONFIG_H
+#include "config.h"
+#endif
+
+#include <stdio.h>
+#include <string.h>
+#include <strings.h>
+#include <sys/types.h>
+#include <sys/fcntl.h>
+#include <unistd.h>
+#include <stdarg.h>
+#include <fcntl.h>
+#include <unistd.h>
+
+#include <dix.h>
+#define XREGISTRY
+#include <registry.h>
+#include <xace.h>
+#include <xacestr.h>
+#include <X11/Xatom.h>
+#include <X11/Xlib.h>
+#include <windowstr.h>
+#include <sys/shm.h>
 
 #include "xdbg_types.h"
-#include "xdbg_evlog_request.h"
-#include "xdbg_evlog_event.h"
+#include "xdbg_evlog.h"
 #include "xdbg_evlog_reply.h"
 
-#include "xdbg_evlog_core.h"
-#include "xdbg_evlog_dri2.h"
-#include "xdbg_evlog_composite.h"
-#include "xdbg_evlog_damage.h"
-#include "xdbg_evlog_gesture.h"
-#include "xdbg_evlog_xext.h"
-#include "xdbg_evlog_randr.h"
-#include "xdbg_evlog_xinput.h"
-#include "xdbg_evlog_xv.h"
-#include <list.h>
+#define UNKNOWN_EVENT "<unknown>"
 
+char *
+xDbgEvlogReply (EvlogInfo *evinfo, Bool on, char *reply, int *len)
+{
+    extern ExtensionInfo Evlog_extensions[];
+    extern int Extensions_size;
+    EvlogReply rep;
+    xGenericReply *xRep = NULL;
+    int i;
 
-char*  xDbgEvlogGetCmd         (char *path);
-Bool   xDbgEvlogRuleSet        (const int argc, const char **argv, char *reply, int *len);
-Bool   xDbgEvlogRuleValidate   (EvlogInfo *evinfo);
-Bool   xDbgEvlogGetExtensionEntry ();
-void   xDbgEvlogFillLog        (EvlogInfo *evinfo, Bool on, char *reply, int *len);
+    RETURN_VAL_IF_FAIL (evinfo != NULL, reply);
+    RETURN_VAL_IF_FAIL (evinfo->type == REPLY, reply);
 
-void   xDbgDistroyAtomList  (EvlogInfo *evinfo);
-void   xDbgDistroyRegionList (EvlogInfo *evinfo);
-char*  xDbgGetAtom              (Atom atom, EvlogInfo *evinfo, char *reply, int *len);
-char*  xDbgGetRegion          (XserverRegion region, EvlogInfo *evinfo, char *reply, int *len);
+    rep = evinfo->rep;
+    xRep = rep.ptr;
 
-#endif
+    if (rep.isStart)
+        REPLY ("%s", evinfo->rep.name);
+
+    if(!on)
+        return reply;
+
+    if (rep.reqType < EXTENSION_BASE)
+    {
+        return xDbgEvlogReplyCore (evinfo, reply, len);
+    }
+    else
+    {
+        for (i = 0 ; i < Extensions_size ; i++)
+        {
+            if (rep.reqType == Evlog_extensions[i].opcode)
+            {
+                return Evlog_extensions[i].rep_func (evinfo, reply, len);
+            }
+        }
+    }
+
+    return reply;
+}

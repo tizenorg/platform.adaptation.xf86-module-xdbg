@@ -101,6 +101,12 @@ static void evtRecord (int fd, EvlogInfo *evinfo)
     if (evinfo->mask & EVLOG_MASK_EVENT)
         write_len += (sizeof (EvlogEvent) + evinfo->evt.size);
 
+    if (evinfo->mask & EVLOG_MASK_REPLY)
+        write_len += (sizeof (EvlogReply) + evinfo->rep.size);
+
+    if (evinfo->mask & EVLOG_MASK_ERROR)
+        write_len += (sizeof (EvlogError));
+
     if (evinfo->mask & EVLOG_MASK_ATOM)
         write_len += (sizeof (int) +
                      (sizeof (EvlogAtomTable) * evinfo->evatom.size));
@@ -200,6 +206,29 @@ static void evtRecord (int fd, EvlogInfo *evinfo)
             return;
         }
     }
+    if (evinfo->mask & EVLOG_MASK_REPLY)
+    {
+        if (write (fd, &evinfo->rep, sizeof (EvlogReply)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write reply\n");
+            return;
+        }
+
+        XDBG_WARNING_IF_FAIL (evinfo->rep.size > 0);
+        if (write (fd, evinfo->rep.ptr, evinfo->rep.size) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write reply\n");
+            return;
+        }
+    }
+    if (evinfo->mask & EVLOG_MASK_ERROR)
+    {
+        if (write (fd, &evinfo->err, sizeof (EvlogError)) == -1)
+        {
+            XDBG_ERROR (MXDBG, "failed: write reply\n");
+            return;
+        }
+    }
 
     if (evinfo->mask & EVLOG_MASK_ATOM)
     {
@@ -244,7 +273,7 @@ static void evtPrintF (int fd, EvlogInfo *evinfo, char *log)
         dprintf (fd, "%s", log);
 }
 
-static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
+static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec *rep)
 {
     EvlogInfo evinfo = {0,};
     static int EntryInit = 0;
@@ -292,17 +321,54 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev)
                               LookupRequestName (stuff->reqType, stuff->data));
             }
         }
+
+        /* evinfo.rep */
+        if (type == REPLY)
+        {
+            REQUEST (xReq);
+
+            evinfo.mask |= EVLOG_MASK_REPLY;
+            evinfo.rep.reqType = stuff->reqType;
+            evinfo.rep.reqData = stuff->data;
+            evinfo.rep.ptr = (xGenericReply*)rep->replyData;
+            evinfo.rep.size = rep->dataLenBytes - rep->padBytes;
+            evinfo.rep.isStart = rep->startOfReply;
+
+            if (stuff->reqType < EXTENSION_BASE)
+                snprintf (evinfo.rep.name, sizeof (evinfo.rep.name), "%s",
+                          LookupRequestName (stuff->reqType, 0));
+            else
+                snprintf (evinfo.rep.name, sizeof (evinfo.rep.name), "%s",
+                          LookupRequestName (stuff->reqType, stuff->data));
+        }
+
+        if (type == ERROR)
+        {
+            xError* err = NULL;
+
+            if (ev)
+                err = (xError *) ev;
+            else if (rep)
+                err = (xError *) rep->replyData;
+
+            evinfo.mask |= EVLOG_MASK_ERROR;
+            evinfo.err.errorCode = err->errorCode;
+            evinfo.err.resourceID = err->resourceID;
+            evinfo.err.minorCode = err->minorCode;
+            evinfo.err.majorCode = err->majorCode;
+        }
     }
 
     /* evinfo.evt */
     if (ev)
     {
-        XDBG_RETURN_IF_FAIL (type == EVENT);
-
-        evinfo.mask |= EVLOG_MASK_EVENT;
-        evinfo.evt.ptr = ev;
-        snprintf (evinfo.evt.name, sizeof (evinfo.evt.name), "%s",
-                  LookupEventName ((int)(ev->u.u.type)));
+        if (type == EVENT)
+        {
+            evinfo.mask |= EVLOG_MASK_EVENT;
+            evinfo.evt.ptr = ev;
+            snprintf (evinfo.evt.name, sizeof (evinfo.evt.name), "%s",
+                      LookupEventName ((int)(ev->u.u.type)));
+        }
     }
 
     /* evinfo.time */
@@ -376,7 +442,7 @@ _traceFlush (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
     if (xev_trace_on == FALSE)
         return;
 
-    evtPrint (FLUSH, NULL, NULL);
+    evtPrint (FLUSH, NULL, NULL, NULL);
 }
 
 static void
@@ -387,7 +453,7 @@ _traceAReply (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 
     ReplyInfoRec *pri = (ReplyInfoRec*)calldata;
 
-    evtPrint (REPLY, pri->client, NULL);
+    evtPrint (REPLY, pri->client, NULL, pri);
 }
 
 static void
@@ -470,8 +536,10 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
             }
         }
 
-        if (xev_trace_on)
-            evtPrint (EVENT, pClient, pev);
+        if (type != X_Error && xev_trace_on)
+            evtPrint (EVENT, pClient, pev, NULL);
+        else if (type == X_Error && xev_trace_on)
+            evtPrint (ERROR, pClient, pev, NULL);
     }
 }
 
@@ -485,7 +553,7 @@ _traceACoreEvents (CallbackListPtr *pcbl, pointer unused, pointer calldata)
 
     XDBG_RETURN_IF_FAIL (rec != NULL);
 
-    evtPrint (REQUEST, rec->client, NULL);
+    evtPrint (REQUEST, rec->client, NULL, NULL);
 }
 
 static void
@@ -544,7 +612,13 @@ _traceAExtEvents (CallbackListPtr *pcbl, pointer unused, pointer calldata)
     if (xev_trace_on == FALSE)
         return;
 
-    evtPrint (REQUEST, rec->client, NULL);
+    evtPrint (REQUEST, rec->client, NULL, NULL);
+}
+
+static void
+_traceAuditEndEvents (CallbackListPtr *pcbl, pointer unused, pointer calldata)
+{
+    return;
 }
 
 static void
@@ -688,6 +762,8 @@ xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name,
         ret &= AddCallback (&FlushCallback, _traceFlush, NULL);
         ret &= AddCallback (&ReplyCallback, _traceAReply, NULL);
         ret &= XaceRegisterCallback (XACE_CORE_DISPATCH, _traceACoreEvents, NULL);
+        ret &= XaceRegisterCallback (XACE_EXT_DISPATCH, _traceAExtEvents, NULL);
+        ret &= XaceRegisterCallback (XACE_AUDIT_END, _traceAuditEndEvents, NULL);
 
         if (!ret)
         {
@@ -700,6 +776,8 @@ xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name,
         DeleteCallback (&FlushCallback, _traceFlush, NULL);
         DeleteCallback (&ReplyCallback, _traceAReply, NULL);
         XaceDeleteCallback (XACE_CORE_DISPATCH, _traceACoreEvents, NULL);
+        XaceDeleteCallback (XACE_EXT_DISPATCH, _traceAExtEvents, NULL);
+        XaceDeleteCallback (XACE_AUDIT_END, _traceAuditEndEvents, NULL);
     }
 
     return;

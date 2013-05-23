@@ -443,14 +443,10 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     case XI_DeviceKeyPress:
         {
             XDeviceKeyPressedEvent *stuff = (XDeviceKeyPressedEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
+            REPLY (": XID(0x%lx) Window(0x%lx) Root(0x%lx) subWindow(0x%lx)",
                 stuff->deviceid,
                 stuff->window,
-                stuff->x,
-                stuff->y,
                 stuff->root,
-                stuff->x_root,
-                stuff->y_root,
                 stuff->subwindow);
 
             return reply;
@@ -459,14 +455,10 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     case XI_DeviceKeyRelease:
         {
             XDeviceKeyReleasedEvent *stuff = (XDeviceKeyReleasedEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
+            REPLY (": XID(0x%lx) Window(0x%lx) Root(0x%lx) subWindow(0x%lx)",
                 stuff->deviceid,
                 stuff->window,
-                stuff->x,
-                stuff->y,
                 stuff->root,
-                stuff->x_root,
-                stuff->y_root,
                 stuff->subwindow);
 
             return reply;
@@ -475,14 +467,10 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     case XI_DeviceButtonPress:
         {
             XDeviceButtonPressedEvent *stuff = (XDeviceButtonPressedEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
+            REPLY (": XID(0x%lx) Window(0x%lx) Root(0x%lx) subWindow(0x%lx)",
                 stuff->deviceid,
                 stuff->window,
-                stuff->x,
-                stuff->y,
                 stuff->root,
-                stuff->x_root,
-                stuff->y_root,
                 stuff->subwindow);
 
             return reply;
@@ -491,14 +479,10 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     case XI_DeviceButtonRelease:
         {
             XDeviceButtonReleasedEvent *stuff = (XDeviceButtonReleasedEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
+            REPLY (": XID(0x%lx) Window(0x%lx) Root(0x%lx) subWindow(0x%lx)",
                 stuff->deviceid,
                 stuff->window,
-                stuff->x,
-                stuff->y,
                 stuff->root,
-                stuff->x_root,
-                stuff->y_root,
                 stuff->subwindow);
 
             return reply;
@@ -507,14 +491,10 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     case XI_DeviceMotionNotify:
         {
             XDeviceMotionEvent *stuff = (XDeviceMotionEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
+            REPLY (": XID(0x%lx) Window(0x%lx) Root(0x%lx) subWindow(0x%lx)",
                 stuff->deviceid,
                 stuff->window,
-                stuff->x,
-                stuff->y,
                 stuff->root,
-                stuff->x_root,
-                stuff->y_root,
                 stuff->subwindow);
 
             return reply;
@@ -543,14 +523,10 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     case XI_ProximityIn:
         {
             XProximityInEvent *stuff = (XProximityInEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
+            REPLY (": XID(0x%lx) Window(0x%lx) Root(0x%lx) subWindow(0x%lx)",
                 stuff->deviceid,
                 stuff->window,
-                stuff->x,
-                stuff->y,
                 stuff->root,
-                stuff->x_root,
-                stuff->y_root,
                 stuff->subwindow);
 
             return reply;
@@ -559,14 +535,10 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     case XI_ProximityOut:
         {
             XProximityOutEvent *stuff = (XProximityOutEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
+            REPLY (": XID(0x%lx) Window(0x%lx) Root(0x%lx) subWindow(0x%lx)",
                 stuff->deviceid,
                 stuff->window,
-                stuff->x,
-                stuff->y,
                 stuff->root,
-                stuff->x_root,
-                stuff->y_root,
                 stuff->subwindow);
 
             return reply;
@@ -648,6 +620,251 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     return reply;
 }
 
+static char *
+_EvlogReplyXinput (EvlogInfo *evinfo, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+    case X_ListInputDevices:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xListInputDevicesReply *stuff = (xListInputDevicesReply *) rep;
+                REPLY (": nDevices(%d)",
+                    stuff->ndevices);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_GrabDevice:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xGrabDeviceReply *stuff = (xGrabDeviceReply *) rep;
+                REPLY (": status(%d)",
+                    stuff->status);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_GetDeviceFocus:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xGetDeviceFocusReply *stuff = (xGetDeviceFocusReply *) rep;
+                REPLY (": XID(0x%lx) Time(0x%lx)",
+                    stuff->focus,
+                    stuff->time);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIQueryVersion:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIQueryVersionReply *stuff = (xXIQueryVersionReply *) rep;
+                REPLY (": majorVersion(%d) minorVersion(%d)",
+                    stuff->major_version,
+                    stuff->minor_version);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIQueryDevice:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIQueryDeviceReply *stuff = (xXIQueryDeviceReply *) rep;
+                REPLY (": numDevices(%d)",
+                    stuff->num_devices);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIGetSelectedEvents:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIGetSelectedEventsReply *stuff = (xXIGetSelectedEventsReply *) rep;
+                REPLY (": numMasks(%d)",
+                    stuff->num_masks);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIQueryPointer:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIQueryPointerReply *stuff = (xXIQueryPointerReply *) rep;
+                REPLY (": XID(0x%x) Child(0x%x) root(%d,%d) win(%d,%d)",
+                    stuff->root,
+                    stuff->child,
+                    stuff->root_x,
+                    stuff->root_y,
+                    stuff->win_x,
+                    stuff->win_y);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIGetClientPointer:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIGetClientPointerReply *stuff = (xXIGetClientPointerReply *) rep;
+                REPLY (": Set(%s) deviceid(%d)",
+                    (stuff->set) ? "true":"false",
+                    stuff->deviceid);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIGetFocus:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIGetFocusReply *stuff = (xXIGetFocusReply *) rep;
+                REPLY (": XID(0x%x)",
+                    stuff->focus);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIGrabDevice:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIGrabDeviceReply *stuff = (xXIGrabDeviceReply *) rep;
+                REPLY (": status(%d)",
+                    stuff->status);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIPassiveGrabDevice:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIPassiveGrabDeviceReply *stuff = (xXIPassiveGrabDeviceReply *) rep;
+                REPLY (": numModifiers(%d)",
+                    stuff->num_modifiers);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_XIListProperties:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIListPropertiesReply *stuff = (xXIListPropertiesReply *) rep;
+                REPLY (": numProperties(%d)",
+                    stuff->num_properties);
+            }
+            else
+            {
+                Atom *stuff = (Atom *)rep;
+                int i;
+
+                REPLY ("Properties(");
+                for (i = 0 ; i < evinfo->rep.size / sizeof(Atom) ; i ++)
+                {
+                    reply = xDbgGetAtom(stuff[i], evinfo, reply, len);
+                    if(i != evinfo->rep.size / sizeof(Atom) - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+            }
+
+            return reply;
+        }
+
+    case X_XIGetProperty:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xXIGetPropertyReply *stuff = (xXIGetPropertyReply *) rep;
+
+                REPLY (": Type");
+                xDbgGetAtom(stuff->type, evinfo, reply, len);
+
+                REPLY (" numItems(%d) format(%d)",
+                    stuff->num_items,
+                    stuff->format);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
+
 void
 xDbgEvlogXinputGetBase (ExtensionInfo *extinfo)
 {
@@ -656,6 +873,7 @@ xDbgEvlogXinputGetBase (ExtensionInfo *extinfo)
 
     extinfo->req_func = _EvlogRequestXinput;
     extinfo->evt_func = _EvlogEventXinput;
+    extinfo->rep_func = _EvlogReplyXinput;
 #else
     ExtensionEntry *xext = CheckExtension (INAME);
     RETURN_IF_FAIL (xext != NULL);
@@ -666,5 +884,6 @@ xDbgEvlogXinputGetBase (ExtensionInfo *extinfo)
     extinfo->err_base = xext->errorBase;
     extinfo->req_func = _EvlogRequestXinput;
     extinfo->evt_func = _EvlogEventXinput;
+    extinfo->rep_func = _EvlogReplyXinput;
 #endif
 }
