@@ -90,6 +90,10 @@ typedef enum
 #define EVLOG_MASK_ATOM      (1<<5)
 #define EVLOG_MASK_REGION    (1<<6)
 
+#define EVLOG_PRINT_DEFAULT           0
+#define EVLOG_PRINT_DETAIL            1
+#define EVLOG_PRINT_REPLY_DETAIL      2
+
 
 typedef struct _EvlogTable
 {
@@ -173,9 +177,9 @@ struct _ExtensionInfo
     int     opcode;
     int     evt_base;
     int     err_base;
-    char* (*req_func) (EvlogInfo *evinfo, char *reply, int *len);
-    char* (*evt_func) (EvlogInfo *evinfo, int first_base, char *reply, int *len);
-    char* (*rep_func) (EvlogInfo *evinfo, char *reply, int *len);
+    char* (*req_func) (EvlogInfo *evinfo, int detail_level, char *reply, int *len);
+    char* (*evt_func) (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len);
+    char* (*rep_func) (EvlogInfo *evinfo, int detail_level, char *reply, int *len);
 };
 
 #endif

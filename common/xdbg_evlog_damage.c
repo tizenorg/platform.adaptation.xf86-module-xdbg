@@ -60,7 +60,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestDamage(EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestDamage(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -69,10 +69,27 @@ _EvlogRequestDamage(EvlogInfo *evinfo, char *reply, int *len)
     case X_DamageCreate:
         {
             xDamageCreateReq *stuff = (xDamageCreateReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) level(%d)",
+            REPLY (": XID(0x%lx) Drawable(0x%lx)",
                 stuff->damage,
-                stuff->drawable,
-                stuff->level);
+                stuff->drawable);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                const char *level;
+                char dlevel[10];
+
+                switch (stuff->level)
+                {
+                    case XDamageReportRawRectangles:  level = "DamageReportRawRegion"; break;
+                    case XDamageReportDeltaRectangles:  level = "DamageReportDeltaRegion"; break;
+                    case XDamageReportBoundingBox:  level = "DamageReportBoundingBox"; break;
+                    case XDamageReportNonEmpty:  level = "DamageReportNonEmpty"; break;
+                    default:  level = dlevel; sprintf (dlevel, "%d", stuff->level); break;
+                }
+
+                REPLY (" level(%s)",
+                    level);
+            }
 
             return reply;
         }
@@ -94,7 +111,7 @@ _EvlogRequestDamage(EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char*
-_EvlogEventDamage (EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventDamage (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -115,6 +132,16 @@ _EvlogEventDamage (EvlogInfo *evinfo, int first_base, char *reply, int *len)
                 stuff->geometry.width,
                 stuff->geometry.height);
 
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY ("\n");
+                REPLY ("%67s time(%lums) level(%d) sequence_num(%d)",
+                    " ",
+                    stuff->timestamp,
+                    stuff->level,
+                    stuff->sequenceNumber);
+            }
+
             return reply;
         }
 
@@ -126,7 +153,7 @@ _EvlogEventDamage (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 }
 
 static char *
-_EvlogReplyDamage (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogReplyDamage (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
 #if 0
     xGenericReply *rep = evinfo->rep.ptr;

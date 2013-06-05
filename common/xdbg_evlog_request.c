@@ -62,7 +62,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 char *conn[] = {"Initial Connect", "Establich Connect"};
 
 char *
-xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, char *reply, int *len)
+xDbgEvlogReqeust (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     extern ExtensionInfo Evlog_extensions[];
     extern int Extensions_size;
@@ -78,16 +78,13 @@ xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, char *reply, int *len)
 
     REPLY ("%s", evinfo->req.name);
 
-    if(!on)
-        return reply;
-
     for (i = 0 ; i < sizeof(conn) / sizeof(char *) ; i++)
         if (!strcmp(evinfo->req.name, conn[i]))
             return reply;
 
     if (xReq->reqType < EXTENSION_BASE)
     {
-        return xDbgEvlogRequestCore (evinfo, reply, len);
+        return xDbgEvlogRequestCore (evinfo, detail_level, reply, len);
     }
     else
     {
@@ -95,7 +92,7 @@ xDbgEvlogReqeust (EvlogInfo *evinfo, Bool on, char *reply, int *len)
         {
             if (xReq->reqType == Evlog_extensions[i].opcode)
             {
-                return Evlog_extensions[i].req_func (evinfo, reply, len);
+                return Evlog_extensions[i].req_func (evinfo, detail_level, reply, len);
             }
         }
     }

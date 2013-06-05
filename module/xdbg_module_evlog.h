@@ -38,6 +38,7 @@ Bool    xDbgModuleEvlogInstallHooks   (XDbgModule *pMod);
 void    xDbgModuleEvlogUninstallHooks (XDbgModule *pMod);
 
 void    xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name, char *reply, int *len);
+void    xDbgModuleEvlogDetail (XDbgModule *pMod, int level, char *reply, int *len);
 int     xDbgModuleEvlogInfoSetRule (XDbgModule *pMod, const int argc, const char ** argv, char *reply, int *len);
 
 Bool    xDbgModuleEvlogSetEvlogPath  (XDbgModule *pMod, int pid, char *path, char *reply, int *len);

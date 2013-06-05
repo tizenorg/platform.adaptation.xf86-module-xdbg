@@ -59,7 +59,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestComposite(EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -68,9 +68,14 @@ _EvlogRequestComposite(EvlogInfo *evinfo, char *reply, int *len)
     case X_CompositeRedirectWindow:
         {
             xCompositeRedirectWindowReq *stuff = (xCompositeRedirectWindowReq *)req;
-            REPLY (": XID(0x%lx) Update(%d)",
-                stuff->window,
-                stuff->update);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" update(%d)",
+                    stuff->update);
+            }
 
             return reply;
         }
@@ -78,9 +83,14 @@ _EvlogRequestComposite(EvlogInfo *evinfo, char *reply, int *len)
     case X_CompositeRedirectSubwindows:
         {
             xCompositeRedirectSubwindowsReq *stuff = (xCompositeRedirectSubwindowsReq *)req;
-            REPLY (": XID(0x%lx) Update(%d)",
-                stuff->window,
-                stuff->update);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" update(%d)",
+                    stuff->update);
+            }
 
             return reply;
         }
@@ -88,9 +98,14 @@ _EvlogRequestComposite(EvlogInfo *evinfo, char *reply, int *len)
     case X_CompositeUnredirectWindow:
         {
             xCompositeUnredirectWindowReq *stuff = (xCompositeUnredirectWindowReq *)req;
-            REPLY (": XID(0x%lx) Update(%d)",
-                stuff->window,
-                stuff->update);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" update(%d)",
+                    stuff->update);
+            }
 
             return reply;
         }
@@ -98,9 +113,14 @@ _EvlogRequestComposite(EvlogInfo *evinfo, char *reply, int *len)
     case X_CompositeUnredirectSubwindows:
         {
             xCompositeUnredirectSubwindowsReq *stuff = (xCompositeUnredirectSubwindowsReq *)req;
-            REPLY (": XID(0x%lx) Update(%d)",
-                stuff->window,
-                stuff->update);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" update(%d)",
+                    stuff->update);
+            }
 
             return reply;
         }
@@ -123,7 +143,7 @@ _EvlogRequestComposite(EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogEventComposite (EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventComposite (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -138,7 +158,7 @@ _EvlogEventComposite (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 }
 
 static char *
-_EvlogReplyComposite (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogReplyComposite (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
 #if 0
     xGenericReply *rep = evinfo->rep.ptr;

@@ -41,7 +41,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <os.h>
 #include <dlog.h>
 
+
 unsigned int xDbgLogGetModule (char *name);
+Bool         xDbgGetLogEnableDlog ();
 
 #define _C(b,s)             (((b) >> (s)) & 0xFF)
 #define _B(c,s)             ((((unsigned int)(c)) & 0xff) << (s))

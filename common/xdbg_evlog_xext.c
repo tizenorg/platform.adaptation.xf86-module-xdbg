@@ -70,7 +70,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestXextDpms(EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextDpms(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -105,7 +105,7 @@ _EvlogRequestXextDpms(EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogRequestXextShm (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -114,8 +114,9 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, char *reply, int *len)
     case X_ShmPutImage:
         {
             xShmPutImageReq *stuff = (xShmPutImageReq *)req;
-            REPLY (": XID(0x%lx) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
+            REPLY (": XID(0x%lx) gc(0x%lx) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
                 stuff->drawable,
+                stuff->gc,
                 stuff->totalWidth,
                 stuff->totalHeight,
                 stuff->srcX,
@@ -124,6 +125,29 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, char *reply, int *len)
                 stuff->srcHeight,
                 stuff->dstX,
                 stuff->dstY);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                const char *format;
+                char dformat[10];
+
+                switch (stuff->format)
+                {
+                    case XYBitmap:  format = "XYBitmap"; break;
+                    case XYPixmap:  format = "XYPixmap"; break;
+                    case ZPixmap:  format = "ZPixmap"; break;
+                    default:  format = dformat; sprintf (dformat, "%d", stuff->format); break;
+                }
+
+                REPLY ("\n");
+                REPLY ("%67s depth(%d) format(%s) send_event(%s) shmseg(0x%lx) offset(%ld)",
+                    " ",
+                    stuff->depth,
+                    format,
+                    stuff->sendEvent ? "YES" : "NO",
+                    stuff->shmseg,
+                    stuff->offset);
+            }
 
             return reply;
         }
@@ -138,6 +162,28 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, char *reply, int *len)
                 stuff->x,
                 stuff->y);
 
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                const char *format;
+                char  dformat[10];
+
+                switch (stuff->format)
+                {
+                    case XYBitmap:  format = "XYBitmap"; break;
+                    case XYPixmap:  format = "XYPixmap"; break;
+                    case ZPixmap:  format = "ZPixmap"; break;
+                    default:  format = dformat; sprintf (dformat, "%d", stuff->format); break;
+                }
+
+                REPLY ("\n");
+                REPLY ("%67s format(%s) plain_mask(0x%lx) shmseg(0x%lx) offset(%ld)",
+                    " ",
+                    format,
+                    stuff->planeMask,
+                    stuff->shmseg,
+                    stuff->offset);
+            }
+
             return reply;
         }
 
@@ -150,6 +196,16 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, char *reply, int *len)
                 stuff->width,
                 stuff->height);
 
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY ("\n");
+                REPLY ("%67s depth(%d) shmseg(0x%lx) offset(%ld)",
+                    " ",
+                    stuff->depth,
+                    stuff->shmseg,
+                    stuff->offset);
+            }
+
             return reply;
         }
 
@@ -161,7 +217,7 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogRequestXextSync(EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -226,7 +282,7 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogRequestXextXtestExt1(EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextXtestExt1(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -259,7 +315,7 @@ _EvlogRequestXextXtestExt1(EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogRequestXextXtest(EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestXextXtest(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -293,6 +349,15 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, char *reply, int *len)
                 stuff->rootX,
                 stuff->rootY);
 
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" type(%d) detail(%d) time(%lums) device_id(%d)",
+                    stuff->type,
+                    stuff->detail,
+                    stuff->time,
+                    stuff->deviceid);
+            }
+
             return reply;
         }
 
@@ -300,7 +365,7 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, char *reply, int *len)
         {
             xXTestGrabControlReq *stuff = (xXTestGrabControlReq *)req;
             REPLY (": Impervious(%s)" ,
-                (stuff->impervious)? "TRUE" : "FALSE");
+                (stuff->impervious)? "YES" : "NO");
 
             return reply;
         }
@@ -314,8 +379,9 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogEventXextDpms (EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextDpms (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
 {
+#if 0
     xEvent *evt = evinfo->evt.ptr;
 
     switch ((evt->u.u.type & 0x7F) - first_base)
@@ -324,13 +390,13 @@ _EvlogEventXextDpms (EvlogInfo *evinfo, int first_base, char *reply, int *len)
     default:
             break;
     }
-
+#endif
     return reply;
 }
 
 
 static char *
-_EvlogEventXextShm (EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextShm (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -342,6 +408,15 @@ _EvlogEventXextShm (EvlogInfo *evinfo, int first_base, char *reply, int *len)
             REPLY (": XID(0x%lx)",
                 stuff->drawable);
 
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" sequence_num(%d) major_event(%d) minor_event(%d) shmseg(0x%lx) offset(%ld)",
+                    stuff->sequenceNumber,
+                    stuff->majorEvent,
+                    stuff->minorEvent,
+                    stuff->shmseg,
+                    stuff->offset);
+            }
             return reply;
         }
 
@@ -354,7 +429,7 @@ _EvlogEventXextShm (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 
 
 static char *
-_EvlogEventXextSync (EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextSync (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -370,6 +445,17 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, char *reply, int *len)
                 stuff->counter_value_hi,
                 stuff->counter_value_lo);
 
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY ("\n");
+                REPLY ("%67s sequence_num(%d) time(%lums) count(%d) destroyed(%s)",
+                    " ",
+                    stuff->sequenceNumber,
+                    stuff->time,
+                    stuff->count,
+                    stuff->destroyed ? "YES" : "NO");
+            }
+
             return reply;
         }
 
@@ -383,6 +469,16 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, char *reply, int *len)
                 stuff->alarm_value_hi,
                 stuff->alarm_value_lo);
 
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY ("\n");
+                REPLY ("%67s sequence_num(%d) time(%lums) state(%d)",
+                    " ",
+                    stuff->sequenceNumber,
+                    stuff->time,
+                    stuff->state);
+            }
+
             return reply;
         }
 
@@ -395,7 +491,7 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 
 
 static char *
-_EvlogEventXextXtestExt1 (EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextXtestExt1 (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -410,7 +506,7 @@ _EvlogEventXextXtestExt1 (EvlogInfo *evinfo, int first_base, char *reply, int *l
 }
 
 static char *
-_EvlogEventXextXtest (EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventXextXtest (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -426,7 +522,7 @@ _EvlogEventXextXtest (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 
 
 static char *
-_EvlogReplyXextDpms (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogReplyXextDpms (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xGenericReply *rep = evinfo->rep.ptr;
 
@@ -437,10 +533,11 @@ _EvlogReplyXextDpms (EvlogInfo *evinfo, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xDPMSGetTimeoutsReply *stuff = (xDPMSGetTimeoutsReply *)rep;
-                REPLY (": Standby(%d) Suspend(%d) off(%d)",
+                REPLY (": Standby(%usec) Suspend(%usec) off(%usec) sequence_num(%d)",
                     stuff->standby,
                     stuff->suspend,
-                    stuff->off);
+                    stuff->off,
+                    stuff->sequenceNumber);
             }
             else
             {
@@ -458,7 +555,7 @@ _EvlogReplyXextDpms (EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogReplyXextShm (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogReplyXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xGenericReply *rep = evinfo->rep.ptr;
 
@@ -469,9 +566,10 @@ _EvlogReplyXextShm (EvlogInfo *evinfo, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xShmGetImageReply *stuff = (xShmGetImageReply *)rep;
-                REPLY (": Visual(0x%lx) size(%ld)",
+                REPLY (": Visual(0x%lx) size(%ld) sequence_num(%d)",
                     stuff->visual,
-                    stuff->size);
+                    stuff->size,
+                    stuff->sequenceNumber);
             }
             else
             {
@@ -489,7 +587,7 @@ _EvlogReplyXextShm (EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogReplyXextSync (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogReplyXextSync (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xGenericReply *rep = evinfo->rep.ptr;
 
@@ -500,9 +598,10 @@ _EvlogReplyXextSync (EvlogInfo *evinfo, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xSyncQueryCounterReply *stuff = (xSyncQueryCounterReply *)rep;
-                REPLY (": Value(0x%lx/0x%lx)",
+                REPLY (": Value(0x%lx/0x%lx) sequence_num(%d)",
                     stuff->value_hi,
-                    stuff->value_lo);
+                    stuff->value_lo,
+                    stuff->sequenceNumber);
             }
             else
             {
@@ -520,7 +619,7 @@ _EvlogReplyXextSync (EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogReplyXextXtestExt1 (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogReplyXextXtestExt1 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xGenericReply *rep = evinfo->rep.ptr;
 
@@ -531,8 +630,9 @@ _EvlogReplyXextXtestExt1 (EvlogInfo *evinfo, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xTestQueryInputSizeReply *stuff = (xTestQueryInputSizeReply *)rep;
-                REPLY (": sizeReturn(0x%lx)",
-                    stuff->size_return);
+                REPLY (": sizeReturn(0x%lx) sequence_num(%d)",
+                    stuff->size_return,
+                    stuff->sequenceNumber);
             }
             else
             {
@@ -550,7 +650,7 @@ _EvlogReplyXextXtestExt1 (EvlogInfo *evinfo, char *reply, int *len)
 }
 
 static char *
-_EvlogReplyXextXtest (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogReplyXextXtest (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xGenericReply *rep = evinfo->rep.ptr;
 
@@ -561,8 +661,9 @@ _EvlogReplyXextXtest (EvlogInfo *evinfo, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xXTestGetVersionReply *stuff = (xXTestGetVersionReply *)rep;
-                REPLY (": MinorVersion(%d)",
-                    stuff->minorVersion);
+                REPLY (": MinorVersion(%d) sequence_num(%d)",
+                    stuff->minorVersion,
+                    stuff->sequenceNumber);
             }
             else
             {

@@ -59,7 +59,7 @@ _CommandDLog (int pid, int argc, char **argv, char *reply, int *len, XDbgModule 
 
     if (argc != 3)
     {
-        XDBG_REPLY ("Error : too few arguments\n");
+        XDBG_REPLY ("DLog level: %d\n", xDbgGetLogEnableDlog() ? 1 : 0);
         return;
     }
 
@@ -196,10 +196,11 @@ static void
 _CommandEvlog (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
 {
     int on;
+    extern Bool xev_trace_on;
 
     if (argc != 3)
     {
-        XDBG_REPLY ("Error : too few arguments\n");
+        XDBG_REPLY ("Evlog level: %d\n", xev_trace_on ? 1 : 0);
         return;
     }
 
@@ -207,6 +208,24 @@ _CommandEvlog (int pid, int argc, char **argv, char *reply, int *len, XDbgModule
 
     xDbgModuleEvlogPrintEvents (pMod, on, argv[0], reply, len);
 
+    XDBG_REPLY ("Success\n");
+}
+
+static void
+_CommandEvlogDetail (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
+{
+    int level;
+    extern int xev_trace_detail_level;
+
+    if (argc != 3)
+    {
+        XDBG_REPLY ("Detail Level: %d\n", xev_trace_detail_level);
+        return;
+    }
+
+    level = atoi(argv[2]);
+
+    xDbgModuleEvlogDetail (pMod, level, reply, len);
     XDBG_REPLY ("Success\n");
 }
 
@@ -335,6 +354,12 @@ static struct
         "evlog", "to print x events", "[0-1]",
         NULL, "[OFF:0/ON:1]",
         _CommandEvlog
+    },
+
+    {
+        "evlog_detail", "to set printing detail log level", "[0-2]",
+        NULL, "[Primary logs:0/ More detail logs:1/ Supplementary Reply logs:2]",
+        _CommandEvlogDetail
     },
 
     {

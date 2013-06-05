@@ -60,7 +60,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define UNKNOWN_EVENT "<unknown>"
 
 char *
-xDbgEvlogReply (EvlogInfo *evinfo, Bool on, char *reply, int *len)
+xDbgEvlogReply (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     extern ExtensionInfo Evlog_extensions[];
     extern int Extensions_size;
@@ -77,12 +77,9 @@ xDbgEvlogReply (EvlogInfo *evinfo, Bool on, char *reply, int *len)
     if (rep.isStart)
         REPLY ("%s", evinfo->rep.name);
 
-    if(!on)
-        return reply;
-
     if (rep.reqType < EXTENSION_BASE)
     {
-        return xDbgEvlogReplyCore (evinfo, reply, len);
+        return xDbgEvlogReplyCore (evinfo, detail_level, reply, len);
     }
     else
     {
@@ -90,7 +87,7 @@ xDbgEvlogReply (EvlogInfo *evinfo, Bool on, char *reply, int *len)
         {
             if (rep.reqType == Evlog_extensions[i].opcode)
             {
-                return Evlog_extensions[i].rep_func (evinfo, reply, len);
+                return Evlog_extensions[i].rep_func (evinfo, detail_level, reply, len);
             }
         }
     }

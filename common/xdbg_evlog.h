@@ -53,7 +53,7 @@ char*  xDbgEvlogGetCmd         (char *path);
 Bool   xDbgEvlogRuleSet        (const int argc, const char **argv, char *reply, int *len);
 Bool   xDbgEvlogRuleValidate   (EvlogInfo *evinfo);
 Bool   xDbgEvlogGetExtensionEntry ();
-void   xDbgEvlogFillLog        (EvlogInfo *evinfo, Bool on, char *reply, int *len);
+Bool   xDbgEvlogFillLog        (EvlogInfo *evinfo, int detail_level, char *reply, int *len);
 
 void   xDbgDistroyAtomList  (EvlogInfo *evinfo);
 void   xDbgDistroyRegionList (EvlogInfo *evinfo);

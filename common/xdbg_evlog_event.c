@@ -61,7 +61,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 
 char *
-xDbgEvlogEvent (EvlogInfo *evinfo, Bool on, char *reply, int *len)
+xDbgEvlogEvent (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     extern ExtensionInfo* Sorted_Evlog_extensions;
     extern int Extensions_size;
@@ -85,12 +85,9 @@ xDbgEvlogEvent (EvlogInfo *evinfo, Bool on, char *reply, int *len)
 
     type &= 0x7F;
 
-    if(!on)
-        return reply;
-
     if (type < EXTENSION_EVENT_BASE)
     {
-        return xDbgEvlogEventCore (evinfo, reply, len);
+        return xDbgEvlogEventCore (evinfo, detail_level, reply, len);
     }
     else
     {
@@ -106,12 +103,12 @@ xDbgEvlogEvent (EvlogInfo *evinfo, Bool on, char *reply, int *len)
                 if (type >= Sorted_Evlog_extensions[i].evt_base &&
                      type < Sorted_Evlog_extensions[i+1].evt_base)
                 {
-                    return Sorted_Evlog_extensions[i].evt_func (evinfo, Sorted_Evlog_extensions[i].evt_base, reply, len);
+                    return Sorted_Evlog_extensions[i].evt_func (evinfo, Sorted_Evlog_extensions[i].evt_base, detail_level, reply, len);
                 }
                 continue;
             }
 
-            return Sorted_Evlog_extensions[i].evt_func (evinfo, Sorted_Evlog_extensions[i].evt_base, reply, len);
+            return Sorted_Evlog_extensions[i].evt_func (evinfo, Sorted_Evlog_extensions[i].evt_base, detail_level, reply, len);
         }
 
     }

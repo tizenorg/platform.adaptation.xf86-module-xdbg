@@ -58,7 +58,7 @@ typedef struct _EvlogOption
     char   command_name[PATH_MAX+1];
     char   path_name[PATH_MAX+1];
     Bool   isRule;
-    Bool   detail;
+    int    detail_level;
 } EvlogOption;
 
 
@@ -79,7 +79,7 @@ _printUsage(char* name)
     printf("                ------------------------\n");
     printf("           * It is possible to write multiple policies.\n");
     printf("\n");
-    printf("       -a [Add Rule]       Setting Rule of 'Add' policy to find information you want\n");
+    printf("       -a [ALLOW Rule]       Setting Rule of 'ALLOW' policy to find information you want\n");
     printf("\n");
     printf("       -n [Deny Rule]      Setting Rule of 'Deny' policy to find information you want\n");
     printf("\n");
@@ -94,7 +94,11 @@ _printUsage(char* name)
     printf("\n");
     printf("           * WARNING : If you set both -a and -n option, must set -a option first. Otherwise Logs you DO NOT want can be printed.\n");
     printf("\n");
-    printf("       -d [OFF:0/ON:1]     To Print detail log of extensions\n");
+    printf("       -d [0-2]            To Set printing detail log level\n");
+    printf("\n");
+    printf("               0: To Print Primary Logs (XID, Root, Atom, Region ...)\n");
+    printf("               1: To Print More Detail Logs (Time, State, Mask ...\n");
+    printf("               2: To Print Supplementary Reply Logs (Information Including Each Item)\n");
     printf("\n");
     printf("       -h                  Usage of xevlog_anlayze\n");
     printf("\n");
@@ -312,8 +316,8 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
 
         if (xDbgEvlogRuleValidate (&evinfo))
         {
-            xDbgEvlogFillLog(&evinfo, eo->detail, log, &size);
-            printf ("%s", log);
+            if (xDbgEvlogFillLog(&evinfo, eo->detail_level, log, &size))
+                printf ("%s", log);
         }
 
         if (evinfo.req.ptr)
@@ -363,7 +367,7 @@ _checkOption(int argc, char** argv)
 
     eo.pid = atoi (argv[0]);
     eo.isRule = FALSE;
-    eo.detail = TRUE;
+    eo.detail_level = 0;
     strncpy(eo.command_name, argv[1], PATH_MAX);
 
     if (argc < 3)
@@ -528,8 +532,8 @@ _checkOption(int argc, char** argv)
 
                     if(opt_str_len > 0)
                     {
-                        eo.detail = (atoi(optarg))?TRUE:FALSE;
-                        printf ("detail %s\n", (eo.detail)?"ON":"OFF");
+                        eo.detail_level = (atoi(optarg));
+                        printf ("Detail Level: %d\n", eo.detail_level);
                     }
                     break;
                 }

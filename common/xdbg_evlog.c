@@ -118,8 +118,9 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
         POLICY_TYPE policy_type;
         RC_RESULT_TYPE result;
         const char * policy = argv[1];
-        char rule[8192];
-        int i;
+        char merge[8192], rule[8192]={0,};
+        int i, index = 0;
+        int apply = 0;
 
         if (argc < 3)
         {
@@ -137,20 +138,32 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
             return FALSE;
         }
 
-        _mergeArgs (rule, argc - 2, &(argv[2]));
+        _mergeArgs (merge, argc - 2, &(argv[2]));
 
-        for (i = 0 ; i < strlen(rule) ; i++)
+        for (i = 0 ; i < strlen(merge) ; i++)
         {
-            static int apply = 0;
-            if(rule[i] == '\"' || rule[i] == '\'')
-                rule[i] = ' ';
-            if(rule[i] == '+')
+            if(merge[i] == '\"' || merge[i] == '\'')
             {
-                rule[i] = ' ';
-                if (apply == 0)
-                   strcat(rule, "|| type=reply || type=error");
-                apply = 1;
+                rule[index++] = ' ';
+                continue;
             }
+
+            if(merge[i] == '+')
+            {
+                rule[index++] = ' ';
+
+                if (apply == 0)
+                {
+                    const char* plus = "|| type=reply || type=error";
+
+                    strcat(rule, plus);
+                    index += strlen(plus);
+
+                    apply = 1;
+                }
+                continue;
+            }
+            rule[index++] = merge[i];
         }
 
         result = rulechecker_add_rule (rc, policy_type, rule);
@@ -335,20 +348,20 @@ xDbgEvlogGetExtensionEntry ()
 }
 
 
-void
-xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
+Bool
+xDbgEvlogFillLog (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     static CARD32 prev;
 
-    RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_dir) / sizeof (char*)));
-    RETURN_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_type) / sizeof (char*)));
+    RETURN_VAL_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_dir) / sizeof (char*)), FALSE);
+    RETURN_VAL_IF_FAIL (evinfo->type >= 0 && (sizeof (evt_type) / sizeof (char*)), FALSE);
 
     if (evinfo->type == REPLY && !evinfo->rep.isStart)
     {
-        if (on) // detail option is on
+        if (detail_level >= EVLOG_PRINT_REPLY_DETAIL)
             REPLY ("%67s"," ");
         else
-            return;
+            return FALSE;
     }
     else
         REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %7s ",
@@ -363,20 +376,20 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
     if (evinfo->type == REQUEST)
     {
         REPLY ("(");
-        reply = xDbgEvlogReqeust (evinfo, on, reply, len);
+        reply = xDbgEvlogReqeust (evinfo, detail_level, reply, len);
         REPLY (")");
     }
     else if (evinfo->type == EVENT)
     {
         evinfo->evt.size = sizeof (xEvent);
         REPLY ("(");
-        reply = xDbgEvlogEvent (evinfo, on, reply, len);
+        reply = xDbgEvlogEvent (evinfo, detail_level, reply, len);
         REPLY (")");
     }
     else if (evinfo->type == REPLY)
     {
         REPLY ("(");
-        reply = xDbgEvlogReply (evinfo, on, reply, len);
+        reply = xDbgEvlogReply (evinfo, detail_level, reply, len);
         REPLY (")");
     }
     else if (evinfo->type == ERROR)
@@ -402,6 +415,8 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, Bool on, char *reply, int *len)
     REPLY ("\n");
 
     prev = evinfo->time;
+
+    return TRUE;
 }
 
 

@@ -178,6 +178,12 @@ xDbgLogEnableDlog (Bool enable)
     dlog_enable = (enable > 0) ? TRUE:FALSE;
 }
 
+API Bool
+xDbgGetLogEnableDlog ()
+{
+    return dlog_enable;
+}
+
 API void*
 xDbgLog (unsigned int module, int logoption, const char * file, int line, const char * f, ...)
 {

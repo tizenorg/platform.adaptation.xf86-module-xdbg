@@ -60,7 +60,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog.h"
 
 static char *
-_EvlogRequestDri2 (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogRequestDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xReq *req = evinfo->req.ptr;
 
@@ -87,9 +87,14 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, char *reply, int *len)
     case X_DRI2GetBuffers:
         {
             xDRI2GetBuffersReq *stuff = (xDRI2GetBuffersReq *)req;
-            REPLY (": XID(0x%lx) Count(%ld)",
-                stuff->drawable,
-                stuff->count);
+            REPLY (": XID(0x%lx)",
+                stuff->drawable);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" count(%ld)",
+                    stuff->count);
+            }
 
             return reply;
         }
@@ -102,8 +107,11 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, char *reply, int *len)
                 stuff->src,
                 stuff->dest);
 
-            REPLY (" Region");
-            reply = xDbgGetRegion(stuff->region, evinfo, reply, len);
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" Region");
+                reply = xDbgGetRegion(stuff->region, evinfo, reply, len);
+            }
 
             return reply;
         }
@@ -111,9 +119,14 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, char *reply, int *len)
     case X_DRI2GetBuffersWithFormat:
         {
             xDRI2GetBuffersReq *stuff = (xDRI2GetBuffersReq *)req;
-            REPLY (": XID(0x%lx) count(%ld)",
-                stuff->drawable,
-                stuff->count);
+            REPLY (": XID(0x%lx)",
+                stuff->drawable);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" count(%ld)",
+                    stuff->count);
+            }
 
             return reply;
         }
@@ -137,9 +150,14 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, char *reply, int *len)
     case X_DRI2SwapInterval:
         {
             xDRI2SwapIntervalReq *stuff = (xDRI2SwapIntervalReq *)req;
-            REPLY (": XID(0x%lx) Interval(%ld)",
-                stuff->drawable,
-                stuff->interval);
+            REPLY (": XID(0x%lx)",
+                stuff->drawable);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" interval(%ld)",
+                    stuff->interval);
+            }
 
             return reply;
         }
@@ -150,8 +168,11 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, char *reply, int *len)
             REPLY (": XID(0x%lx)",
                 stuff->drawable);
 
-            REPLY (" Region");
-            reply = xDbgGetRegion(stuff->region, evinfo, reply, len);
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" Region");
+                reply = xDbgGetRegion(stuff->region, evinfo, reply, len);
+            }
 
             return reply;
         }
@@ -165,7 +186,7 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, char *reply, int *len)
 
 
 static char *
-_EvlogEventDri2 (EvlogInfo *evinfo, int first_base, char *reply, int *len)
+_EvlogEventDri2 (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
 {
     xEvent *evt = evinfo->evt.ptr;
 
@@ -185,6 +206,15 @@ _EvlogEventDri2 (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 
             evinfo->evt.size = sizeof (xDRI2BufferSwapComplete);
 
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY ("\n");
+                REPLY ("%67s sequence_num(%d) event_type(%d)",
+                    " ",
+                    stuff->sequenceNumber,
+                    stuff->event_type);
+            }
+
             return reply;
         }
 
@@ -193,6 +223,12 @@ _EvlogEventDri2 (EvlogInfo *evinfo, int first_base, char *reply, int *len)
             xDRI2InvalidateBuffers *stuff = (xDRI2InvalidateBuffers *) evt;
             REPLY (": XID(0x%lx)",
                 stuff->drawable);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" sequence_num(%d)",
+                    stuff->sequenceNumber);
+            }
 
             return reply;
         }
@@ -205,7 +241,7 @@ _EvlogEventDri2 (EvlogInfo *evinfo, int first_base, char *reply, int *len)
 }
 
 static char *
-_EvlogReplyDri2 (EvlogInfo *evinfo, char *reply, int *len)
+_EvlogReplyDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 {
     xGenericReply *rep = evinfo->rep.ptr;
 
@@ -216,20 +252,27 @@ _EvlogReplyDri2 (EvlogInfo *evinfo, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xDRI2GetBuffersReply *stuff = (xDRI2GetBuffersReply *)rep;
-                REPLY (": size(%ldx%ld) Count(%ld)",
+                REPLY (": size(%ldx%ld) count(%ld)",
                     stuff->width,
                     stuff->height,
                     stuff->count);
+
+                if (detail_level >= EVLOG_PRINT_DETAIL)
+                {
+                    REPLY (" sequence_num(%d)",
+                        stuff->sequenceNumber);
+                }
             }
             else
             {
                 xDRI2Buffer *stuff = (xDRI2Buffer *)rep;
 
-                REPLY ("attachment(0x%lx) Name(0x%lx) pitch(0x%lx) cpp(0x%lx)",
+                REPLY ("attachment(0x%lx) Name(0x%lx) pitch(0x%lx) cpp(0x%lx) flags(0x%lx)",
                     stuff->attachment,
                     stuff->name,
                     stuff->pitch,
-                    stuff->cpp);
+                    stuff->cpp,
+                    stuff->flags);
             }
 
             return reply;
@@ -243,6 +286,12 @@ _EvlogReplyDri2 (EvlogInfo *evinfo, char *reply, int *len)
                 REPLY (": swap(%ld/%ld)",
                     stuff->swap_hi,
                     stuff->swap_lo);
+
+                if (detail_level >= EVLOG_PRINT_DETAIL)
+                {
+                    REPLY (" sequence_num(%d)",
+                        stuff->sequenceNumber);
+                }
             }
             else
             {

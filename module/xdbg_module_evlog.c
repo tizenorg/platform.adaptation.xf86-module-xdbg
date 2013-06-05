@@ -69,7 +69,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define FP1616toDBL(x) ((x) * 1.0 / (1 << 16))
 
-static Bool	xev_trace_on = FALSE;
+Bool	    xev_trace_on = FALSE;
+int         xev_trace_detail_level = EVLOG_PRINT_DEFAULT;
 static int  xev_trace_fd = -1;
 static int  xev_trace_record_fd = -1;
 static Atom atom_rotate = None;
@@ -384,16 +385,16 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
 
     if (xev_trace_record_fd >= 0)
     {
-        xDbgEvlogFillLog (&evinfo, TRUE, NULL, NULL);
-        evtRecord (xev_trace_record_fd, &evinfo);
+        if (xDbgEvlogFillLog (&evinfo, EVLOG_PRINT_REPLY_DETAIL, NULL, NULL))
+            evtRecord (xev_trace_record_fd, &evinfo);
     }
     else
     {
         char log[1024];
         int size = sizeof (log);
 
-        xDbgEvlogFillLog (&evinfo, TRUE, log, &size);
-        evtPrintF (xev_trace_fd, &evinfo, log);
+        if (xDbgEvlogFillLog (&evinfo, xev_trace_detail_level, log, &size))
+            evtPrintF (xev_trace_fd, &evinfo, log);
     }
 
     /* evatom initialize */
@@ -732,6 +733,12 @@ xDbgModuleEvlogPrintEvents (XDbgModule *pMod, Bool on, const char * client_name,
     }
 
     return;
+}
+
+void
+xDbgModuleEvlogDetail (XDbgModule *pMod, int level, char *reply, int *len)
+{
+    xev_trace_detail_level = level;
 }
 
 int
