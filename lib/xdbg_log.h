@@ -39,6 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <errno.h>
 #include <stdlib.h>
 #include <os.h>
+#include <dlog.h>
 
 // Masks
 #define XLOG_MASK_LOGLEVEL   0x000000FF
@@ -64,7 +65,9 @@ enum
 
 // Log Options
 #define XLOG_OPTION_KLOG        (1 << 8)
-#define XLOG_OPTION_SLOG        (1 << 9)    /* print to stderr always */
+#define XLOG_OPTION_SLOG        (1 << 9)
+#define XLOG_OPTION_XORG        (1 << 10)
+#define XLOG_OPTION_SECURE      (1 << 11)   /* print secure log */
 
 typedef enum
 {
@@ -77,13 +80,15 @@ int   xDbgLogSetLevel    (unsigned int module, int level);
 void* xDbgLog            (unsigned int module, int logoption, const char *file, int line, const char *f, ...);
 
 // defines
-#define XLOG_DEBUG(mod, ...)    xDbgLog(mod, XLOG_LEVEL_DEBUG, __FILE__, __LINE__, __VA_ARGS__)
-#define XLOG_TRACE(mod, ...)    xDbgLog(mod, XLOG_LEVEL_TRACE, __FILE__, __LINE__, __VA_ARGS__)
-#define XLOG_INFO(mod, ...)     xDbgLog(mod, XLOG_LEVEL_INFO, __FILE__, __LINE__, __VA_ARGS__)
-#define XLOG_WARNING(mod, ...)  xDbgLog(mod, XLOG_LEVEL_WARNING, __FILE__, __LINE__, __VA_ARGS__)
-#define XLOG_ERROR(mod, ...)    xDbgLog(mod, XLOG_LEVEL_ERROR, __FILE__, __LINE__, __VA_ARGS__)
-#define XLOG_KLOG(mod, ...)     xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_KLOG, __FILE__, __LINE__, __VA_ARGS__)
-#define XLOG_SLOG(mod, ...)     xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_SLOG, __FILE__, __LINE__, __VA_ARGS__)
+#define XLOG_DEBUG(mod, ARG...)    xDbgLog(mod, XLOG_LEVEL_DEBUG, __FILE__, __LINE__, ##ARG)
+#define XLOG_TRACE(mod, ARG...)    xDbgLog(mod, XLOG_LEVEL_TRACE, __FILE__, __LINE__, ##ARG)
+#define XLOG_INFO(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_INFO, __FILE__, __LINE__, ##ARG)
+#define XLOG_WARNING(mod, ARG...)  xDbgLog(mod, XLOG_LEVEL_WARNING, __FILE__, __LINE__, ##ARG)
+#define XLOG_ERROR(mod, ARG...)    xDbgLog(mod, XLOG_LEVEL_ERROR, __FILE__, __LINE__, ##ARG)
+#define XLOG_KLOG(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_KLOG, __FILE__, __LINE__, ##ARG)
+#define XLOG_SLOG(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_SLOG, __FILE__, __LINE__, ##ARG)
+#define XLOG_XORG(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_XORG, __FILE__, __LINE__, ##ARG)
+#define XLOG_SECURE(mod, ARG...)   xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_SECURE, __FILE__, __LINE__, ##ARG)
 
 #define XDBG_DEBUG(mod, fmt, ARG...)      XLOG_DEBUG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 #define XDBG_TRACE(mod, fmt, ARG...)      XLOG_TRACE(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
@@ -93,6 +98,14 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 #define XDBG_ERRNO(mod, fmt, ARG...)      XLOG_ERROR(mod, "[%s](err=%s(%d)) "fmt, __FUNCTION__, strerror(errno), errno, ##ARG)
 #define XDBG_KLOG(mod, fmt, ARG...)       XLOG_KLOG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 #define XDBG_SLOG(mod, fmt, ARG...)       XLOG_SLOG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
+#define XDBG_XORG(mod, fmt, ARG...)       XLOG_XORG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
+
+/* _SECURE_LOG defined by system, <dlog.h> */
+#ifdef _SECURE_LOG
+#define XDBG_SECURE(mod, fmt, ARG...)     XLOG_SECURE(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
+#else
+#define XDBG_SECURE(mod, fmt, ARG...)     (0)
+#endif
 
 #define XDBG_NEVER_GET_HERE(mod)          XLOG_ERROR(mod, "[%s:%d] ** NEVER GET HERE **\n", __FUNCTION__,__LINE__)
 

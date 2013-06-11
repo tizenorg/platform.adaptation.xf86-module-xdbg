@@ -5,6 +5,7 @@ Release:    1
 Group:      System/Libraries
 License:    MIT
 Source0:    %{name}-%{version}.tar.gz
+BuildRequires:  pkgconfig(dlog)
 BuildRequires:  pkgconfig(xorg-server)
 BuildRequires:  pkgconfig(x11)
 BuildRequires:  pkgconfig(xext)
@@ -53,6 +54,7 @@ Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: pkgconfig(xorg-server)
 Requires: pkgconfig(x11)
+Requires: pkgconfig(dlog)
 
 %description devel
 X server runtime debug library development package

@@ -35,7 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <string.h>
 #include <stdarg.h>
-
+#include <dlog.h>
 #include "xdbg_log.h"
 
 #ifndef API
@@ -98,12 +98,19 @@ _LogModule (void * handle, int logoption, const char * file, int line, const cha
         kLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
     }
 
+
     /* write to file */
     if (loglevel >= XLOG_LEVEL_INFO)
     {
-        snprintf(tmpBuf, BUF_LEN, "(%s) [%s]%s", ostr[loglevel], (name)?name:"", f);
+        if (logoption & XLOG_OPTION_SECURE)
+            snprintf(tmpBuf, BUF_LEN, "(%s) > [SECURE_LOG] [%s]%s", ostr[loglevel], (name)?name:"", f);
+        else
+            snprintf(tmpBuf, BUF_LEN, "(%s) [%s]%s", ostr[loglevel], (name)?name:"", f);
 
-        LogVWrite (1, tmpBuf, args);
+        if (logoption & XLOG_OPTION_XORG)
+            LogVWrite (1, tmpBuf, args);
+
+        dLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
     }
 
     /* write to terminal */

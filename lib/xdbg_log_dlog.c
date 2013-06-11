@@ -30,43 +30,33 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 **************************************************************************/
 
 #include <stdarg.h>
-//#include <dlog.h>
+#include <dlog.h>
+
+#include "xdbg_log.h"
 
 void dLogWrapper (int loglevel, int module, const char * file, int line, const char * f, va_list args)
 {
-#if 0
-    const char * tag;
-    int priority;
-
-    if (module & LOGOPTION_DLOG_X)
-        tag = "xserver";
-    else if (module & LOGOPTION_DLOG_EVENT)
-        tag = "dlog_event";
-    else
-        return;
+    const char * tag = "Xorg";
 
     switch (loglevel)
     {
-    case LOGLEVEL_DEBUG:
-        priority = DLOG_DEBUG;
+    case XLOG_LEVEL_DEBUG:
+        SLOG_VA (LOG_DEBUG, tag, f, args);
         break;
-    case LOGLEVEL_TRACE:
-        priority = DLOG_INFO;
+    case XLOG_LEVEL_TRACE:
+        SLOG_VA (LOG_DEBUG, tag, f, args);
         break;
-    case LOGLEVEL_INFO:
-        priority = DLOG_WARN;
+    case XLOG_LEVEL_INFO:
+        SLOG_VA (LOG_INFO, tag, f, args);
         break;
-    case LOGLEVEL_WARNING:
-        priority = DLOG_ERROR;
+    case XLOG_LEVEL_WARNING:
+        SLOG_VA (LOG_WARN, tag, f, args);
         break;
-    case LOGLEVEL_ERROR:
-        priority = DLOG_FATAL;
+    case XLOG_LEVEL_ERROR:
+        SLOG_VA (LOG_ERROR, tag, f, args);
         break;
     default:
         return;
     }
-
-    SLOG_VA (priority, tag, f, args);
-#endif
 }
 

@@ -127,7 +127,7 @@ _traceClientState (CallbackListPtr *list, pointer closure, pointer calldata)
         if (client->clientState == ClientStateInitial)
               _debugClientInfo (client);
 
-        XDBG_INFO (MXDBG, "id:%d, conn_fd:%d, pid:%d, uid:%d, name:%s (%s)\n",
+        XDBG_SECURE (MXDBG, "id:%d, conn_fd:%d, pid:%d, uid:%d, name:%s (%s)\n",
               info->index, info->conn_fd, info->pid, info->uid, info->command,
               clientState[client->clientState]);
         return;
