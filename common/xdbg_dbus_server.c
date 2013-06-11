@@ -92,7 +92,7 @@ _xDbgDBusServerReplyMessage (XDbgDBusServerInfo *info, DBusMessage *msg, char *r
         return FALSE;
     }
 
-    XDBG_INFO (MDBUS, "[SERVER] send reply\n");
+    XDBG_DEBUG (MDBUS, "[SERVER] send reply\n");
 
     dbus_connection_flush (info->conn);
     dbus_message_unref (reply_msg);
@@ -114,7 +114,7 @@ _xDbgDBusServerProcessMessage (XDbgDBusServerInfo *info, DBusMessage *msg)
 
     dbus_error_init (&err);
 
-    XDBG_INFO (MDBUS, "[SERVER] Process a message (%s.%s)\n",
+    XDBG_DEBUG (MDBUS, "[SERVER] Process a message (%s.%s)\n",
                dbus_message_get_interface (msg), dbus_message_get_member (msg));
 
     XDBG_RETURN_IF_FAIL (info->conn != NULL);
@@ -221,7 +221,7 @@ _xDbgDBusServerMsgHandler (DBusConnection *connection, DBusMessage *msg, void *d
     if (!info || !info->conn || !msg)
         return DBUS_HANDLER_RESULT_NOT_YET_HANDLED;
 
-    XDBG_INFO (MDBUS, "[SERVER] Got a message (%s.%s)\n",
+    XDBG_DEBUG (MDBUS, "[SERVER] Got a message (%s.%s)\n",
                dbus_message_get_interface (msg), dbus_message_get_member (msg));
 
     if (!dbus_message_is_method_call (msg, XDBG_DBUS_INTERFACE, XDBG_DBUS_METHOD))
@@ -242,7 +242,7 @@ _xDbgDBusServerMsgFilter (DBusConnection *conn, DBusMessage *msg, void *data)
 
     if (dbus_message_is_signal (msg, DBUS_INTERFACE_LOCAL, "Disconnected"))
     {
-        XDBG_INFO (MDBUS, "[SERVER] disconnected by signal\n");
+        XDBG_DEBUG (MDBUS, "[SERVER] disconnected by signal\n");
         _xDbgDBusServerDeinit (info);
 
         if (info->timer)

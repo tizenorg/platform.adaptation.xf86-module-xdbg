@@ -56,7 +56,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xacestr.h>
 #include <X11/Xatom.h>
 #include <X11/extensions/XI2proto.h>
-#include <X11/extensions/Xvproto.h>
 #include <windowstr.h>
 
 #include <xdbg.h>
@@ -559,58 +558,12 @@ _traceACoreEvents (CallbackListPtr *pcbl, pointer unused, pointer calldata)
 static void
 _traceAExtEvents (CallbackListPtr *pcbl, pointer unused, pointer calldata)
 {
-    XaceExtAccessRec *rec = calldata;
-    ClientPtr client;
-
-    XDBG_RETURN_IF_FAIL (rec != NULL);
-
-    client = rec->client;
-    REQUEST (xReq);
-
-    if (stuff && stuff->reqType >= EXTENSION_BASE)
-    {
-        ExtensionEntry *xext = CheckExtension (XvName);
-        if (xext && stuff->reqType == xext->base)
-        {
-            ModuleClientInfo *info = GetClientInfo (client);
-            XDBG_RETURN_IF_FAIL (info != NULL);
-
-            switch (stuff->data)
-            {
-            case xv_GrabPort:
-                {
-                    xvGrabPortReq *req = (xvGrabPortReq *)client->requestBuffer;
-                    XDBG_INFO (MXDBG, "%s(port:%d), %s(%d)\n",
-                               LookupRequestName (stuff->reqType, stuff->data), req->port,
-                               info->command, info->pid);
-                    break;
-                }
-            case xv_UngrabPort:
-                {
-                    xvUngrabPortReq *req = (xvUngrabPortReq *)client->requestBuffer;
-                    XDBG_INFO (MXDBG, "%s(port:%d), %s(%d)\n",
-                               LookupRequestName (stuff->reqType, stuff->data), req->port,
-                               info->command, info->pid);
-                    break;
-                }
-            case xv_StopVideo:
-                {
-                    xvStopVideoReq *req = (xvStopVideoReq *)client->requestBuffer;
-                    XDBG_INFO (MXDBG, "%s(port:%d,drawable:0x%lx), %s(%d)\n",
-                               LookupRequestName (stuff->reqType, stuff->data),
-                               req->port, req->drawable,
-                               info->command, info->pid);
-                    break;
-                }
-            default:
-                break;
-
-            }
-        }
-    }
-
     if (xev_trace_on == FALSE)
         return;
+
+    XaceExtAccessRec *rec = calldata;
+
+    XDBG_RETURN_IF_FAIL (rec != NULL);
 
     evtPrint (REQUEST, rec->client, NULL, NULL);
 }
@@ -685,7 +638,6 @@ xDbgModuleEvlogInstallHooks (XDbgModule *pMod)
     ret &= AddCallback (&EventCallback, _traceEvent, NULL);
     ret &= XaceRegisterCallback (XACE_PROPERTY_ACCESS, _traceProperty, NULL);
     ret &= XaceRegisterCallback (XACE_RESOURCE_ACCESS, _traceResource, NULL);
-    ret &= XaceRegisterCallback (XACE_EXT_DISPATCH, _traceAExtEvents, NULL);
 
     /*Disable Visibility Event*/
     ret &= XaceRegisterCallback (XACE_RECEIVE_ACCESS, _traceReceive, NULL);
@@ -713,7 +665,6 @@ xDbgModuleEvlogUninstallHooks (XDbgModule *pMod)
     DeleteCallback (&EventCallback, _traceEvent, NULL);
     XaceDeleteCallback (XACE_PROPERTY_ACCESS, _traceProperty, NULL);
     XaceDeleteCallback (XACE_RESOURCE_ACCESS, _traceResource, NULL);
-    XaceDeleteCallback (XACE_EXT_DISPATCH, _traceAExtEvents, NULL);
 }
 
 void
