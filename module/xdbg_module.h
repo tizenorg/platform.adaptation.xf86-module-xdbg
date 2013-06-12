@@ -48,6 +48,7 @@ typedef struct _ModuleClientInfo
 
 typedef struct _XDbgModule
 {
+    Bool  dlog;
     char *log_path;
     char *real_log_path;
     char *evlog_path;

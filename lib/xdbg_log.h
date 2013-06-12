@@ -63,8 +63,10 @@ enum
     XLOG_LEVEL_3,
     XLOG_LEVEL_4,
     XLOG_LEVEL_MAX,
-    XLOG_LEVEL_DEFAULT = XLOG_LEVEL_3
+    XLOG_LEVEL_DEFAULT = XLOG_LEVEL_MAX
 };
+
+#define XDBG_ALL_MODULE  0xFFFFFFFF
 
 #define XLOG_LEVEL_DEBUG    XLOG_LEVEL_0
 #define XLOG_LEVEL_TRACE    XLOG_LEVEL_1
@@ -86,6 +88,7 @@ typedef enum
 
 int   xDbgLogEnumModules (LOG_ENUM_MODE mode, char *buf, int *remain);
 int   xDbgLogSetLevel    (unsigned int module, int level);
+void  xDbgLogEnableDlog  (Bool enable);
 void* xDbgLog            (unsigned int module, int logoption, const char *file, int line, const char *f, ...);
 
 // defines
@@ -122,7 +125,7 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 #define XDBG_RETURN_IF_FAIL(cond)          {if (!(cond)) { XDBG_ERROR (MXDBG, "'%s' failed.\n", #cond); return; }}
 #define XDBG_RETURN_VAL_IF_FAIL(cond, val) {if (!(cond)) { XDBG_ERROR (MXDBG, "'%s' failed.\n", #cond); return val; }}
 #define XDBG_RETURN_VAL_IF_ERRNO(cond, val, errno)       {if (!(cond)) { XDBG_ERRNO (MXDBG, "'%s' failed.\n", #cond); return val; }}
-#define XDBG_GOTO_IF_FAIL(cond, dst)       {if (!(cond)) { XDBG_ERROR ("'%s' failed.\n", #cond); goto dst; }}
+#define XDBG_GOTO_IF_FAIL(cond, dst)       {if (!(cond)) { XDBG_ERROR (MXDBG, "'%s' failed.\n", #cond); goto dst; }}
 #define XDBG_GOTO_IF_ERRNO(cond, dst, errno)       {if (!(cond)) { XDBG_ERRNO (MXDBG, "'%s' failed.\n", #cond); goto dst; }}
 
 #define XDBG_REPLY(fmt, ARG...)  \

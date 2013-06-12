@@ -59,6 +59,9 @@ typedef struct
 
 static ModuleInfo modules[MAX_MODULE_CNT];
 static int module_cnt = 0;
+static int default_level = XLOG_LEVEL_DEFAULT;
+
+static Bool dlog_enable;
 
 extern void dLogWrapper (int loglevel, int is_module, const char * file, int line, const char * f, va_list args);
 extern void kLogWrapper (int loglevel, int is_module, const char * file, int line, const char * f, va_list args);
@@ -98,7 +101,6 @@ _LogModule (void * handle, int logoption, const char * file, int line, const cha
         kLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
     }
 
-
     /* write to file */
     if (loglevel >= XLOG_LEVEL_INFO)
     {
@@ -107,10 +109,16 @@ _LogModule (void * handle, int logoption, const char * file, int line, const cha
         else
             snprintf(tmpBuf, BUF_LEN, "(%s) [%s]%s", ostr[loglevel], (name)?name:"", f);
 
-        if (logoption & XLOG_OPTION_XORG)
+        if (!dlog_enable)
             LogVWrite (1, tmpBuf, args);
+        else
+        {
+            dLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
 
-        dLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
+            /* write to Xorg.0.log too */
+            if (logoption & XLOG_OPTION_XORG)
+                LogVWrite (1, tmpBuf, args);
+        }
     }
 
     /* write to terminal */
@@ -139,6 +147,15 @@ xDbgLogSetLevel (unsigned int module, int level)
     if (level < XLOG_LEVEL_0 || level > XLOG_LEVEL_4)
         return FALSE;
 
+    if (module == XDBG_ALL_MODULE)
+    {
+        default_level = level;
+        for (i = 0; i < module_cnt; i++)
+            modules[i].loglevel = level;
+
+        return TRUE;
+    }
+
     for (i = 0; i < module_cnt; i++)
     {
         if (module == modules[i].module)
@@ -153,6 +170,12 @@ xDbgLogSetLevel (unsigned int module, int level)
         return FALSE;
 
     return TRUE;
+}
+
+API void
+xDbgLogEnableDlog (Bool enable)
+{
+    dlog_enable = (enable > 0) ? TRUE:FALSE;
 }
 
 API void*
@@ -176,7 +199,7 @@ xDbgLog (unsigned int module, int logoption, const char * file, int line, const 
             goto check_level;
     }
 
-    h= (ModuleInfo *)_LogInitModule (module, XLOG_LEVEL_DEFAULT);
+    h= (ModuleInfo *)_LogInitModule (module, default_level);
     if(h == NULL)
         return NULL;
 
@@ -267,6 +290,9 @@ xDbgLogGetModule (char *name)
 
     if (!name)
         return 0;
+
+    if (!strcasecmp (name, "all"))
+        return XDBG_ALL_MODULE;
 
     len = strlen (name);
     for (i = 0; i < len; i++)

@@ -40,12 +40,14 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 /* Supported options */
 typedef enum
 {
+    OPTION_DLOG,
     OPTION_LOG_PATH,
     OPTION_EVLOG_PATH,
 } ModuleOption;
 
 static const OptionInfoRec module_options[] =
 {
+    { OPTION_DLOG,			"dlog",			OPTV_BOOLEAN,	{0},	FALSE },
     { OPTION_LOG_PATH,		"log_path",			OPTV_STRING,	{0},	FALSE },
     { OPTION_EVLOG_PATH,	"evlog_path",		OPTV_STRING,	{0},	FALSE },
     { -1,				NULL,				OPTV_NONE,		{0},	FALSE }
@@ -60,6 +62,11 @@ xDbgModuleParseOptions (XDbgModule *pMod, XF86OptionPtr pOpt)
     memcpy (options, module_options, sizeof(module_options));
 
     xf86ProcessOptions (-1, pOpt, options);
+
+    /* dlog */
+    xf86GetOptValBool (options, OPTION_DLOG, &pMod->dlog);
+    XDBG_SLOG (MXDBG, "dlog: \"%s\"\n", (pMod->dlog)?"on":"off");
+    xDbgLogEnableDlog (pMod->dlog);
 
     /* log_path */
     log_path = xf86GetOptValString (options, OPTION_LOG_PATH);

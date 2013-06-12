@@ -52,6 +52,24 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_module_fpsdebug.h"
 #include "xdbg_module_command.h"
 
+static void
+_CommandDLog (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
+{
+    int on;
+
+    if (argc != 3)
+    {
+        XDBG_REPLY ("Error : too few arguments\n");
+        return;
+    }
+
+    on = atoi (argv[2]);
+
+    xDbgLogEnableDlog (on);
+
+    XDBG_REPLY ("Success\n");
+}
+
 static Bool
 _CommandSetLogFile (int pid, char *path, char *reply, int *len, XDbgModule *pMod)
 {
@@ -283,6 +301,12 @@ static struct
     void (*func) (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod);
 } command_proc[] =
 {
+    {
+        "dlog", "to enable dlog", "[0-1]",
+        NULL, "[OFF:0/ON:1]",
+        _CommandDLog
+    },
+
     {
         "log_path", "to set log path", "[console/filepath]",
         NULL, "[console/filepath]",
