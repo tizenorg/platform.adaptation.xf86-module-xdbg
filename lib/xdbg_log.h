@@ -41,6 +41,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <os.h>
 #include <dlog.h>
 
+unsigned int xDbgLogGetModule (char *name);
+
+#define _C(b,s)             (((b) >> (s)) & 0xFF)
+#define _B(c,s)             ((((unsigned int)(c)) & 0xff) << (s))
+#define XDBG_M(a,b,c,d)     (_B(d,24)|_B(c,16)|_B(b,8)|_B(a,0))
+
+/* debug module for XDBG */
+#define MXDBG    XDBG_M('X','D','B','G')
+
 // Masks
 #define XLOG_MASK_LOGLEVEL   0x000000FF
 #define XLOG_MASK_OPTIONS    0xFFFFFF00
@@ -109,12 +118,12 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 
 #define XDBG_NEVER_GET_HERE(mod)          XLOG_ERROR(mod, "[%s:%d] ** NEVER GET HERE **\n", __FUNCTION__,__LINE__)
 
-#define XDBG_WARNING_IF_FAIL(cond)         {if (!(cond)) { ErrorF ("[%s] '%s' failed.\n", __FUNCTION__, #cond);}}
-#define XDBG_RETURN_IF_FAIL(cond)          {if (!(cond)) { ErrorF ("[%s] '%s' failed.\n", __FUNCTION__, #cond); return; }}
-#define XDBG_RETURN_VAL_IF_FAIL(cond, val) {if (!(cond)) { ErrorF ("[%s] '%s' failed.\n", __FUNCTION__, #cond); return val; }}
-#define XDBG_RETURN_VAL_IF_ERRNO(cond, val, errno)       {if (!(cond)) { ErrorF ("[%s] '%s' failed. (err=%s(%d))\n", __FUNCTION__, #cond, strerror(errno), errno); return val; }}
-#define XDBG_GOTO_IF_FAIL(cond, dst)       {if (!(cond)) { ErrorF ("[%s] '%s' failed.\n", __FUNCTION__, #cond); goto dst; }}
-#define XDBG_GOTO_IF_ERRNO(cond, dst, errno)       {if (!(cond)) { ErrorF ("[%s] '%s' failed. (err=%s(%d))\n", __FUNCTION__, #cond, strerror(errno), errno); goto dst; }}
+#define XDBG_WARNING_IF_FAIL(cond)         {if (!(cond)) { XDBG_ERROR (MXDBG, "'%s' failed.\n", #cond);}}
+#define XDBG_RETURN_IF_FAIL(cond)          {if (!(cond)) { XDBG_ERROR (MXDBG, "'%s' failed.\n", #cond); return; }}
+#define XDBG_RETURN_VAL_IF_FAIL(cond, val) {if (!(cond)) { XDBG_ERROR (MXDBG, "'%s' failed.\n", #cond); return val; }}
+#define XDBG_RETURN_VAL_IF_ERRNO(cond, val, errno)       {if (!(cond)) { XDBG_ERRNO (MXDBG, "'%s' failed.\n", #cond); return val; }}
+#define XDBG_GOTO_IF_FAIL(cond, dst)       {if (!(cond)) { XDBG_ERROR ("'%s' failed.\n", #cond); goto dst; }}
+#define XDBG_GOTO_IF_ERRNO(cond, dst, errno)       {if (!(cond)) { XDBG_ERRNO (MXDBG, "'%s' failed.\n", #cond); goto dst; }}
 
 #define XDBG_REPLY(fmt, ARG...)  \
     do { \
@@ -125,14 +134,5 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
             *len -= s; \
         } \
     } while (0)
-
-unsigned int xDbgLogGetModule (char *name);
-
-#define _C(b,s)             (((b) >> (s)) & 0xFF)
-#define _B(c,s)             ((((unsigned int)(c)) & 0xff) << (s))
-#define XDBG_M(a,b,c,d)     (_B(d,24)|_B(c,16)|_B(b,8)|_B(a,0))
-
-/* debug module for XDBG */
-#define MXDBG    XDBG_M('X','D','B','G')
 
 #endif  /* __XDBG_LOG_H__ */
