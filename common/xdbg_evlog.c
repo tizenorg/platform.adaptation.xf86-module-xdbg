@@ -215,6 +215,20 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
         rulechecker_print_rule (rc, reply);
         return TRUE;
     }
+    else if (!_strcasecmp (command, "file"))
+    {
+        if (argc < 2)
+        {
+            REPLY ("Error : Too few arguments.\n");
+            return FALSE;
+        }
+
+        if (!xDbgEvlogReadRuleFile(argv[1], reply, len))
+            return FALSE;
+        rulechecker_print_rule (rc, reply);
+        
+        return TRUE;
+    }
     else if (!_strcasecmp (command, "print"))
     {
         rulechecker_print_rule (rc, reply);
@@ -261,6 +275,65 @@ xDbgEvlogRuleValidate (EvlogInfo *evinfo)
                                       evlog_name,
                                       evinfo->client.pid,
                                       cmd);
+}
+
+Bool
+xDbgEvlogReadRuleFile(const char *filename, char *reply, int *len)
+{
+    int   fd = -1;
+    char  fs[8096];
+    char *pfs;
+    int   rule_len;
+
+    fd = open (filename, O_RDONLY);
+    if (fd < 0)
+    {
+        REPLY ("failed: open '%s'. (%s)\n", filename, strerror(errno));
+        return FALSE;
+    }
+
+    rule_len = read(fd, fs, sizeof(fs));
+    pfs = fs;
+
+    while (pfs - fs < rule_len)
+    {
+        int   new_argc = 3;
+        char *new_argv[3] = {"add", };
+        char  policy[64] = {0, };
+        char  rule[1024] = {0, };
+        int   i;
+
+        if (pfs[0] == ' ' || pfs[0] == '\n')
+        {
+            pfs++;
+            continue;
+        }
+        for (i = 0 ; pfs[i] != ' ' ; i++)
+            policy[i] = pfs[i];
+
+        new_argv[1] = policy;
+        pfs += (strlen(new_argv[1]) + 1);
+
+        memset(rule, 0, sizeof(rule));
+        for (i = 0 ; pfs[i] != '\n' ; i++)
+            rule[i] = pfs[i];
+
+        new_argv[2] = rule;
+
+        pfs += (strlen(new_argv[2]) + 1);
+
+
+        if(!xDbgEvlogRuleSet ((const int) new_argc, (const char**) new_argv, reply, len))
+        {
+            return FALSE;
+        }
+
+    }
+
+    if (fd >= 0)
+        close (fd);
+
+    return TRUE;
 }
 
 

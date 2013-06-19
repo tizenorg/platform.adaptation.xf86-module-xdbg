@@ -362,6 +362,7 @@ const char * rulechecker_print_usage()
         "-----------------------------------------------------------------\n"
         "Usage : xdbg evlog_rule add [POLICY] [RULE]\n"
         "        xdbg evlog_rule remove [INDEX]\n"
+        "        xdbg evlog_rule file [RULE_FILE]\n"
         "        xdbg evlog_rule help / print\n"
         "      [POLICY] : allow / deny \n"
         "      [RULE] : C Language-style boolean expression syntax. [VARIABLE] [COMPAROTOR] [VALUE]\n"

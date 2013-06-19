@@ -464,63 +464,12 @@ _checkOption(int argc, char** argv)
 
                     if(opt_str_len > 0)
                     {
-                        int   fd = -1;
-                        char  fs[8096];
-                        char *pfs;
-                        int   len;
-
-                        fd = open (opt_str, O_RDONLY);
-                        if (fd < 0)
+                        if(!xDbgEvlogReadRuleFile(opt_str, rule_log, &rule_size))
                         {
-                            printf ("failed: open '%s'. (%s)\n", opt_str, strerror(errno));
+                            printf("%s", rule_log);
                             return;
                         }
-
-                        len = read(fd, fs, sizeof(fs));
-                        pfs = fs;
-
-                        while (pfs - fs < len)
-                        {
-                            int   new_argc = 3;
-                            char *new_argv[3] = {"add", };
-                            char  policy[64] = {0, };
-                            char  rule[1024] = {0, };
-                            int   i;
-
-                            if (pfs[0] == ' ' || pfs[0] == '\n')
-                            {
-                                pfs++;
-                                continue;
-                            }
-                            for (i = 0 ; pfs[i] != ' ' ; i++)
-                                policy[i] = pfs[i];
-
-                            new_argv[1] = policy;
-                            pfs += (strlen(new_argv[1]) + 1);
-
-                            memset(rule, 0, sizeof(rule));
-                            for (i = 0 ; pfs[i] != '\n' ; i++)
-                                rule[i] = pfs[i];
-
-                            new_argv[2] = rule;
-
-                            pfs += (strlen(new_argv[2]) + 1);
-
-
-                            if(!xDbgEvlogRuleSet ((const int) new_argc,
-                                                  (const char**) new_argv,
-                                                   rule_log, &rule_size))
-                            {
-                                printf("%s\n", rule_log);
-                                return;
-                            }
-
-                        }
-
                         eo.isRule = TRUE;
-
-                        if (fd >= 0)
-                            close (fd);
                     }
                     break;
                 }

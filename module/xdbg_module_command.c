@@ -363,8 +363,8 @@ static struct
     },
 
     {
-        "evlog_rule", "to set evlog rules", "[add/remove/print]",
-        NULL, "[add allow/deny rules / remove (index) / print]",
+        "evlog_rule", "to set evlog rules", "[add/remove/file/print/help]",
+        NULL, "[add allow/deny rules / remove (index) / file(file_name) / print / help]",
         _CommandSetEvlogRule
     },
 
