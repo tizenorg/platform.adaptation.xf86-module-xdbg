@@ -360,12 +360,234 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, int detail_level, char *reply, int *le
 
             return reply;
         }
+    }
 
-    case X_XTestGrabControl:
+    return reply;
+}
+
+static char *
+_EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
+{
+    xReq *req = evinfo->req.ptr;
+
+    switch (req->data)
+    {
+    case X_ShapeRectangles:
         {
-            xXTestGrabControlReq *stuff = (xXTestGrabControlReq *)req;
-            REPLY (": Impervious(%s)" ,
-                (stuff->impervious)? "YES" : "NO");
+            xShapeRectanglesReq *stuff = (xShapeRectanglesReq *)req;
+            REPLY (": XID(0x%lx) coord(%d,%d)",
+                stuff->dest,
+                stuff->xOff,
+                stuff->yOff);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                int i;
+                int nrect;
+                xRectangle *prect;
+                const char *destKind, *ordering;
+                char  ddestKind[10], dordering[10];
+
+                switch (stuff->destKind)
+                {
+                    case ShapeBounding:  destKind = "ShapeBounding"; break;
+                    case ShapeClip:  destKind = "ShapeClip"; break;
+                    case ShapeInput:  destKind = "ShapeInput"; break;
+                    default:  destKind = ddestKind; sprintf (ddestKind, "%d", stuff->destKind); break;
+                }
+
+                switch (stuff->ordering)
+                {
+                    case Unsorted:  ordering = "Unsorted"; break;
+                    case YSorted:  ordering = "YSorted"; break;
+                    case YXSorted:  ordering = "YXSorted"; break;
+                    case YXBanded:  ordering = "YXBanded"; break;
+                    default:  ordering = dordering; sprintf (dordering, "%d", stuff->ordering); break;
+                }
+
+                nrect = ((stuff->length * 4) - sizeof(xShapeRectanglesReq)) / sizeof(xRectangle);
+                prect = (xRectangle *) &stuff[1];
+
+                REPLY (" op(%d) destKind(%s) ordering(%s) nrect(%d)",
+                    stuff->op,
+                    destKind,
+                    ordering,
+                    nrect);
+
+                REPLY ("\n");
+                REPLY ("%67s Region", " ");
+                REPLY ("(");
+
+                for (i = 0 ; i < nrect ; i++)
+                {
+                    REPLY("[%d,%d %dx%d]", 
+                        prect[i].x,
+                        prect[i].y,
+                        prect[i].width,
+                        prect[i].height);
+
+                    if(i != nrect - 1)
+                        REPLY (", ");
+                }
+
+                REPLY (")");
+            }
+
+            return reply;
+        }
+
+    case X_ShapeMask:
+        {
+            xShapeMaskReq *stuff = (xShapeMaskReq *)req;
+            REPLY (": XID(0x%lx) coord(%d,%d) src(0x%lx)",
+                stuff->dest,
+                stuff->xOff,
+                stuff->yOff,
+                stuff->src);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                const char *destKind;
+                char  ddestKind[10];
+
+                switch (stuff->destKind)
+                {
+                    case ShapeBounding:  destKind = "ShapeBounding"; break;
+                    case ShapeClip:  destKind = "ShapeClip"; break;
+                    case ShapeInput:  destKind = "ShapeInput"; break;
+                    default:  destKind = ddestKind; sprintf (ddestKind, "%d", stuff->destKind); break;
+                }
+
+                REPLY (" op(%d) destKind(%s)",
+                    stuff->op,
+                    destKind);
+            }
+
+            return reply;
+        }
+
+    case X_ShapeCombine:
+        {
+            xShapeCombineReq *stuff = (xShapeCombineReq *)req;
+            REPLY (": XID(0x%lx) coord(%d,%d) src(0x%lx)",
+                stuff->dest,
+                stuff->xOff,
+                stuff->yOff,
+                stuff->src);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                const char *destKind, *srcKind;
+                char  ddestKind[10], dsrcKind[10];
+
+                switch (stuff->destKind)
+                {
+                    case ShapeBounding:  destKind = "ShapeBounding"; break;
+                    case ShapeClip:  destKind = "ShapeClip"; break;
+                    case ShapeInput:  destKind = "ShapeInput"; break;
+                    default:  destKind = ddestKind; sprintf (ddestKind, "%d", stuff->destKind); break;
+                }
+
+                switch (stuff->srcKind)
+                {
+                    case ShapeBounding:  srcKind = "ShapeBounding"; break;
+                    case ShapeClip:  srcKind = "ShapeClip"; break;
+                    case ShapeInput:  srcKind = "ShapeInput"; break;
+                    default:  srcKind = dsrcKind; sprintf (dsrcKind, "%d", stuff->srcKind); break;
+                }
+
+                REPLY (" op(%d) destKind(%s) srcKind(%s)",
+                    stuff->op,
+                    destKind,
+                    srcKind);
+            }
+
+            return reply;
+        }
+
+    case X_ShapeOffset:
+        {
+            xShapeOffsetReq *stuff = (xShapeOffsetReq *)req;
+            REPLY (": XID(0x%lx) coord(%d,%d)",
+                stuff->dest,
+                stuff->xOff,
+                stuff->yOff);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                const char *destKind;
+                char  ddestKind[10];
+
+                switch (stuff->destKind)
+                {
+                    case ShapeBounding:  destKind = "ShapeBounding"; break;
+                    case ShapeClip:  destKind = "ShapeClip"; break;
+                    case ShapeInput:  destKind = "ShapeInput"; break;
+                    default:  destKind = ddestKind; sprintf (ddestKind, "%d", stuff->destKind); break;
+                }
+
+                REPLY (" destKind(%s)",
+                    destKind);
+            }
+
+            return reply;
+        }
+
+    case X_ShapeQueryExtents:
+        {
+            xShapeQueryExtentsReq *stuff = (xShapeQueryExtentsReq *)req;
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            return reply;
+        }
+
+    case X_ShapeSelectInput:
+        {
+            xShapeSelectInputReq *stuff = (xShapeSelectInputReq *)req;
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                REPLY (" enable(%s)",
+                    stuff->enable ? "YES" : "NO");
+            }
+
+            return reply;
+        }
+
+    case X_ShapeInputSelected:
+        {
+            xShapeInputSelectedReq *stuff = (xShapeInputSelectedReq *)req;
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            return reply;
+        }
+
+    case X_ShapeGetRectangles:
+        {
+            xShapeGetRectanglesReq *stuff = (xShapeGetRectanglesReq *)req;
+            REPLY (": XID(0x%lx)",
+                stuff->window);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                const char *kind;
+                char  dkind[10];
+
+                switch (stuff->kind)
+                {
+                    case ShapeBounding:  kind = "ShapeBounding"; break;
+                    case ShapeClip:  kind = "ShapeClip"; break;
+                    case ShapeInput:  kind = "ShapeInput"; break;
+                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                }
+
+                REPLY (" kind(%s)",
+                    kind);
+            }
 
             return reply;
         }
@@ -376,7 +598,6 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, int detail_level, char *reply, int *le
 
     return reply;
 }
-
 
 static char *
 _EvlogEventXextDpms (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
@@ -520,6 +741,55 @@ _EvlogEventXextXtest (EvlogInfo *evinfo, int first_base, int detail_level, char 
     return reply;
 }
 
+static char *
+_EvlogEventXextShape (EvlogInfo *evinfo, int first_base, int detail_level, char *reply, int *len)
+{
+    xEvent *evt = evinfo->evt.ptr;
+
+    switch ((evt->u.u.type & 0x7F) - first_base)
+    {
+    case ShapeNotify:
+        {
+            xShapeNotifyEvent *stuff = (xShapeNotifyEvent *) evt;
+            REPLY (": XID(0x%lx) coord(%d,%d %dx%d)",
+                stuff->window,
+                stuff->x,
+                stuff->y,
+                stuff->width,
+                stuff->height);
+
+            if (detail_level >= EVLOG_PRINT_DETAIL)
+            {
+                const char *kind;
+                char dkind[10];
+
+                switch (stuff->kind)
+                {
+                    case ShapeBounding:  kind = "ShapeBounding"; break;
+                    case ShapeClip:  kind = "ShapeClip"; break;
+                    case ShapeInput:  kind = "ShapeInput"; break;
+                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                }
+
+
+                REPLY ("\n");
+                REPLY ("%67s kind(%s) sequence_num(%d) time(%lums) shaped(%s)",
+                    " ",
+                    kind,
+                    stuff->sequenceNumber,
+                    stuff->time,
+                    stuff->shaped ? "EXIST" : "NON_EXIST");
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
 
 static char *
 _EvlogReplyXextDpms (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
@@ -680,6 +950,141 @@ _EvlogReplyXextXtest (EvlogInfo *evinfo, int detail_level, char *reply, int *len
     return reply;
 }
 
+static char *
+_EvlogReplyXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
+{
+    xGenericReply *rep = evinfo->rep.ptr;
+
+    switch (evinfo->rep.reqData)
+    {
+    case X_ShapeQueryVersion:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xShapeQueryVersionReply *stuff = (xShapeQueryVersionReply *)rep;
+                REPLY (": MajorVersion(%d) MinorVersion(%d)",
+                    stuff->majorVersion,
+                    stuff->minorVersion);
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_ShapeQueryExtents:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xShapeQueryExtentsReply *stuff = (xShapeQueryExtentsReply *)rep;
+
+                REPLY (": bounding_shaped(%s)",
+                    stuff->boundingShaped ? "YES" : "NO");
+
+                if (stuff->boundingShaped)
+                    REPLY (" bounding(%d,%d %dx%d)",
+                        stuff->xClipShape,
+                        stuff->yClipShape,
+                        stuff->widthClipShape,
+                        stuff->heightClipShape);
+                else
+                    REPLY (" bounding(None)");
+
+
+                REPLY (" clip_shaped(%s)",
+                    stuff->clipShaped ? "YES" : "NO");
+
+                if (stuff->boundingShaped)
+                    REPLY (" clip(%d,%d %dx%d)",
+                        stuff->xBoundingShape,
+                        stuff->yBoundingShape,
+                        stuff->widthBoundingShape,
+                        stuff->heightBoundingShape);
+                else
+                    REPLY (" clip(None)");
+
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_ShapeInputSelected:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xShapeInputSelectedReply *stuff = (xShapeInputSelectedReply *)rep;
+
+                REPLY (" enable(%s)",
+                    stuff->enabled ? "YES" : "NO");
+            }
+            else
+            {
+                return reply;
+            }
+
+            return reply;
+        }
+
+    case X_ShapeGetRectangles:
+        {
+            if (evinfo->rep.isStart)
+            {
+                xShapeGetRectanglesReply *stuff = (xShapeGetRectanglesReply *)rep;
+
+                const char *ordering;
+                char dordering[10];
+
+                switch (stuff->ordering)
+                {
+                    case Unsorted:  ordering = "Unsorted"; break;
+                    case YSorted:  ordering = "YSorted"; break;
+                    case YXSorted:  ordering = "YXSorted"; break;
+                    case YXBanded:  ordering = "YXBanded"; break;
+                    default:  ordering = dordering; sprintf (dordering, "%d", stuff->ordering); break;
+                }
+                REPLY (": ordering(%s) nrects(%ld)",
+                    ordering,
+                    stuff->nrects);
+            }
+            else
+            {
+                xRectangle *stuff = (xRectangle *)rep;
+                int i;
+
+                REPLY ("Region");
+                REPLY ("(");
+                for (i = 0 ; i < evinfo->rep.size / sizeof(xRectangle) ; i ++)
+                {
+                    REPLY ("[%d,%d %dx%d]",
+                        stuff->x,
+                        stuff->y,
+                        stuff->width,
+                        stuff->height);
+
+                    if(i != evinfo->rep.size / sizeof(xRectangle) - 1)
+                        REPLY (", ");
+                }
+                REPLY (")");
+
+                return reply;
+            }
+
+            return reply;
+        }
+
+    default:
+            break;
+    }
+
+    return reply;
+}
+
 void
 xDbgEvlogXextDpmsGetBase (ExtensionInfo *extinfo)
 {
@@ -799,5 +1204,27 @@ xDbgEvlogXextXtestGetBase (ExtensionInfo *extinfo)
     extinfo->evt_func = _EvlogEventXextXtest;
     extinfo->rep_func = _EvlogReplyXextXtest;
 #endif
+}
 
+void
+xDbgEvlogXextShapeGetBase (ExtensionInfo *extinfo)
+{
+#ifdef XDBG_CLIENT
+    RETURN_IF_FAIL (extinfo != NULL);
+
+    extinfo->req_func = _EvlogRequestXextShape;
+    extinfo->evt_func = _EvlogEventXextShape;
+    extinfo->rep_func = _EvlogReplyXextShape;
+#else
+    ExtensionEntry *xext = CheckExtension (SHAPENAME);
+    RETURN_IF_FAIL (xext != NULL);
+    RETURN_IF_FAIL (extinfo != NULL);
+
+    extinfo->opcode = xext->base;
+    extinfo->evt_base = xext->eventBase;
+    extinfo->err_base = xext->errorBase;
+    extinfo->req_func = _EvlogRequestXextShape;
+    extinfo->evt_func = _EvlogEventXextShape;
+    extinfo->rep_func = _EvlogReplyXextShape;
+#endif
 }

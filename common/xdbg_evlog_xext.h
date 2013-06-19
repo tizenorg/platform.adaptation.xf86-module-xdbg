@@ -39,5 +39,6 @@ void    xDbgEvlogXextShmGetBase (ExtensionInfo *extinfo);
 void    xDbgEvlogXextSyncGetBase (ExtensionInfo *extinfo);
 void    xDbgEvlogXextXtestExt1GetBase (ExtensionInfo *extinfo);
 void    xDbgEvlogXextXtestGetBase (ExtensionInfo *extinfo);
+void    xDbgEvlogXextShapeGetBase (ExtensionInfo *extinfo);
 
 #endif

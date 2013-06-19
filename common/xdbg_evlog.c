@@ -276,6 +276,7 @@ ExtensionInfo Evlog_extensions[] = {
     {xDbgEvlogXextSyncGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXextXtestGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXextXtestExt1GetBase, 0, 0, 0, NULL, NULL},
+    {xDbgEvlogXextShapeGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXvGetBase, 0, 0, 0, NULL, NULL}
 };
 ExtensionInfo* Sorted_Evlog_extensions;
