@@ -116,7 +116,7 @@ _LogModule (void * handle, int logoption, const char * file, int line, const cha
             dLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
 
             /* write to Xorg.0.log too */
-            if (logoption & XLOG_OPTION_XORG)
+            if (logoption & XLOG_OPTION_XORG || loglevel >= XLOG_LEVEL_WARNING)
                 LogVWrite (1, tmpBuf, args);
         }
     }
