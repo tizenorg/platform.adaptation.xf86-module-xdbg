@@ -65,14 +65,12 @@ xDbgEvlogReply (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     extern ExtensionInfo Evlog_extensions[];
     extern int Extensions_size;
     EvlogReply rep;
-    xGenericReply *xRep = NULL;
     int i;
 
     RETURN_VAL_IF_FAIL (evinfo != NULL, reply);
     RETURN_VAL_IF_FAIL (evinfo->type == REPLY, reply);
 
     rep = evinfo->rep;
-    xRep = rep.ptr;
 
     if (rep.isStart)
         REPLY ("%s", evinfo->rep.name);

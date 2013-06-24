@@ -647,7 +647,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 
         case X_RRGetOutputInfo:
         {
-            static int nCrtcs, nModes, nPreferred, nClones, namelength;
+            static int nCrtcs, nModes, nClones, namelength;
             if (evinfo->rep.isStart)
             {
                 xRRGetOutputInfoReply *stuff = (xRRGetOutputInfoReply *)rep;
@@ -663,7 +663,6 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 
                 nCrtcs = stuff->nCrtcs;
                 nModes = stuff->nModes;
-                nPreferred = stuff->nPreferred;
                 nClones = stuff->nClones;
                 namelength = stuff->nameLength;
             }
