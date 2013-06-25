@@ -402,6 +402,7 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
     xDbgDistroyRegionList(&evinfo);
 }
 
+#ifdef _SECURE_LOG
 static const char*
 _traceGetWindowName (ClientPtr client, Window window)
 {
@@ -435,6 +436,7 @@ _traceGetWindowName (ClientPtr client, Window window)
 
     return NULL;
 }
+#endif
 
 static void
 _traceFlush (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
@@ -465,6 +467,8 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
     int ev; /* event index */
     static int xi2_opcode = -1;
     xEvent *pev;
+
+#ifdef _SECURE_LOG
     static char* ename[]=
     {
         "KeyPress",
@@ -472,6 +476,7 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
         "ButtonPress",
         "ButtonRelease",
     };
+#endif
 
     XDBG_RETURN_IF_FAIL (pei != NULL);
 
