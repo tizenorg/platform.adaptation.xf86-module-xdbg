@@ -496,7 +496,7 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 
 void xDbgDistroyAtomList (EvlogInfo *evinfo)
 {
-    EvlogAtomTable *cur, *next;
+    EvlogAtomTable *cur = NULL, *next = NULL;
 
     if (!evinfo->evatom.init)
         return;
@@ -513,7 +513,7 @@ void xDbgDistroyAtomList (EvlogInfo *evinfo)
 
 void xDbgDistroyRegionList (EvlogInfo *evinfo)
 {
-    EvlogRegionTable *cur, *next;
+    EvlogRegionTable *cur = NULL, *next = NULL;
 
     if (!evinfo->evregion.init)
         return;

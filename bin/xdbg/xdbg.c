@@ -53,8 +53,8 @@ int main(int argc, char ** argv)
     Display *dpy;
     char **new_argv;
     int new_argc, i;
-    char temp[128];
-    char cwd[128];
+    char temp[1024];
+    char cwd[1024];
     dpy = XOpenDisplay (NULL);
     if (!dpy)
     {

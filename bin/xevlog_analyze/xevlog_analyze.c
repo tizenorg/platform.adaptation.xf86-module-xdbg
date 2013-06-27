@@ -212,6 +212,8 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
             GOTO_IF_FAIL (read_len == sizeof(EvlogRequest), print_done);
             total += read_len;
 
+            GOTO_IF_FAIL ((evinfo.req.length * 4) < SSIZE_MAX, print_done);
+
             evinfo.req.ptr = malloc (evinfo.req.length * 4);
             GOTO_IF_FAIL (evinfo.req.ptr != NULL, print_done);
 
@@ -277,8 +279,14 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
                     xorg_list_init(&evinfo.evatom.list);
                     evinfo.evatom.init = 1;
                 }
+
                 read_len = read (fd, table, sizeof (EvlogAtomTable));
-                GOTO_IF_FAIL (read_len == sizeof(EvlogAtomTable), print_done);
+                if (read_len != sizeof(EvlogAtomTable))
+                {
+                    WARNING_IF_FAIL (read_len == sizeof(EvlogAtomTable));
+                    free (table);
+                    goto print_done;
+                }
                 total += read_len;
 
                 xorg_list_add(&table->link, &evinfo.evatom.list);

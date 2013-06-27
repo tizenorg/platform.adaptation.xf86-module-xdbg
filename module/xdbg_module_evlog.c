@@ -249,7 +249,7 @@ static void evtRecord (int fd, EvlogInfo *evinfo)
 
     if (evinfo->mask & EVLOG_MASK_REGION)
     {
-        EvlogRegionTable *table;
+        EvlogRegionTable *table = NULL;
 
         if (write (fd, &evinfo->evregion.size, sizeof (int)) == -1)
         {
@@ -351,11 +351,16 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
             else if (rep)
                 err = (xError *) rep->replyData;
 
-            evinfo.mask |= EVLOG_MASK_ERROR;
-            evinfo.err.errorCode = err->errorCode;
-            evinfo.err.resourceID = err->resourceID;
-            evinfo.err.minorCode = err->minorCode;
-            evinfo.err.majorCode = err->majorCode;
+            if (err)
+            {
+                evinfo.mask |= EVLOG_MASK_ERROR;
+                evinfo.err.errorCode = err->errorCode;
+                evinfo.err.resourceID = err->resourceID;
+                evinfo.err.minorCode = err->minorCode;
+                evinfo.err.majorCode = err->majorCode;
+            }
+            else
+                XDBG_NEVER_GET_HERE (MXDBG);
         }
     }
 
