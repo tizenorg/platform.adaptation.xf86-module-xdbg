@@ -171,6 +171,12 @@ xDbgModuleMain (XDbgModule *pMod)
         return FALSE;
     }
 
+    if (!xDbgModuleCommandInitEvlogRulePath (pMod))
+    {
+        XDBG_ERROR (MXDBG, "failed: xDbgModuleCommandInitEvlogRulePath\n");
+        return FALSE;
+    }
+
     snprintf (method.name, sizeof (method.name), "%s", XDBG_DBUS_METHOD);
     method.func = xDbgModuleCommand;
     method.data = pMod;

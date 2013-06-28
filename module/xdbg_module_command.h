@@ -36,5 +36,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 void xDbgModuleCommand (void *data, int argc, char **argv, char *reply, int *len);
 Bool xDbgModuleCommandInitLogPath (XDbgModule *pMod);
+Bool xDbgModuleCommandInitEvlogRulePath (XDbgModule *pMod);
 
 #endif /* __XDBG_MODULE_COMMAND_H__ */

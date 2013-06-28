@@ -52,6 +52,7 @@ typedef struct _XDbgModule
     char *log_path;
     char *real_log_path;
     char *evlog_path;
+    char *evlog_rule_path;
     char *cwd;
 } XDbgModule;
 

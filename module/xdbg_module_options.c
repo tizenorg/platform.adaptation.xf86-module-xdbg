@@ -43,6 +43,7 @@ typedef enum
     OPTION_DLOG,
     OPTION_LOG_PATH,
     OPTION_EVLOG_PATH,
+    OPTION_EVLOG_RULE_PATH,
 } ModuleOption;
 
 static const OptionInfoRec module_options[] =
@@ -50,6 +51,7 @@ static const OptionInfoRec module_options[] =
     { OPTION_DLOG,			"dlog",			OPTV_BOOLEAN,	{0},	FALSE },
     { OPTION_LOG_PATH,		"log_path",			OPTV_STRING,	{0},	FALSE },
     { OPTION_EVLOG_PATH,	"evlog_path",		OPTV_STRING,	{0},	FALSE },
+    { OPTION_EVLOG_RULE_PATH,	"evlog_rule_path",		OPTV_STRING,	{0},	FALSE },
     { -1,				NULL,				OPTV_NONE,		{0},	FALSE }
 };
 
@@ -87,6 +89,16 @@ xDbgModuleParseOptions (XDbgModule *pMod, XF86OptionPtr pOpt)
     }
     else
         XDBG_SLOG (MXDBG, "evlog path: none\n");
+
+    /* evlog_rule_path */
+    log_path = xf86GetOptValString (options, OPTION_EVLOG_RULE_PATH);
+    if (log_path)
+    {
+        XDBG_SLOG (MXDBG, "evlog log path: \"%s\"\n", log_path);
+        pMod->evlog_rule_path = strdup (log_path);
+    }
+    else
+        XDBG_SLOG (MXDBG, "evlog log path: none\n");
 
     free (options);
 }

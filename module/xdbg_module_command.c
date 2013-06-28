@@ -510,3 +510,32 @@ xDbgModuleCommandInitLogPath (XDbgModule *pMod)
 
     return TRUE;
 }
+
+Bool
+xDbgModuleCommandInitEvlogRulePath (XDbgModule *pMod)
+{
+    if (pMod->evlog_rule_path && strlen (pMod->evlog_rule_path) > 0)
+    {
+        char reply[4096];
+        int len = sizeof (reply);
+        char *argv[4];
+        int argc = 4;
+
+        if (!pMod->evlog_path)
+        {
+            XDBG_XORG (MXDBG, "no evlog_path!!!\n");
+            return TRUE;
+        }
+
+        argv[0] = "unknown";
+        argv[1] = "evlog_rule";
+        argv[2] = "file";
+        argv[3] = pMod->evlog_rule_path;
+
+        _CommandSetEvlogRule (0, argc, argv, reply, &len, pMod);
+
+        xDbgModuleEvlogPrintEvents (pMod, TRUE, "", reply, &len);
+    }
+
+    return TRUE;
+}
