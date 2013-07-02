@@ -208,17 +208,20 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
 
         if (evinfo.mask & EVLOG_MASK_REQUEST)
         {
+            int size;
+
             read_len = read (fd, &evinfo.req, sizeof(EvlogRequest));
             GOTO_IF_FAIL (read_len == sizeof(EvlogRequest), print_done);
             total += read_len;
 
-            GOTO_IF_FAIL ((evinfo.req.length * 4) < SSIZE_MAX, print_done);
+            size = (int)(evinfo.req.length * 4);
+            GOTO_IF_FAIL (size > 0, print_done);
 
-            evinfo.req.ptr = malloc (evinfo.req.length * 4);
+            evinfo.req.ptr = malloc (size);
             GOTO_IF_FAIL (evinfo.req.ptr != NULL, print_done);
 
-            read_len = read (fd, evinfo.req.ptr, (evinfo.req.length * 4));
-            GOTO_IF_FAIL (read_len == (evinfo.req.length * 4), print_done);
+            read_len = read (fd, evinfo.req.ptr, size);
+            GOTO_IF_FAIL (read_len == size, print_done);
             total += read_len;
         }
 
@@ -313,7 +316,12 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
                 }
 
                 read_len = read (fd, table, sizeof (EvlogRegionTable));
-                GOTO_IF_FAIL (read_len == sizeof(EvlogRegionTable), print_done);
+                if (read_len != sizeof(EvlogRegionTable))
+                {
+                    WARNING_IF_FAIL (read_len == sizeof(EvlogRegionTable));
+                    free (table);
+                    goto print_done;
+                }
                 total += read_len;
 
                 xorg_list_add(&table->link, &evinfo.evregion.list);

@@ -232,7 +232,7 @@ static void evtRecord (int fd, EvlogInfo *evinfo)
 
     if (evinfo->mask & EVLOG_MASK_ATOM)
     {
-        EvlogAtomTable *table;
+        EvlogAtomTable *table = NULL;
 
         if (write (fd, &evinfo->evatom.size, sizeof (int)) == -1)
         {
