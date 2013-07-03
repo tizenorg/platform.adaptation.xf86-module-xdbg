@@ -274,6 +274,20 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
             return reply;
         }
 
+    case X_SyncAwait:
+        {
+            xSyncAwaitReq *stuff = (xSyncAwaitReq*)req;
+            xSyncWaitCondition *pProtocolWaitConds;
+
+            pProtocolWaitConds = (xSyncWaitCondition *) &stuff[1];
+            REPLY (": XID(0x%lx) VType:%d TType:%d Value(%d/%d)",
+                pProtocolWaitConds->counter,
+                (unsigned int)pProtocolWaitConds->value_type,
+                (unsigned int)pProtocolWaitConds->test_type,
+                (unsigned int)pProtocolWaitConds->wait_value_hi,
+                (unsigned int)pProtocolWaitConds->wait_value_lo);
+        }
+
     default:
             break;
     }
@@ -868,7 +882,7 @@ _EvlogReplyXextSync (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xSyncQueryCounterReply *stuff = (xSyncQueryCounterReply *)rep;
-                REPLY (": Value(0x%lx/0x%lx) sequence_num(%d)",
+                REPLY (": Value(%ld/%ld) sequence_num(%d)",
                     stuff->value_hi,
                     stuff->value_lo,
                     stuff->sequenceNumber);
