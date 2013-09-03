@@ -1,4 +1,4 @@
-Name: xorg-x11-module-xdbg
+Name: xf86-module-xdbg
 Summary: Xserver debug module
 Version: 0.1.26
 Release:    1
