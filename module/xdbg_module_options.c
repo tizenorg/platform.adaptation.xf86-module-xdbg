@@ -59,7 +59,7 @@ void
 xDbgModuleParseOptions (XDbgModule *pMod, XF86OptionPtr pOpt)
 {
     OptionInfoPtr options = xnfalloc (sizeof (module_options));
-    char *log_path;
+    const char *log_path;
 
     memcpy (options, module_options, sizeof(module_options));
 
