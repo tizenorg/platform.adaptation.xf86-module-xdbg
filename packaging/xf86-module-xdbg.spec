@@ -1,3 +1,5 @@
+%bcond_with x
+
 Name: xf86-module-xdbg
 Summary: Xserver debug module
 Version: 0.1.26
@@ -44,6 +46,10 @@ BuildRequires:  pkgconfig(libdrm)
 BuildRequires:  pkgconfig(xtst)
 BuildRequires:  pkgconfig(xi)
 BuildRequires:  pkgconfig(xv)
+
+%if !%{with x}
+ExclusiveArch:
+%endif
 
 %description
 This package provides the runtime debug library and module for debug of inside X server.
