@@ -69,13 +69,13 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GestureSelectEvents:
         {
             xGestureSelectEventsReq *stuff = (xGestureSelectEventsReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
-                REPLY (" mask(0x%lx)",
-                    stuff->mask);
+                REPLY (" mask(0x%x)",
+                    (unsigned int)stuff->mask);
             }
 
             return reply;
@@ -84,8 +84,8 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GestureGetSelectedEvents:
         {
             xGestureGetSelectedEventsReq *stuff = (xGestureGetSelectedEventsReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             return reply;
         }
@@ -93,8 +93,8 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GestureGrabEvent:
         {
             xGestureGrabEventReq *stuff = (xGestureGrabEventReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -125,8 +125,8 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GestureUngrabEvent:
         {
             xGestureUngrabEventReq *stuff = (xGestureUngrabEventReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -171,8 +171,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyFlick:
         {
             xGestureNotifyFlickEvent *stuff = (xGestureNotifyFlickEvent *) evt;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -208,8 +208,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyPan:
         {
             xGestureNotifyPanEvent *stuff = (xGestureNotifyPanEvent *) evt;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -247,8 +247,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyPinchRotation:
         {
             xGestureNotifyPinchRotationEvent *stuff = (xGestureNotifyPinchRotationEvent *) evt;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -286,8 +286,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyTap:
         {
             xGestureNotifyTapEvent *stuff = (xGestureNotifyTapEvent *) evt;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -324,8 +324,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyTapNHold:
         {
             xGestureNotifyTapNHoldEvent *stuff = (xGestureNotifyTapNHoldEvent *) evt;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -362,8 +362,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyHold:
         {
             xGestureNotifyHoldEvent *stuff = (xGestureNotifyHoldEvent *) evt;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -399,8 +399,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyGroup:
         {
             xGestureNotifyGroupEvent *stuff = (xGestureNotifyGroupEvent *) evt;
-            REPLY (": XID(0x%lx) groupID(%d) groupNum(%d)",
-                stuff->window,
+            REPLY (": XID(0x%x) groupID(%d) groupNum(%d)",
+                (unsigned int)stuff->window,
                 stuff->groupid,
                 stuff->num_group);
 

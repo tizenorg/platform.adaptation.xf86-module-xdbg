@@ -70,8 +70,8 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_GrabPort:
         {
             xvGrabPortReq *stuff = (xvGrabPortReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->port);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->port);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -85,8 +85,8 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_UngrabPort:
         {
             xvUngrabPortReq *stuff = (xvUngrabPortReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->port);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->port);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -100,10 +100,10 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_PutStill:
         {
             xvPutStillReq *stuff = (xvPutStillReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
-                stuff->port,
-                stuff->drawable,
-                stuff->gc,
+            REPLY (": XID(0x%x) Drawable(0x%x) GC(0x%x) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
+                (unsigned int)stuff->port,
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->gc,
                 stuff->vid_x,
                 stuff->vid_y,
                 stuff->vid_w,
@@ -119,10 +119,10 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_GetStill:
         {
             xvGetStillReq *stuff = (xvGetStillReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
-                stuff->port,
-                stuff->drawable,
-                stuff->gc,
+            REPLY (": XID(0x%x) Drawable(0x%x) GC(0x%x) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
+                (unsigned int)stuff->port,
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->gc,
                 stuff->vid_x,
                 stuff->vid_y,
                 stuff->vid_w,
@@ -138,10 +138,10 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_PutVideo:
         {
             xvPutVideoReq *stuff = (xvPutVideoReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
-                stuff->port,
-                stuff->drawable,
-                stuff->gc,
+            REPLY (": XID(0x%x) Drawable(0x%x) GC(0x%x) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
+                (unsigned int)stuff->port,
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->gc,
                 stuff->vid_x,
                 stuff->vid_y,
                 stuff->vid_w,
@@ -157,10 +157,10 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_GetVideo:
         {
             xvGetVideoReq *stuff = (xvGetVideoReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
-                stuff->port,
-                stuff->drawable,
-                stuff->gc,
+            REPLY (": XID(0x%x) Drawable(0x%x) GC(0x%x) Vid(%d,%d %dx%d) Drw(%d,%d %dx%d)",
+                (unsigned int)stuff->port,
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->gc,
                 stuff->vid_x,
                 stuff->vid_y,
                 stuff->vid_w,
@@ -176,9 +176,9 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_StopVideo:
         {
             xvStopVideoReq *stuff = (xvStopVideoReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx)",
-                stuff->port,
-                stuff->drawable);
+            REPLY (": XID(0x%x) Drawable(0x%x)",
+                (unsigned int)stuff->port,
+                (unsigned int)stuff->drawable);
 
             return reply;
         }
@@ -186,8 +186,8 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_SelectVideoNotify:
         {
             xvSelectVideoNotifyReq *stuff = (xvSelectVideoNotifyReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->drawable);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->drawable);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -201,8 +201,8 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_SelectPortNotify:
         {
             xvSelectPortNotifyReq *stuff = (xvSelectPortNotifyReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->port);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->port);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -216,8 +216,8 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_QueryBestSize:
         {
             xvQueryBestSizeReq *stuff = (xvQueryBestSizeReq *)req;
-            REPLY (": XID(0x%lx) VidSize(%dx%d) DrwSize(%dx%d)",
-                stuff->port,
+            REPLY (": XID(0x%x) VidSize(%dx%d) DrwSize(%dx%d)",
+                (unsigned int)stuff->port,
                 stuff->vid_w,
                 stuff->vid_h,
                 stuff->drw_w,
@@ -235,8 +235,8 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_SetPortAttribute:
         {
             xvSetPortAttributeReq *stuff = (xvSetPortAttributeReq *)req;
-            REPLY (": XID(0x%lx) ",
-                stuff->port);
+            REPLY (": XID(0x%x) ",
+                (unsigned int)stuff->port);
 
             REPLY (" Attribute");
             reply = xDbgGetAtom(stuff->attribute, evinfo, reply, len);
@@ -253,8 +253,8 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_GetPortAttribute:
         {
             xvGetPortAttributeReq *stuff = (xvGetPortAttributeReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->port);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->port);
 
             REPLY (" Attribute");
             reply = xDbgGetAtom(stuff->attribute, evinfo, reply, len);
@@ -265,11 +265,11 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_PutImage:
         {
             xvPutImageReq *stuff = (xvPutImageReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) ID(%lx) buf(%dx%d) src(%d,%d %dx%d) drw(%d,%d %dx%d)",
-                stuff->port,
-                stuff->drawable,
-                stuff->gc,
-                stuff->id,
+            REPLY (": XID(0x%x) Drawable(0x%x) GC(0x%x) ID(%x) buf(%dx%d) src(%d,%d %dx%d) drw(%d,%d %dx%d)",
+                (unsigned int)stuff->port,
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->gc,
+                (unsigned int)stuff->id,
                 stuff->width,
                 stuff->height,
                 stuff->src_x,
@@ -287,11 +287,11 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case xv_ShmPutImage:
         {
             xvShmPutImageReq *stuff = (xvShmPutImageReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx) GC(0x%lx) ID(%lx) buf(%dx%d) src(%d,%d %dx%d) drw(%d,%d %dx%d)",
-                stuff->port,
-                stuff->drawable,
-                stuff->gc,
-                stuff->id,
+            REPLY (": XID(0x%x) Drawable(0x%x) GC(0x%x) ID(%x) buf(%dx%d) src(%d,%d %dx%d) drw(%d,%d %dx%d)",
+                (unsigned int)stuff->port,
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->gc,
+                (unsigned int)stuff->id,
                 stuff->width,
                 stuff->height,
                 stuff->src_x,
@@ -306,9 +306,9 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
-                REPLY ("%67s shmseg(0x%lx) offset(%ld) send_event(%s)",
+                REPLY ("%67s shmseg(0x%x) offset(%ld) send_event(%s)",
                     " ",
-                    stuff->shmseg,
+                    (unsigned int)stuff->shmseg,
                     stuff->offset,
                     stuff->send_event ? "YES" : "NO");
             }
@@ -333,9 +333,9 @@ _EvlogEventXv (EvlogInfo *evinfo, int first_base, int detail_level, char *reply,
     case XvVideoNotify:
         {
             XvVideoNotifyEvent *stuff = (XvVideoNotifyEvent *) evt;
-            REPLY (": XID(0x%lx) portID(0x%lx)",
-                stuff->drawable,
-                stuff->port_id);
+            REPLY (": XID(0x%x) portID(0x%x)",
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->port_id);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -351,8 +351,8 @@ _EvlogEventXv (EvlogInfo *evinfo, int first_base, int detail_level, char *reply,
     case XvPortNotify:
         {
             XvPortNotifyEvent *stuff = (XvPortNotifyEvent *) evt;
-            REPLY (": XID(0x%lx) Value(%ld)",
-                stuff->port_id,
+            REPLY (": XID(0x%x) Value(%ld)",
+                (unsigned int)stuff->port_id,
                 stuff->value);
 
             REPLY (" Attribute");

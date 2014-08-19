@@ -69,9 +69,9 @@ _EvlogRequestDamage(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_DamageCreate:
         {
             xDamageCreateReq *stuff = (xDamageCreateReq *)req;
-            REPLY (": XID(0x%lx) Drawable(0x%lx)",
-                stuff->damage,
-                stuff->drawable);
+            REPLY (": XID(0x%x) Drawable(0x%x)",
+                (unsigned int)stuff->damage,
+                (unsigned int)stuff->drawable);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -97,8 +97,8 @@ _EvlogRequestDamage(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_DamageDestroy:
         {
             xDamageDestroyReq *stuff = (xDamageDestroyReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->damage);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->damage);
 
             return reply;
         }
@@ -120,9 +120,9 @@ _EvlogEventDamage (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XDamageNotify:
         {
             xDamageNotifyEvent *stuff = (xDamageNotifyEvent*)evt;
-            REPLY (": XID(0x%lx) Damage(0x%lx) area(%d,%d %dx%d) geo(%d,%d %dx%d)",
-                stuff->drawable,
-                stuff->damage,
+            REPLY (": XID(0x%x) Damage(0x%x) area(%d,%d %dx%d) geo(%d,%d %dx%d)",
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->damage,
                 stuff->area.x,
                 stuff->area.y,
                 stuff->area.width,

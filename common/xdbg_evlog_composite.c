@@ -68,8 +68,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeRedirectWindow:
         {
             xCompositeRedirectWindowReq *stuff = (xCompositeRedirectWindowReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -83,8 +83,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeRedirectSubwindows:
         {
             xCompositeRedirectSubwindowsReq *stuff = (xCompositeRedirectSubwindowsReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -98,8 +98,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeUnredirectWindow:
         {
             xCompositeUnredirectWindowReq *stuff = (xCompositeUnredirectWindowReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -113,8 +113,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeUnredirectSubwindows:
         {
             xCompositeUnredirectSubwindowsReq *stuff = (xCompositeUnredirectSubwindowsReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -128,9 +128,9 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeNameWindowPixmap:
         {
             xCompositeNameWindowPixmapReq *stuff = (xCompositeNameWindowPixmapReq *)req;
-            REPLY (": XID(0x%lx) Pixmap(0x%lx)",
-                stuff->window,
-                stuff->pixmap);
+            REPLY (": XID(0x%x) Pixmap(0x%x)",
+                (unsigned int)stuff->window,
+                (unsigned int)stuff->pixmap);
 
             return reply;
         }

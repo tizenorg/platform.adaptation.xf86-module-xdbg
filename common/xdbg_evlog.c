@@ -468,9 +468,9 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     }
     else if (evinfo->type == ERROR)
     {
-        REPLY("(ErrorCode(0x%02x) resourceID(0x%lx) majorCode(%d) minorCode(%d))",
+        REPLY("(ErrorCode(0x%02x) resourceID(0x%x) majorCode(%d) minorCode(%d))",
             evinfo->err.errorCode,
-            evinfo->err.resourceID,
+            (unsigned int)evinfo->err.resourceID,
             evinfo->err.majorCode,
             evinfo->err.minorCode);
     }
@@ -548,7 +548,7 @@ char* xDbgGetAtom(Atom atom, EvlogInfo *evinfo, char *reply, int *len)
     if (NameForAtom(atom))
         snprintf (table->buf, XDBG_BUF_SIZE, "%s", (char*)NameForAtom(atom));
     else
-        snprintf (table->buf, XDBG_BUF_SIZE, "0x%lx", atom);
+        snprintf (table->buf, XDBG_BUF_SIZE, "0x%x", (unsigned int)atom);
 
     xorg_list_add(&table->link, &evinfo->evatom.list);
     evinfo->evatom.size++;
@@ -592,7 +592,7 @@ char* xDbgGetRegion(XserverRegion region, EvlogInfo *evinfo, char *reply, int *l
 
         table->xid = region;
 
-        snprintf (table->buf, XDBG_BUF_SIZE, "0x%lx", region);
+        snprintf (table->buf, XDBG_BUF_SIZE, "0x%x", (unsigned int)region);
         xorg_list_add(&table->link, &evinfo->evregion.list);
         evinfo->evregion.size++;
     }
