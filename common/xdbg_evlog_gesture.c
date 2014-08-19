@@ -110,7 +110,7 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                     case GestureNotifyTapNHold:  event_type = "GestureNotifyTapNHold"; break;
                     case GestureNotifyHold:  event_type = "GestureNotifyHold"; break;
                     case GestureNotifyGroup:  event_type = "GestureNotifyGroup"; break;
-                    default:  event_type = devent_type; sprintf (devent_type, "%ld", stuff->eventType); break;
+                    default:  event_type = devent_type; sprintf (devent_type, "%ld", (long int)stuff->eventType); break;
                 }
 
                 REPLY (" event_type(%s) num_finger(%d) time(%lums)",

@@ -400,7 +400,7 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, int detail_level, char *reply, i
                     " ",
                     mode,
                     stuff->format,
-                    stuff->nUnits);
+                    (long int)stuff->nUnits);
             }
 
             return reply;
@@ -436,8 +436,8 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, int detail_level, char *reply, i
                 REPLY ("%67s delete(%s) longOffset(%ld) longLength(%ld)",
                     " ",
                     stuff->delete ? "YES" : "NO",
-                    stuff->longOffset,
-                    stuff->longLength);
+                    (long int)stuff->longOffset,
+                    (long int)stuff->longLength);
             }
 
             return reply;
@@ -1755,7 +1755,7 @@ char * xDbgEvlogReplyCore (EvlogInfo *evinfo, int detail_level, char *reply, int
                 REPLY (" bytesAfter(0x%x) format(%d) ItemNum(%ld)",
                     (unsigned int)stuff->bytesAfter,
                     stuff->format,
-                    stuff->nItems);
+                    (long int)stuff->nItems);
             }
             else
             {

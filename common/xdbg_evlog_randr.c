@@ -87,8 +87,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" milliSize(%ldx%ld)",
-                    stuff->widthInMillimeters,
-                    stuff->heightInMillimeters);
+                    (long int)stuff->widthInMillimeters,
+                    (long int)stuff->heightInMillimeters);
             }
 
             return reply;
@@ -187,7 +187,7 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                     " ",
                     mode,
                     stuff->format,
-                    stuff->nUnits);
+                    (long int)stuff->nUnits);
             }
 
             return reply;
@@ -219,8 +219,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" longOffset(%ld) longLength(%ld)",
-                    stuff->longOffset,
-                    stuff->longLength);
+                    (long int)stuff->longOffset,
+                    (long int)stuff->longLength);
             }
 
             return reply;
@@ -579,8 +579,8 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             {
                 xRRGetScreenResourcesReply *stuff = (xRRGetScreenResourcesReply *)rep;
                 REPLY (": Timestamp(%ldms) ConfigTimestamp(%ldms) nCrtcs(%d) nOutputs(%d) nModes(%d) nbytesNames(%d)",
-                    stuff->timestamp,
-                    stuff->configTimestamp,
+                    (long int)stuff->timestamp,
+                    (long int)stuff->configTimestamp,
                     stuff->nCrtcs,
                     stuff->nOutputs,
                     stuff->nModes,
@@ -652,10 +652,10 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             {
                 xRRGetOutputInfoReply *stuff = (xRRGetOutputInfoReply *)rep;
                 REPLY (": Timestamp(%ldms) Crtc(0x%x) mmSize(%ldx%ld) nCrtcs(%d) nModes(%d) nPreferred(%d) nClones(%d)",
-                    stuff->timestamp,
+                    (long int)stuff->timestamp,
                     (unsigned int)stuff->crtc,
-                    stuff->mmWidth,
-                    stuff->mmHeight,
+                    (long int)stuff->mmWidth,
+                    (long int)stuff->mmHeight,
                     stuff->nCrtcs,
                     stuff->nModes,
                     stuff->nPreferred,
@@ -749,8 +749,8 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 reply = xDbgGetAtom(stuff->propertyType, evinfo, reply, len);
 
                 REPLY (" bytesAfter(%ld) nItems(%ld)",
-                    stuff->bytesAfter,
-                    stuff->nItems);
+                    (long int)stuff->bytesAfter,
+                    (long int)stuff->nItems);
             }
             else
             {
@@ -768,7 +768,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             {
                 xRRGetCrtcInfoReply *stuff = (xRRGetCrtcInfoReply *)rep;
                 REPLY (" Timestamp(%ldms) coord(%d,%d %dx%d) RRmode(0x%x) rot(%d) rots(%d) nOutput(%d) nPossibleOutput(%d)",
-                    stuff->timestamp,
+                    (long int)stuff->timestamp,
                     stuff->x,
                     stuff->y,
                     stuff->width,
@@ -819,7 +819,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 xRRSetCrtcConfigReply *stuff = (xRRSetCrtcConfigReply *)rep;
 
                 REPLY (" newTimestamp(%ldms)",
-                    stuff->newTimestamp);
+                    (long int)stuff->newTimestamp);
             }
             else
             {
@@ -838,8 +838,8 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 xRRGetScreenResourcesReply *stuff = (xRRGetScreenResourcesReply *)rep;
 
                 REPLY (" Timestamp(%ldms) ConfigTimestamp(%ldms) nCrtcs(%d) nOutputs(%d) nModes(%d) nbytesNames(%d)",
-                    stuff->timestamp,
-                    stuff->configTimestamp,
+                    (long int)stuff->timestamp,
+                    (long int)stuff->configTimestamp,
                     stuff->nCrtcs,
                     stuff->nOutputs,
                     stuff->nModes,

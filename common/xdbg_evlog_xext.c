@@ -146,7 +146,7 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
                     format,
                     stuff->sendEvent ? "YES" : "NO",
                     (unsigned int)stuff->shmseg,
-                    stuff->offset);
+                    (long int)stuff->offset);
             }
 
             return reply;
@@ -181,7 +181,7 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
                     format,
                     (unsigned int)stuff->planeMask,
                     (unsigned int)stuff->shmseg,
-                    stuff->offset);
+                    (long int)stuff->offset);
             }
 
             return reply;
@@ -203,7 +203,7 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
                     " ",
                     stuff->depth,
                     (unsigned int)stuff->shmseg,
-                    stuff->offset);
+                    (long int)stuff->offset);
             }
 
             return reply;
@@ -228,8 +228,8 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
             xSyncCreateCounterReq *stuff = (xSyncCreateCounterReq *)req;
             REPLY (": XID(0x%x) initValue(%ld/%ld)",
                 (unsigned int)stuff->cid,
-                stuff->initial_value_hi,
-                stuff->initial_value_lo);
+                (long int)stuff->initial_value_hi,
+                (long int)stuff->initial_value_lo);
 
             return reply;
         }
@@ -239,8 +239,8 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
             xSyncSetCounterReq *stuff = (xSyncSetCounterReq *)req;
             REPLY (": XID(0x%x) Value(%ld/%ld)",
                 (unsigned int)stuff->cid,
-                stuff->value_hi,
-                stuff->value_lo);
+                (long int)stuff->value_hi,
+                (long int)stuff->value_lo);
 
             return reply;
         }
@@ -250,8 +250,8 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
             xSyncChangeCounterReq *stuff = (xSyncChangeCounterReq *)req;
             REPLY (": XID(0x%x) Value(%ld/%ld)",
                 (unsigned int)stuff->cid,
-                stuff->value_hi,
-                stuff->value_lo);
+                (long int)stuff->value_hi,
+                (long int)stuff->value_lo);
 
             return reply;
         }
@@ -650,7 +650,7 @@ _EvlogEventXextShm (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     stuff->majorEvent,
                     stuff->minorEvent,
                     (unsigned int)stuff->shmseg,
-                    stuff->offset);
+                    (long int)stuff->offset);
             }
             return reply;
         }
@@ -852,7 +852,7 @@ _EvlogReplyXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 xShmGetImageReply *stuff = (xShmGetImageReply *)rep;
                 REPLY (": Visual(0x%x) size(%ld) sequence_num(%d)",
                     (unsigned int)stuff->visual,
-                    stuff->size,
+                    (long int)stuff->size,
                     stuff->sequenceNumber);
             }
             else
@@ -883,8 +883,8 @@ _EvlogReplyXextSync (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             {
                 xSyncQueryCounterReply *stuff = (xSyncQueryCounterReply *)rep;
                 REPLY (": Value(%ld/%ld) sequence_num(%d)",
-                    stuff->value_hi,
-                    stuff->value_lo,
+                    (long int)stuff->value_hi,
+                    (long int)stuff->value_lo,
                     stuff->sequenceNumber);
             }
             else
@@ -1064,7 +1064,7 @@ _EvlogReplyXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 }
                 REPLY (": ordering(%s) nrects(%ld)",
                     ordering,
-                    stuff->nrects);
+                    (long int)stuff->nrects);
             }
             else
             {

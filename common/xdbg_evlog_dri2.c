@@ -93,7 +93,7 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" count(%ld)",
-                    stuff->count);
+                    (long int)stuff->count);
             }
 
             return reply;
@@ -125,7 +125,7 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" count(%ld)",
-                    stuff->count);
+                    (long int)stuff->count);
             }
 
             return reply;
@@ -156,7 +156,7 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" interval(%ld)",
-                    stuff->interval);
+                    (long int)stuff->interval);
             }
 
             return reply;
@@ -253,9 +253,9 @@ _EvlogReplyDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             {
                 xDRI2GetBuffersReply *stuff = (xDRI2GetBuffersReply *)rep;
                 REPLY (": size(%ldx%ld) count(%ld)",
-                    stuff->width,
-                    stuff->height,
-                    stuff->count);
+                    (long int)stuff->width,
+                    (long int)stuff->height,
+                    (long int)stuff->count);
 
                 if (detail_level >= EVLOG_PRINT_DETAIL)
                 {
@@ -284,8 +284,8 @@ _EvlogReplyDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             {
                 xDRI2SwapBuffersReply *stuff = (xDRI2SwapBuffersReply *)rep;
                 REPLY (": swap(%ld/%ld)",
-                    stuff->swap_hi,
-                    stuff->swap_lo);
+                    (long int)stuff->swap_hi,
+                    (long int)stuff->swap_lo);
 
                 if (detail_level >= EVLOG_PRINT_DETAIL)
                 {

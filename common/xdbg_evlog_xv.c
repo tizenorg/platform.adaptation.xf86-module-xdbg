@@ -244,7 +244,7 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("  value(%ld)",
-                    stuff->value);
+                    (long int)stuff->value);
             }
 
             return reply;
@@ -309,7 +309,7 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("%67s shmseg(0x%x) offset(%ld) send_event(%s)",
                     " ",
                     (unsigned int)stuff->shmseg,
-                    stuff->offset,
+                    (long int)stuff->offset,
                     stuff->send_event ? "YES" : "NO");
             }
 
@@ -353,7 +353,7 @@ _EvlogEventXv (EvlogInfo *evinfo, int first_base, int detail_level, char *reply,
             XvPortNotifyEvent *stuff = (XvPortNotifyEvent *) evt;
             REPLY (": XID(0x%x) Value(%ld)",
                 (unsigned int)stuff->port_id,
-                stuff->value);
+                (long int)stuff->value);
 
             REPLY (" Attribute");
             reply = xDbgGetAtom(stuff->attribute, evinfo, reply, len);
@@ -362,7 +362,7 @@ _EvlogEventXv (EvlogInfo *evinfo, int first_base, int detail_level, char *reply,
             {
                 REPLY (" serial(%lu) value(%ld) time(%lums)",
                     (unsigned long)stuff->serial,
-                    stuff->value,
+                    (long int)stuff->value,
                     (unsigned long)stuff->time);
             }
 

@@ -665,7 +665,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 {
                     REPLY (" valuator%d(%ld)",
                         i,
-                        *(&stuff->valuator0 + i));
+                        (long int)*(&stuff->valuator0 + i));
                 }
             }
 
