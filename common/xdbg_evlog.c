@@ -440,7 +440,7 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     else
         REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %7s ",
                     evinfo->time / 1000.0,
-                    evinfo->time - prev,
+                    (long int)evinfo->time - prev,
                     xDbgEvlogGetCmd (evinfo->client.command),
                     evinfo->client.index,
                     evinfo->client.pid,
