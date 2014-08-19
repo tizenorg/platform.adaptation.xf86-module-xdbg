@@ -142,7 +142,7 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                     case GestureNotifyTapNHold:  event_type = "GestureNotifyTapNHold"; break;
                     case GestureNotifyHold:  event_type = "GestureNotifyHold"; break;
                     case GestureNotifyGroup:  event_type = "GestureNotifyGroup"; break;
-                    default:  event_type = devent_type; sprintf (devent_type, "%ld", stuff->eventType); break;
+                    default:  event_type = devent_type; sprintf (devent_type, "%ld", (long int)stuff->eventType); break;
                 }
 
                 REPLY (" event_type(%s) num_finger(%d) time(%lums)",
@@ -199,7 +199,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("%67s duration(%lums) angle(%ld)",
                     " ",
                     (unsigned long)stuff->duration,
-                    stuff->angle);
+                    (long int)stuff->angle);
             }
 
             return reply;
@@ -236,7 +236,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("%67s distance(%d) duration(%ldms) coord(%d,%d)",
                     " ",
                     stuff->distance,
-                    stuff->duration,
+                    (long int)stuff->duration,
                     stuff->dx,
                     stuff->dy);
             }
@@ -276,8 +276,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     " ",
                     stuff->cx,
                     stuff->cy,
-                    stuff->zoom,
-                    stuff->angle);
+                    (long int)stuff->zoom,
+                    (long int)stuff->angle);
             }
 
             return reply;
