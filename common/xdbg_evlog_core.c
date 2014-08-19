@@ -455,7 +455,7 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, int detail_level, char *reply, i
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -477,7 +477,7 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, int detail_level, char *reply, i
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -534,7 +534,7 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, int detail_level, char *reply, i
                 REPLY (" pointer_mode(%s) keyboard_mode(%s) time(%lums)\n",
                     pointer_mode,
                     keyboard_mode,
-                    stuff->time);
+                    (unsigned long)stuff->time);
 
                 REPLY (" event_mask");
                 REPLY ("(");
@@ -626,7 +626,7 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, int detail_level, char *reply, i
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    stuff->time);
+                    (unsigned long)stuff->time);
 
                 REPLY (" event_mask");
                 REPLY ("(");
@@ -742,7 +742,7 @@ char * xDbgEvlogRequestCore (EvlogInfo *evinfo, int detail_level, char *reply, i
             {
                 REPLY (" reverTo(%d) time(%lums)",
                     stuff->revertTo,
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -1234,7 +1234,7 @@ char * xDbgEvlogEventCore (EvlogInfo *evinfo, int detail_level, char *reply, int
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(0x%x) same_screen(%s) focus(%s)",
                     " ",
-                    evt->u.enterLeave.time,
+                    (unsigned long)evt->u.enterLeave.time,
                     evt->u.enterLeave.state,
                     evt->u.enterLeave.flags & ELFlagSameScreen ? "YES" : "NO",
                     evt->u.enterLeave.flags & ELFlagFocus ? "YES" : "NO");
@@ -1572,7 +1572,7 @@ char * xDbgEvlogEventCore (EvlogInfo *evinfo, int detail_level, char *reply, int
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%s)",
                     " ",
-                    evt->u.property.time,
+                    (unsigned long)evt->u.property.time,
                     state);
             }
 
@@ -1590,7 +1590,7 @@ char * xDbgEvlogEventCore (EvlogInfo *evinfo, int detail_level, char *reply, int
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    evt->u.selectionClear.time);
+                    (unsigned long)evt->u.selectionClear.time);
             }
 
             return reply;
@@ -1612,7 +1612,7 @@ char * xDbgEvlogEventCore (EvlogInfo *evinfo, int detail_level, char *reply, int
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    evt->u.selectionRequest.time);
+                    (unsigned long)evt->u.selectionRequest.time);
             }
 
             return reply;
@@ -1633,7 +1633,7 @@ char * xDbgEvlogEventCore (EvlogInfo *evinfo, int detail_level, char *reply, int
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    evt->u.selectionNotify.time);
+                    (unsigned long)evt->u.selectionNotify.time);
             }
 
             return reply;

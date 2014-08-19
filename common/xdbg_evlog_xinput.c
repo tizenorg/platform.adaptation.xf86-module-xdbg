@@ -108,7 +108,7 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY (")");
 
                 REPLY (" time(%lums) evt_cnt(%d)  owner_events(%s)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->event_count,
                     stuff->ownerEvents ? "YES" : "NO");
             }
@@ -125,7 +125,7 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -245,7 +245,7 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) mode(%d)",
-                stuff->time,
+                (unsigned long)stuff->time,
                 stuff->mode);
             }
 
@@ -271,7 +271,7 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) revertTo(%d)",
-                stuff->time,
+                (unsigned long)stuff->time,
                 stuff->revertTo);
             }
 
@@ -690,7 +690,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) key_code(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->keycode,
                     stuff->same_screen ? "YES" : "NO",
@@ -719,7 +719,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) key_code(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->keycode,
                     stuff->same_screen ? "YES" : "NO",
@@ -748,7 +748,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) button(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->button,
                     stuff->same_screen ? "YES" : "NO",
@@ -777,7 +777,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) button(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->button,
                     stuff->same_screen ? "YES" : "NO",
@@ -806,7 +806,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) is_hint(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->is_hint,
                     stuff->same_screen ? "YES" : "NO",
@@ -854,7 +854,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY (" mode(%s) detail(%s) time(%lums)",
                     mode,
                     detail,
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -897,7 +897,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY (" mode(%s) detail(%s) time(%lums)",
                     mode,
                     detail,
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -921,7 +921,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->same_screen ? "YES" : "NO",
                     stuff->device_state,
@@ -949,7 +949,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->same_screen ? "YES" : "NO",
                     stuff->device_state,
@@ -969,7 +969,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) num_classes(%d)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->num_classes);
             }
 
@@ -997,7 +997,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 }
 
                 REPLY (" time(%lums) request(%s) first_keycode(%d) count(%d)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     request,
                     stuff->first_keycode,
                     stuff->count);
@@ -1026,7 +1026,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 }
 
                 REPLY (" time(%lums) request(%s)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     request);
             }
 
@@ -1072,7 +1072,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) device_change(%d) control(%d) sequence_num(%d)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->devchange,
                     stuff->control,
                     stuff->sequenceNumber);
@@ -1093,7 +1093,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) state(%d) sequence_num(%d)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->sequenceNumber);
             }

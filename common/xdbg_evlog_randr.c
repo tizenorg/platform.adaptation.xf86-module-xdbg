@@ -112,7 +112,7 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" config_timestamp(%lums)",
-                    stuff->configTimestamp);
+                    (unsigned long)stuff->configTimestamp);
             }
 
             return reply;
@@ -235,7 +235,7 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" config_timestamp(%lums)",
-                    stuff->configTimestamp);
+                    (unsigned long)stuff->configTimestamp);
             }
 
             return reply;
@@ -265,8 +265,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("\n");
                 REPLY ("%67s timestamp(%lums) config_timestamp(%lums) RRmode(0x%x) rotation(%s)",
                     " ",
-                    stuff->timestamp,
-                    stuff->configTimestamp,
+                    (unsigned long)stuff->timestamp,
+                    (unsigned long)stuff->configTimestamp,
                     (unsigned int)stuff->mode,
                     rotation);
             }
@@ -331,8 +331,8 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                     " ",
                     rotation,
                     stuff->sequenceNumber,
-                    stuff->timestamp,
-                    stuff->configTimestamp);
+                    (unsigned long)stuff->timestamp,
+                    (unsigned long)stuff->configTimestamp);
             }
 
             return reply;
@@ -372,7 +372,7 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                             " ",
                             rotation,
                             stuff->sequenceNumber,
-                            stuff->timestamp);
+                            (unsigned long)stuff->timestamp);
                     }
 
                     return reply;
@@ -426,8 +426,8 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                         REPLY ("\n");
                         REPLY ("%67s timestamp(%lums) config_timestamp(%lums) rotation(%s) connection(%s) subpixel_order(%s)",
                             " ",
-                            stuff->timestamp,
-                            stuff->configTimestamp,
+                            (unsigned long)stuff->timestamp,
+                            (unsigned long)stuff->configTimestamp,
                             rotation,
                             connection,
                             subpixelOrder);
@@ -462,7 +462,7 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                         REPLY ("%67s sequence_num(%d) timestamp(%lums) state(%s)",
                             " ",
                             stuff->sequenceNumber,
-                            stuff->timestamp,
+                            (unsigned long)stuff->timestamp,
                             state);
                     }
 
@@ -480,7 +480,7 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                     {
                         REPLY (" sequence_num(%d) timestamp(%lums)",
                             stuff->sequenceNumber,
-                            stuff->timestamp);
+                            (unsigned long)stuff->timestamp);
                     }
 
                     return reply;
@@ -510,7 +510,7 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
 
                         REPLY (" sequence_num(%d) timestamp(%lums) state(%s)",
                             stuff->sequenceNumber,
-                            stuff->timestamp,
+                            (unsigned long)stuff->timestamp,
                             state);
                     }
 
@@ -527,7 +527,7 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                     {
                         REPLY (" sequence_num(%d) timestamp(%lums)",
                             stuff->sequenceNumber,
-                            stuff->timestamp);
+                            (unsigned long)stuff->timestamp);
                     }
 
                     return reply;

@@ -76,7 +76,7 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -91,7 +91,7 @@ _EvlogRequestXv(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -340,9 +340,9 @@ _EvlogEventXv (EvlogInfo *evinfo, int first_base, int detail_level, char *reply,
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" serial(%lu) reason(%lu) time(%lums)",
-                    stuff->serial,
-                    stuff->reason,
-                    stuff->time);
+                    (unsigned long)stuff->serial,
+                    (unsigned long)stuff->reason,
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -361,9 +361,9 @@ _EvlogEventXv (EvlogInfo *evinfo, int first_base, int detail_level, char *reply,
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" serial(%lu) value(%ld) time(%lums)",
-                    stuff->serial,
+                    (unsigned long)stuff->serial,
                     stuff->value,
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;

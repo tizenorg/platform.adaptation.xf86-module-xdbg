@@ -368,7 +368,7 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, int detail_level, char *reply, int *le
                 REPLY (" type(%d) detail(%d) time(%lums) device_id(%d)",
                     stuff->type,
                     stuff->detail,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->deviceid);
             }
 
@@ -686,7 +686,7 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, int detail_level, char *
                 REPLY ("%67s sequence_num(%d) time(%lums) count(%d) destroyed(%s)",
                     " ",
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->count,
                     stuff->destroyed ? "YES" : "NO");
             }
@@ -710,7 +710,7 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, int detail_level, char *
                 REPLY ("%67s sequence_num(%d) time(%lums) state(%d)",
                     " ",
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state);
             }
 
@@ -791,7 +791,7 @@ _EvlogEventXextShape (EvlogInfo *evinfo, int first_base, int detail_level, char 
                     " ",
                     kind,
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->shaped ? "EXIST" : "NON_EXIST");
             }
 

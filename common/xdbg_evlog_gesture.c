@@ -116,7 +116,7 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY (" event_type(%s) num_finger(%d) time(%lums)",
                     event_type,
                     stuff->num_finger,
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -148,7 +148,7 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY (" event_type(%s) num_finger(%d) time(%lums)",
                     event_type,
                     stuff->num_finger,
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -190,7 +190,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
 
                 REPLY (" kind(%s) time(%lums) num_finger(%d) direction(%d) distance(%d)",
                     kind,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->num_finger,
                     stuff->direction,
                     stuff->distance);
@@ -198,7 +198,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("\n");
                 REPLY ("%67s duration(%lums) angle(%ld)",
                     " ",
-                    stuff->duration,
+                    (unsigned long)stuff->duration,
                     stuff->angle);
             }
 
@@ -228,7 +228,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) direction(%d) ",
                     kind,
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->num_finger,
                     stuff->direction);
 
@@ -267,7 +267,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) distance(%d)",
                     kind,
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->num_finger,
                     stuff->distance);
 
@@ -306,7 +306,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) coord(%d,%d)",
                     kind,
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->num_finger,
                     stuff->cx,
                     stuff->cy);
@@ -315,7 +315,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("%67s tap_repeat(%d) interval(%lums)",
                     " ",
                     stuff->tap_repeat,
-                    stuff->interval);
+                    (unsigned long)stuff->interval);
             }
 
             return reply;
@@ -344,7 +344,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) coord(%d,%d)",
                     kind,
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->num_finger,
                     stuff->cx,
                     stuff->cy);
@@ -352,8 +352,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("\n");
                 REPLY ("%67s interval(%lums) hold_time(%lums)",
                     " ",
-                    stuff->interval,
-                    stuff->holdtime);
+                    (unsigned long)stuff->interval,
+                    (unsigned long)stuff->holdtime);
             }
 
             return reply;
@@ -382,7 +382,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) coord(%d,%d) ",
                     kind,
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->num_finger,
                     stuff->cx,
                     stuff->cy);
@@ -390,7 +390,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("\n");
                 REPLY ("%67s hold_time(%lums)",
                     " ",
-                    stuff->holdtime);
+                    (unsigned long)stuff->holdtime);
             }
 
             return reply;
@@ -422,7 +422,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     " ",
                     kind,
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->groupid,
                     stuff->num_group);
             }

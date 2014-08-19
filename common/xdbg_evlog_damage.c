@@ -137,7 +137,7 @@ _EvlogEventDamage (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) level(%d) sequence_num(%d)",
                     " ",
-                    stuff->timestamp,
+                    (unsigned long)stuff->timestamp,
                     stuff->level,
                     stuff->sequenceNumber);
             }
