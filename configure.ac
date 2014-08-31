@@ -49,7 +49,7 @@ AC_ARG_WITH(xorg-module-dir,
                            [moduledir="$libdir/xorg/modules"])
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XDBG, dlog xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dmxproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto scrnsaverproto videoproto xcmiscproto xextproto xf86bigfontproto xf86dgaproto xf86driproto xf86vidmodeproto xineramaproto xproto libdrm xcomposite libdri2 xgesture xtst xrandr xi xv)
+PKG_CHECK_MODULES(XDBG, dlog xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dmxproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto scrnsaverproto videoproto xcmiscproto xextproto xf86bigfontproto xf86dgaproto xf86driproto xf86vidmodeproto xineramaproto xproto libdrm xcomposite libdri2 xtst xrandr xi xv)
 
 AC_SUBST([XDBG_CFLAGS])
 AC_SUBST([XDBG_LIBS])

@@ -51,7 +51,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <windowstr.h>
-#include <X11/extensions/gesture.h>
 #include <X11/extensions/gestureproto.h>
 
 
