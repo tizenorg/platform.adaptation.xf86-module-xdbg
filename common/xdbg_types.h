@@ -32,6 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __XDBG_TYPES_H__
 #define __XDBG_TYPES_H__
 
+#include <xorg-server.h>
 #include <xf86.h>
 #include <X11/Xdefs.h>	/* for Bool */
 #include <X11/Xlib.h>

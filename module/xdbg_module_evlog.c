@@ -380,7 +380,7 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
     evinfo.time = GetTimeInMillis ();
 
     /* get extension entry */
-    if (!EntryInit && !xDbgEvlogGetExtensionEntry (NULL))
+    if (!EntryInit && !xDbgEvlogGetExtensionEntry())
         return;
 
     EntryInit = 1;

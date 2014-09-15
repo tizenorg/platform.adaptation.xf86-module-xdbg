@@ -31,6 +31,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <stdarg.h>
 #include <dlog.h>
+#include <xorg-server.h>
 
 #include "xdbg_log.h"
 
