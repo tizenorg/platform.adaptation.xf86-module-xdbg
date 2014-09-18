@@ -386,6 +386,10 @@ XDbgLogSetWindowPixmap (WindowPtr pWin, PixmapPtr pPixmap)
     pScreen->SetWindowPixmap (pWin, pPixmap);
     pScreen->SetWindowPixmap = XDbgLogSetWindowPixmap;
 
+    /* temporary : check the root window and ignore */
+    if (!pParent)
+        return;
+
     if (pPixmap != pScreen->GetWindowPixmap(pParent))
     {
         //Add to window list
