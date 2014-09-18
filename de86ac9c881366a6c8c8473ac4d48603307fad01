@@ -1,0 +1,10 @@
+Verified+1: Chanho Park
+Code-Review+2: Boram Park <boram1288.park@samsung.com>
+Code-Review+2: SooChan Lim <sc1.lim@samsung.com>
+Code-Review+2: Stéphane Desneux (sdx) <stephane.desneux@open.eurogiciel.org>
+Verified+1: Stéphane Desneux (sdx) <stephane.desneux@open.eurogiciel.org>
+Submitted-by: Stéphane Desneux (sdx) <stephane.desneux@open.eurogiciel.org>
+Submitted-at: Thu, 18 Sep 2014 03:13:24 -0700
+Reviewed-on: https://review.tizen.org/gerrit/27498
+Project: platform/adaptation/xf86-module-xdbg
+Branch: refs/heads/tizen
