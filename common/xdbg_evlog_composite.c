@@ -69,8 +69,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeRedirectWindow:
         {
             xCompositeRedirectWindowReq *stuff = (xCompositeRedirectWindowReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -84,8 +84,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeRedirectSubwindows:
         {
             xCompositeRedirectSubwindowsReq *stuff = (xCompositeRedirectSubwindowsReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -99,8 +99,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeUnredirectWindow:
         {
             xCompositeUnredirectWindowReq *stuff = (xCompositeUnredirectWindowReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -114,8 +114,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeUnredirectSubwindows:
         {
             xCompositeUnredirectSubwindowsReq *stuff = (xCompositeUnredirectSubwindowsReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -129,9 +129,9 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeNameWindowPixmap:
         {
             xCompositeNameWindowPixmapReq *stuff = (xCompositeNameWindowPixmapReq *)req;
-            REPLY (": XID(0x%lx) Pixmap(0x%lx)",
-                stuff->window,
-                stuff->pixmap);
+            REPLY (": XID(0x%x) Pixmap(0x%x)",
+                (unsigned int)stuff->window,
+                (unsigned int)stuff->pixmap);
 
             return reply;
         }
@@ -140,8 +140,8 @@ _EvlogRequestComposite(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_CompositeSetCoordinateTransform:
         {
             xCompositeSetCoordinateTransformReq *stuff = (xCompositeSetCoordinateTransformReq *)req;
-            REPLY (": XID(0x%lx) (%.3f,%.3f,%.3f) (%.3f,%.3f,%.3f) (%.3f,%.3f,%.3f)",
-                stuff->window,
+            REPLY (": XID(0x%x) (%.3f,%.3f,%.3f) (%.3f,%.3f,%.3f) (%.3f,%.3f,%.3f)",
+                (unsigned int)stuff->window,
                 (float)pixman_fixed_to_double(stuff->transform.matrix11), (float)pixman_fixed_to_double(stuff->transform.matrix12), (float)pixman_fixed_to_double(stuff->transform.matrix13),
                 (float)pixman_fixed_to_double(stuff->transform.matrix21), (float)pixman_fixed_to_double(stuff->transform.matrix22), (float)pixman_fixed_to_double(stuff->transform.matrix23),
                 (float)pixman_fixed_to_double(stuff->transform.matrix31), (float)pixman_fixed_to_double(stuff->transform.matrix32), (float)pixman_fixed_to_double(stuff->transform.matrix33));

@@ -91,8 +91,8 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GrabDevice:
         {
             xGrabDeviceReq *stuff = (xGrabDeviceReq *)req;
-            REPLY (": XID(0x%lx) device_ID(%d)",
-                stuff->grabWindow,
+            REPLY (": XID(0x%x) device_ID(%d)",
+                (unsigned int)stuff->grabWindow,
                 stuff->deviceid);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
@@ -108,7 +108,7 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY (")");
 
                 REPLY (" time(%lums) evt_cnt(%d)  owner_events(%s)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->event_count,
                     stuff->ownerEvents ? "YES" : "NO");
             }
@@ -125,7 +125,7 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums)",
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -134,8 +134,8 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GrabDeviceKey:
         {
             xGrabDeviceKeyReq *stuff = (xGrabDeviceKeyReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->grabWindow);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->grabWindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -169,8 +169,8 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_UngrabDeviceKey:
         {
             xUngrabDeviceKeyReq *stuff = (xUngrabDeviceKeyReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->grabWindow);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->grabWindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -187,8 +187,8 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GrabDeviceButton:
         {
             xGrabDeviceButtonReq *stuff = (xGrabDeviceButtonReq *)req;
-            REPLY (": XID(0x%lx))",
-                stuff->grabWindow);
+            REPLY (": XID(0x%x))",
+                (unsigned int)stuff->grabWindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -221,8 +221,8 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_UngrabDeviceButton:
         {
             xUngrabDeviceButtonReq *stuff = (xUngrabDeviceButtonReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->grabWindow);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->grabWindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -245,7 +245,7 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) mode(%d)",
-                stuff->time,
+                (unsigned long)stuff->time,
                 stuff->mode);
             }
 
@@ -264,14 +264,14 @@ _EvlogRequestXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_SetDeviceFocus:
         {
             xSetDeviceFocusReq *stuff = (xSetDeviceFocusReq *)req;
-            REPLY (": XID(0x%lx) dev_ID(%d)",
-                stuff->focus,
+            REPLY (": XID(0x%x) dev_ID(%d)",
+                (unsigned int)stuff->focus,
                 stuff->device);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) revertTo(%d)",
-                stuff->time,
+                (unsigned long)stuff->time,
                 stuff->revertTo);
             }
 
@@ -665,7 +665,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 {
                     REPLY (" valuator%d(%ld)",
                         i,
-                        *(&stuff->valuator0 + i));
+                        (long int)*(&stuff->valuator0 + i));
                 }
             }
 
@@ -675,22 +675,22 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceKeyPress:
         {
             XDeviceKeyPressedEvent *stuff = (XDeviceKeyPressedEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
-                stuff->deviceid,
-                stuff->window,
+            REPLY (": XID(0x%x) Window(0x%x %d,%d) Root(0x%x %d,%d) subWindow(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window,
                 stuff->x,
                 stuff->y,
-                stuff->root,
+                (unsigned int)stuff->root,
                 stuff->x_root,
                 stuff->y_root,
-                stuff->subwindow);
+                (unsigned int)stuff->subwindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) key_code(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->keycode,
                     stuff->same_screen ? "YES" : "NO",
@@ -704,22 +704,22 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceKeyRelease:
         {
             XDeviceKeyReleasedEvent *stuff = (XDeviceKeyReleasedEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
-                stuff->deviceid,
-                stuff->window,
+            REPLY (": XID(0x%x) Window(0x%x %d,%d) Root(0x%x %d,%d) subWindow(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window,
                 stuff->x,
                 stuff->y,
-                stuff->root,
+                (unsigned int)stuff->root,
                 stuff->x_root,
                 stuff->y_root,
-                stuff->subwindow);
+                (unsigned int)stuff->subwindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) key_code(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->keycode,
                     stuff->same_screen ? "YES" : "NO",
@@ -733,22 +733,22 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceButtonPress:
         {
             XDeviceButtonPressedEvent *stuff = (XDeviceButtonPressedEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
-                stuff->deviceid,
-                stuff->window,
+            REPLY (": XID(0x%x) Window(0x%x %d,%d) Root(0x%x %d,%d) subWindow(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window,
                 stuff->x,
                 stuff->y,
-                stuff->root,
+                (unsigned int)stuff->root,
                 stuff->x_root,
                 stuff->y_root,
-                stuff->subwindow);
+                (unsigned int)stuff->subwindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) button(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->button,
                     stuff->same_screen ? "YES" : "NO",
@@ -762,22 +762,22 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceButtonRelease:
         {
             XDeviceButtonReleasedEvent *stuff = (XDeviceButtonReleasedEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
-                stuff->deviceid,
-                stuff->window,
+            REPLY (": XID(0x%x) Window(0x%x %d,%d) Root(0x%x %d,%d) subWindow(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window,
                 stuff->x,
                 stuff->y,
-                stuff->root,
+                (unsigned int)stuff->root,
                 stuff->x_root,
                 stuff->y_root,
-                stuff->subwindow);
+                (unsigned int)stuff->subwindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) button(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->button,
                     stuff->same_screen ? "YES" : "NO",
@@ -791,22 +791,22 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceMotionNotify:
         {
             XDeviceMotionEvent *stuff = (XDeviceMotionEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
-                stuff->deviceid,
-                stuff->window,
+            REPLY (": XID(0x%x) Window(0x%x %d,%d) Root(0x%x %d,%d) subWindow(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window,
                 stuff->x,
                 stuff->y,
-                stuff->root,
+                (unsigned int)stuff->root,
                 stuff->x_root,
                 stuff->y_root,
-                stuff->subwindow);
+                (unsigned int)stuff->subwindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) is_hint(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->is_hint,
                     stuff->same_screen ? "YES" : "NO",
@@ -820,9 +820,9 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceFocusIn:
         {
             XDeviceFocusInEvent *stuff = (XDeviceFocusInEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx)",
-                stuff->deviceid,
-                stuff->window);
+            REPLY (": XID(0x%x) Window(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -854,7 +854,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY (" mode(%s) detail(%s) time(%lums)",
                     mode,
                     detail,
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -863,9 +863,9 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceFocusOut:
         {
             XDeviceFocusOutEvent *stuff = (XDeviceFocusOutEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx)",
-                stuff->deviceid,
-                stuff->window);
+            REPLY (": XID(0x%x) Window(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -897,7 +897,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 REPLY (" mode(%s) detail(%s) time(%lums)",
                     mode,
                     detail,
-                    stuff->time);
+                    (unsigned long)stuff->time);
             }
 
             return reply;
@@ -906,22 +906,22 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_ProximityIn:
         {
             XProximityInEvent *stuff = (XProximityInEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
-                stuff->deviceid,
-                stuff->window,
+            REPLY (": XID(0x%x) Window(0x%x %d,%d) Root(0x%x %d,%d) subWindow(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window,
                 stuff->x,
                 stuff->y,
-                stuff->root,
+                (unsigned int)stuff->root,
                 stuff->x_root,
                 stuff->y_root,
-                stuff->subwindow);
+                (unsigned int)stuff->subwindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->same_screen ? "YES" : "NO",
                     stuff->device_state,
@@ -934,22 +934,22 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_ProximityOut:
         {
             XProximityOutEvent *stuff = (XProximityOutEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx %d,%d) Root(0x%lx %d,%d) subWindow(0x%lx)",
-                stuff->deviceid,
-                stuff->window,
+            REPLY (": XID(0x%x) Window(0x%x %d,%d) Root(0x%x %d,%d) subWindow(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window,
                 stuff->x,
                 stuff->y,
-                stuff->root,
+                (unsigned int)stuff->root,
                 stuff->x_root,
                 stuff->y_root,
-                stuff->subwindow);
+                (unsigned int)stuff->subwindow);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
                 REPLY ("%67s time(%lums) state(%d) same_screen(%s) device_state(%d) first_axis(%d)",
                     " ",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->same_screen ? "YES" : "NO",
                     stuff->device_state,
@@ -962,14 +962,14 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceStateNotify:
         {
             XDeviceStateNotifyEvent *stuff = (XDeviceStateNotifyEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx)",
-                stuff->deviceid,
-                stuff->window);
+            REPLY (": XID(0x%x) Window(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) num_classes(%d)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->num_classes);
             }
 
@@ -979,9 +979,9 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_DeviceMappingNotify:
         {
             XDeviceMappingEvent *stuff = (XDeviceMappingEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx)",
-                stuff->deviceid,
-                stuff->window);
+            REPLY (": XID(0x%x) Window(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -997,7 +997,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 }
 
                 REPLY (" time(%lums) request(%s) first_keycode(%d) count(%d)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     request,
                     stuff->first_keycode,
                     stuff->count);
@@ -1009,9 +1009,9 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
     case XI_ChangeDeviceNotify:
         {
             XChangeDeviceNotifyEvent *stuff = (XChangeDeviceNotifyEvent *) evt;
-            REPLY (": XID(0x%lx) Window(0x%lx)",
-                stuff->deviceid,
-                stuff->window);
+            REPLY (": XID(0x%x) Window(0x%x)",
+                (unsigned int)stuff->deviceid,
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -1026,7 +1026,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
                 }
 
                 REPLY (" time(%lums) request(%s)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     request);
             }
 
@@ -1072,7 +1072,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) device_change(%d) control(%d) sequence_num(%d)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->devchange,
                     stuff->control,
                     stuff->sequenceNumber);
@@ -1093,7 +1093,7 @@ _EvlogEventXinput (EvlogInfo *evinfo, int first_base, int detail_level, char *re
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" time(%lums) state(%d) sequence_num(%d)",
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state,
                     stuff->sequenceNumber);
             }
@@ -1152,9 +1152,9 @@ _EvlogReplyXinput (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xGetDeviceFocusReply *stuff = (xGetDeviceFocusReply *) rep;
-                REPLY (": XID(0x%lx) Time(0x%lx)",
-                    stuff->focus,
-                    stuff->time);
+                REPLY (": XID(0x%x) Time(0x%x)",
+                    (unsigned int)stuff->focus,
+                    (unsigned int)stuff->time);
             }
             else
             {

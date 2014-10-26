@@ -114,9 +114,9 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
     case X_ShmPutImage:
         {
             xShmPutImageReq *stuff = (xShmPutImageReq *)req;
-            REPLY (": XID(0x%lx) gc(0x%lx) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
-                stuff->drawable,
-                stuff->gc,
+            REPLY (": XID(0x%x) gc(0x%x) size(%dx%d) src(%d,%d %dx%d) dst(%d,%d)",
+                (unsigned int)stuff->drawable,
+                (unsigned int)stuff->gc,
                 stuff->totalWidth,
                 stuff->totalHeight,
                 stuff->srcX,
@@ -145,8 +145,8 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
                     stuff->depth,
                     format,
                     stuff->sendEvent ? "YES" : "NO",
-                    stuff->shmseg,
-                    stuff->offset);
+                    (unsigned int)stuff->shmseg,
+                    (long int)stuff->offset);
             }
 
             return reply;
@@ -155,8 +155,8 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
     case X_ShmGetImage:
         {
             xShmGetImageReq *stuff = (xShmGetImageReq *)req;
-            REPLY (": XID(0x%lx) size(%dx%d) coord(%d,%d)",
-                stuff->drawable,
+            REPLY (": XID(0x%x) size(%dx%d) coord(%d,%d)",
+                (unsigned int)stuff->drawable,
                 stuff->width,
                 stuff->height,
                 stuff->x,
@@ -176,12 +176,12 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
                 }
 
                 REPLY ("\n");
-                REPLY ("%67s format(%s) plain_mask(0x%lx) shmseg(0x%lx) offset(%ld)",
+                REPLY ("%67s format(%s) plain_mask(0x%x) shmseg(0x%x) offset(%ld)",
                     " ",
                     format,
-                    stuff->planeMask,
-                    stuff->shmseg,
-                    stuff->offset);
+                    (unsigned int)stuff->planeMask,
+                    (unsigned int)stuff->shmseg,
+                    (long int)stuff->offset);
             }
 
             return reply;
@@ -190,20 +190,20 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
     case X_ShmCreatePixmap:
         {
             xShmCreatePixmapReq *stuff = (xShmCreatePixmapReq *)req;
-            REPLY (": Pixmap(0x%lx) Drawable(0x%lx) size(%dx%d)",
-                stuff->pid,
-                stuff->drawable,
+            REPLY (": Pixmap(0x%x) Drawable(0x%x) size(%dx%d)",
+                (unsigned int)stuff->pid,
+                (unsigned int)stuff->drawable,
                 stuff->width,
                 stuff->height);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY ("\n");
-                REPLY ("%67s depth(%d) shmseg(0x%lx) offset(%ld)",
+                REPLY ("%67s depth(%d) shmseg(0x%x) offset(%ld)",
                     " ",
                     stuff->depth,
-                    stuff->shmseg,
-                    stuff->offset);
+                    (unsigned int)stuff->shmseg,
+                    (long int)stuff->offset);
             }
 
             return reply;
@@ -226,10 +226,10 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
     case X_SyncCreateCounter:
         {
             xSyncCreateCounterReq *stuff = (xSyncCreateCounterReq *)req;
-            REPLY (": XID(0x%lx) initValue(%ld/%ld)",
-                stuff->cid,
-                stuff->initial_value_hi,
-                stuff->initial_value_lo);
+            REPLY (": XID(0x%x) initValue(%ld/%ld)",
+                (unsigned int)stuff->cid,
+                (long int)stuff->initial_value_hi,
+                (long int)stuff->initial_value_lo);
 
             return reply;
         }
@@ -237,10 +237,10 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
     case X_SyncSetCounter:
         {
             xSyncSetCounterReq *stuff = (xSyncSetCounterReq *)req;
-            REPLY (": XID(0x%lx) Value(%ld/%ld)",
-                stuff->cid,
-                stuff->value_hi,
-                stuff->value_lo);
+            REPLY (": XID(0x%x) Value(%ld/%ld)",
+                (unsigned int)stuff->cid,
+                (long int)stuff->value_hi,
+                (long int)stuff->value_lo);
 
             return reply;
         }
@@ -248,10 +248,10 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
     case X_SyncChangeCounter:
         {
             xSyncChangeCounterReq *stuff = (xSyncChangeCounterReq *)req;
-            REPLY (": XID(0x%lx) Value(%ld/%ld)",
-                stuff->cid,
-                stuff->value_hi,
-                stuff->value_lo);
+            REPLY (": XID(0x%x) Value(%ld/%ld)",
+                (unsigned int)stuff->cid,
+                (long int)stuff->value_hi,
+                (long int)stuff->value_lo);
 
             return reply;
         }
@@ -259,8 +259,8 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
     case X_SyncQueryCounter:
         {
             xSyncQueryCounterReq *stuff = (xSyncQueryCounterReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->counter);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->counter);
 
             return reply;
         }
@@ -268,8 +268,8 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
     case X_SyncDestroyCounter:
         {
             xSyncDestroyCounterReq *stuff = (xSyncDestroyCounterReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->counter);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->counter);
 
             return reply;
         }
@@ -280,8 +280,8 @@ _EvlogRequestXextSync(EvlogInfo *evinfo, int detail_level, char *reply, int *len
             xSyncWaitCondition *pProtocolWaitConds;
 
             pProtocolWaitConds = (xSyncWaitCondition *) &stuff[1];
-            REPLY (": XID(0x%lx) VType:%d TType:%d Value(%d/%d)",
-                pProtocolWaitConds->counter,
+            REPLY (": XID(0x%x) VType:%d TType:%d Value(%d/%d)",
+                (unsigned int)pProtocolWaitConds->counter,
                 (unsigned int)pProtocolWaitConds->value_type,
                 (unsigned int)pProtocolWaitConds->test_type,
                 (unsigned int)pProtocolWaitConds->wait_value_hi,
@@ -305,8 +305,8 @@ _EvlogRequestXextXtestExt1(EvlogInfo *evinfo, int detail_level, char *reply, int
     case X_TestFakeInput:
         {
             xTestFakeInputReq *stuff = (xTestFakeInputReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->ack);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->ack);
 
             return reply;
         }
@@ -314,8 +314,8 @@ _EvlogRequestXextXtestExt1(EvlogInfo *evinfo, int detail_level, char *reply, int
     case X_TestGetInput:
         {
             xTestGetInputReq *stuff = (xTestGetInputReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->mode);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->mode);
 
             return reply;
         }
@@ -348,9 +348,9 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_XTestCompareCursor:
         {
             xXTestCompareCursorReq *stuff = (xXTestCompareCursorReq *)req;
-            REPLY (": XID(0x%lx) Cursor(0x%lx)",
-                stuff->window,
-                stuff->cursor);
+            REPLY (": XID(0x%x) Cursor(0x%x)",
+                (unsigned int)stuff->window,
+                (unsigned int)stuff->cursor);
 
             return reply;
         }
@@ -358,8 +358,8 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_XTestFakeInput:
         {
             xXTestFakeInputReq *stuff = (xXTestFakeInputReq *)req;
-            REPLY (": XID(0x%lx) coord(%d,%d)",
-                stuff->root,
+            REPLY (": XID(0x%x) coord(%d,%d)",
+                (unsigned int)stuff->root,
                 stuff->rootX,
                 stuff->rootY);
 
@@ -368,7 +368,7 @@ _EvlogRequestXextXtest(EvlogInfo *evinfo, int detail_level, char *reply, int *le
                 REPLY (" type(%d) detail(%d) time(%lums) device_id(%d)",
                     stuff->type,
                     stuff->detail,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->deviceid);
             }
 
@@ -389,8 +389,8 @@ _EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_ShapeRectangles:
         {
             xShapeRectanglesReq *stuff = (xShapeRectanglesReq *)req;
-            REPLY (": XID(0x%lx) coord(%d,%d)",
-                stuff->dest,
+            REPLY (": XID(0x%x) coord(%d,%d)",
+                (unsigned int)stuff->dest,
                 stuff->xOff,
                 stuff->yOff);
 
@@ -453,11 +453,11 @@ _EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_ShapeMask:
         {
             xShapeMaskReq *stuff = (xShapeMaskReq *)req;
-            REPLY (": XID(0x%lx) coord(%d,%d) src(0x%lx)",
-                stuff->dest,
+            REPLY (": XID(0x%x) coord(%d,%d) src(0x%x)",
+                (unsigned int)stuff->dest,
                 stuff->xOff,
                 stuff->yOff,
-                stuff->src);
+                (unsigned int)stuff->src);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -483,11 +483,11 @@ _EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_ShapeCombine:
         {
             xShapeCombineReq *stuff = (xShapeCombineReq *)req;
-            REPLY (": XID(0x%lx) coord(%d,%d) src(0x%lx)",
-                stuff->dest,
+            REPLY (": XID(0x%x) coord(%d,%d) src(0x%x)",
+                (unsigned int)stuff->dest,
                 stuff->xOff,
                 stuff->yOff,
-                stuff->src);
+                (unsigned int)stuff->src);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -522,8 +522,8 @@ _EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_ShapeOffset:
         {
             xShapeOffsetReq *stuff = (xShapeOffsetReq *)req;
-            REPLY (": XID(0x%lx) coord(%d,%d)",
-                stuff->dest,
+            REPLY (": XID(0x%x) coord(%d,%d)",
+                (unsigned int)stuff->dest,
                 stuff->xOff,
                 stuff->yOff);
 
@@ -550,8 +550,8 @@ _EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_ShapeQueryExtents:
         {
             xShapeQueryExtentsReq *stuff = (xShapeQueryExtentsReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             return reply;
         }
@@ -559,8 +559,8 @@ _EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_ShapeSelectInput:
         {
             xShapeSelectInputReq *stuff = (xShapeSelectInputReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -574,8 +574,8 @@ _EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_ShapeInputSelected:
         {
             xShapeInputSelectedReq *stuff = (xShapeInputSelectedReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             return reply;
         }
@@ -583,8 +583,8 @@ _EvlogRequestXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *le
     case X_ShapeGetRectangles:
         {
             xShapeGetRectanglesReq *stuff = (xShapeGetRectanglesReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -640,17 +640,17 @@ _EvlogEventXextShm (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case ShmCompletion:
         {
             xShmCompletionEvent *stuff = (xShmCompletionEvent *) evt;
-            REPLY (": XID(0x%lx)",
-                stuff->drawable);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->drawable);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
-                REPLY (" sequence_num(%d) major_event(%d) minor_event(%d) shmseg(0x%lx) offset(%ld)",
+                REPLY (" sequence_num(%d) major_event(%d) minor_event(%d) shmseg(0x%x) offset(%ld)",
                     stuff->sequenceNumber,
                     stuff->majorEvent,
                     stuff->minorEvent,
-                    stuff->shmseg,
-                    stuff->offset);
+                    (unsigned int)stuff->shmseg,
+                    (long int)stuff->offset);
             }
             return reply;
         }
@@ -673,12 +673,12 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, int detail_level, char *
     case XSyncCounterNotify:
         {
             xSyncCounterNotifyEvent *stuff = (xSyncCounterNotifyEvent *) evt;
-            REPLY (": XID(0x%lx) WaitValue(0x%lx/0x%lx) CounterValue(0x%lx/0x%lx)",
-                stuff->counter,
-                stuff->wait_value_hi,
-                stuff->wait_value_lo,
-                stuff->counter_value_hi,
-                stuff->counter_value_lo);
+            REPLY (": XID(0x%x) WaitValue(0x%x/0x%x) CounterValue(0x%x/0x%x)",
+                (unsigned int)stuff->counter,
+                (unsigned int)stuff->wait_value_hi,
+                (unsigned int)stuff->wait_value_lo,
+                (unsigned int)stuff->counter_value_hi,
+                (unsigned int)stuff->counter_value_lo);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -686,7 +686,7 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, int detail_level, char *
                 REPLY ("%67s sequence_num(%d) time(%lums) count(%d) destroyed(%s)",
                     " ",
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->count,
                     stuff->destroyed ? "YES" : "NO");
             }
@@ -697,12 +697,12 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, int detail_level, char *
     case XSyncAlarmNotify:
         {
             xSyncAlarmNotifyEvent *stuff = (xSyncAlarmNotifyEvent *) evt;
-            REPLY (": XID(0x%lx) CounterValue(0x%lx/0x%lx) AlarmValue(0x%lx/0x%lx)",
-                stuff->alarm,
-                stuff->counter_value_hi,
-                stuff->counter_value_lo,
-                stuff->alarm_value_hi,
-                stuff->alarm_value_lo);
+            REPLY (": XID(0x%x) CounterValue(0x%x/0x%x) AlarmValue(0x%x/0x%x)",
+                (unsigned int)stuff->alarm,
+                (unsigned int)stuff->counter_value_hi,
+                (unsigned int)stuff->counter_value_lo,
+                (unsigned int)stuff->alarm_value_hi,
+                (unsigned int)stuff->alarm_value_lo);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -710,7 +710,7 @@ _EvlogEventXextSync (EvlogInfo *evinfo, int first_base, int detail_level, char *
                 REPLY ("%67s sequence_num(%d) time(%lums) state(%d)",
                     " ",
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->state);
             }
 
@@ -765,8 +765,8 @@ _EvlogEventXextShape (EvlogInfo *evinfo, int first_base, int detail_level, char 
     case ShapeNotify:
         {
             xShapeNotifyEvent *stuff = (xShapeNotifyEvent *) evt;
-            REPLY (": XID(0x%lx) coord(%d,%d %dx%d)",
-                stuff->window,
+            REPLY (": XID(0x%x) coord(%d,%d %dx%d)",
+                (unsigned int)stuff->window,
                 stuff->x,
                 stuff->y,
                 stuff->width,
@@ -791,7 +791,7 @@ _EvlogEventXextShape (EvlogInfo *evinfo, int first_base, int detail_level, char 
                     " ",
                     kind,
                     stuff->sequenceNumber,
-                    stuff->time,
+                    (unsigned long)stuff->time,
                     stuff->shaped ? "EXIST" : "NON_EXIST");
             }
 
@@ -850,9 +850,9 @@ _EvlogReplyXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xShmGetImageReply *stuff = (xShmGetImageReply *)rep;
-                REPLY (": Visual(0x%lx) size(%ld) sequence_num(%d)",
-                    stuff->visual,
-                    stuff->size,
+                REPLY (": Visual(0x%x) size(%ld) sequence_num(%d)",
+                    (unsigned int)stuff->visual,
+                    (long int)stuff->size,
                     stuff->sequenceNumber);
             }
             else
@@ -883,8 +883,8 @@ _EvlogReplyXextSync (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             {
                 xSyncQueryCounterReply *stuff = (xSyncQueryCounterReply *)rep;
                 REPLY (": Value(%ld/%ld) sequence_num(%d)",
-                    stuff->value_hi,
-                    stuff->value_lo,
+                    (long int)stuff->value_hi,
+                    (long int)stuff->value_lo,
                     stuff->sequenceNumber);
             }
             else
@@ -914,8 +914,8 @@ _EvlogReplyXextXtestExt1 (EvlogInfo *evinfo, int detail_level, char *reply, int 
             if (evinfo->rep.isStart)
             {
                 xTestQueryInputSizeReply *stuff = (xTestQueryInputSizeReply *)rep;
-                REPLY (": sizeReturn(0x%lx) sequence_num(%d)",
-                    stuff->size_return,
+                REPLY (": sizeReturn(0x%x) sequence_num(%d)",
+                    (unsigned int)stuff->size_return,
                     stuff->sequenceNumber);
             }
             else
@@ -1064,7 +1064,7 @@ _EvlogReplyXextShape(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 }
                 REPLY (": ordering(%s) nrects(%ld)",
                     ordering,
-                    stuff->nrects);
+                    (long int)stuff->nrects);
             }
             else
             {

@@ -508,20 +508,20 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
             {
             case KeyPress:
             case KeyRelease:
-                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%lx) root(%d,%d) win(%d,%d)\n"
+                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%x) root(%d,%d) win(%d,%d)\n"
                         , ename[type-KeyPress], pev->u.u.detail, pev->u.u.type
                         , info->command, info->pid
-                        , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), pev->u.keyButtonPointer.event
+                        , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), (unsigned int)pev->u.keyButtonPointer.event
                         , pev->u.keyButtonPointer.rootX, pev->u.keyButtonPointer.rootY
                         , pev->u.keyButtonPointer.eventX, pev->u.keyButtonPointer.eventY);
                 break;
 
             case ButtonPress:
             case ButtonRelease:
-                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%lx) root(%d,%d) win(%d,%d)\n"
+                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%x) root(%d,%d) win(%d,%d)\n"
                         , ename[type-KeyPress], pev->u.u.detail, pev->u.u.type
                         , info->command, info->pid
-                        , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), pev->u.keyButtonPointer.event
+                        , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), (unsigned int)pev->u.keyButtonPointer.event
                         , pev->u.keyButtonPointer.rootX, pev->u.keyButtonPointer.rootY
                         , pev->u.keyButtonPointer.eventX, pev->u.keyButtonPointer.eventY);
                 break;

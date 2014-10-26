@@ -70,8 +70,8 @@ _EvlogRequestHwc (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_HWCOpen:
         {
             xHWCOpenReq *stuff = (xHWCOpenReq *)req;
-            REPLY (": XID(0x%lx)",
-                stuff->window);
+            REPLY (": XID(0x%x)",
+                (unsigned int)stuff->window);
 
             return reply;
         }
@@ -79,13 +79,13 @@ _EvlogRequestHwc (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_HWCSetDrawables:
         {
             xHWCSetDrawablesReq *stuff = (xHWCSetDrawablesReq *)req;
-            REPLY (": XID(0x%lx) count(%ld)",
-                stuff->window, stuff->count);
+            REPLY (": XID(0x%x) count(%ld)",
+                (unsigned int)stuff->window, stuff->count);
 
             p = (CARD32 *) & req[3];
             REPLY (" Drawables(");
             for (i = 0; i < stuff->count; i++)
-                REPLY (" 0x%lx", p[i]);
+                REPLY (" 0x%x", (unsigned int)p[i]);
             REPLY (" )");
 
 
@@ -110,8 +110,8 @@ _EvlogEventHwc (EvlogInfo *evinfo, int first_base, int detail_level, char *reply
     case HWCConfigureNotify:
         {
             xHWCConfigureNotify *stuff = (xHWCConfigureNotify *) evt;
-            REPLY (": maxLayer(%ld)",
-                stuff->maxLayer);
+            REPLY (": maxLayer(%d)",
+                (unsigned int)stuff->maxLayer);
 
             return reply;
         }
@@ -135,8 +135,8 @@ _EvlogReplyHwc (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xHWCOpenReply *stuff = (xHWCOpenReply *)rep;
-                REPLY (": maxLayers(%ld)",
-                    stuff->maxLayer);
+                REPLY (": maxLayers(%d)",
+                    (unsigned int)stuff->maxLayer);
             }
 
             return reply;
