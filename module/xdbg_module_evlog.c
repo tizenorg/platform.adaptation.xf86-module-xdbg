@@ -411,7 +411,7 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
     xDbgDistroyRegionList(&evinfo);
 }
 
-#if TIZEN_ENGINEER_MODE
+#if (TIZEN_ENGINEER_MODE || USE_NORMAL_LOG)
 static const char*
 _traceGetWindowName (ClientPtr client, Window window)
 {
@@ -477,7 +477,7 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
     static int xi2_opcode = -1;
     xEvent *pev;
 
-#if TIZEN_ENGINEER_MODE
+#if (TIZEN_ENGINEER_MODE || USE_NORMAL_LOG)
     static char* ename[]=
     {
         "KeyPress",

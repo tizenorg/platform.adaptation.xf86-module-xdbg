@@ -96,8 +96,10 @@ if test "x$SECURELOG" = xyes; then
     AC_SUBST([TIZEN_ENGINEER_MODE])
 fi
 
+USE_NORMAL_LOG=0
 if test "x$NORMALLOG" = xyes; then
-    AC_DEFINE(USE_NORMAL_LOG, 1, [Use normal log])
+    USE_NORMAL_LOG=1
+    AC_SUBST([USE_NORMAL_LOG])
 fi
 
 AC_OUTPUT([Makefile
