@@ -52,6 +52,11 @@ AC_ARG_ENABLE(secure-log,
                              [Enable secure log (default: disabled)]),
                              [SECURELOG=$enableval], [SECURELOG=no])
 
+AC_ARG_ENABLE(normal-log,
+              AS_HELP_STRING([--enable-normal-log],
+                             [Enable normal log instead of secure log (default: disabled)]),
+                             [NORMALLOG=$enableval], [NORMALLOG=no])
+
 # Checks for pkg-config packages
 PKG_CHECK_MODULES(XDBG, dlog xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto videoproto xcmiscproto xextproto xf86vidmodeproto xproto libdrm xcomposite libdri2 xgesture xtst xrandr xi xv)
 
@@ -91,6 +96,10 @@ if test "x$SECURELOG" = xyes; then
     AC_SUBST([TIZEN_ENGINEER_MODE])
 fi
 
+if test "x$NORMALLOG" = xyes; then
+    AC_DEFINE(USE_NORMAL_LOG, 1, [Use normal log])
+fi
+
 AC_OUTPUT([Makefile
            common/Makefile
            bin/Makefile
@@ -103,6 +112,7 @@ AC_OUTPUT([Makefile
 
 echo "CFLAGS     : $CFLAGS"
 echo "LDFLAGS    : $LDFLAGS"
+echo "LOG        : secure($SECURELOG) normal($NORMALLOG)"
 echo "XDBG_CFLAGS: $XDBG_CFLAGS"
 echo "XDBG_LIBS  : $XDBG_LIBS"
 echo "XDBG_CLIENT_CFLAGS: $XDBG_CLIENT_CFLAGS"

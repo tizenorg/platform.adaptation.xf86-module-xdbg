@@ -70,7 +70,7 @@ X server runtime debug library development package
 %setup -q
 
 %build
-%reconfigure --disable-static --prefix=/usr \
+%reconfigure --disable-static --prefix=/usr --enable-normal-log \
   CFLAGS="$CFLAGS -Wall -Werror" \
   LDFLAGS="$LDFLAGS -Wl,--hash-style=both -Wl,--as-needed"
 make %{?jobs:-j%jobs}
