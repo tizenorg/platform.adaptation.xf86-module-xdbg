@@ -140,7 +140,7 @@ _EvlogRequestXextShm (EvlogInfo *evinfo, int detail_level, char *reply, int *len
                 }
 
                 REPLY ("\n");
-                REPLY ("%67s depth(%d) format(%s) send_event(%s) shmseg(0x%lx) offset(%ld)",
+                REPLY ("%67s depth(%d) format(%s) send_event(%s) shmseg(0x%x) offset(%ld)",
                     " ",
                     stuff->depth,
                     format,
