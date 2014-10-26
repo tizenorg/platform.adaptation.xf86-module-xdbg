@@ -32,6 +32,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __XDBG_EVLOG_H__
 #define __XDBG_EVLOG_H__
 
+#include <config.h>
+
 #include "xdbg_types.h"
 #include "xdbg_evlog_request.h"
 #include "xdbg_evlog_event.h"
@@ -46,6 +48,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog_randr.h"
 #include "xdbg_evlog_xinput.h"
 #include "xdbg_evlog_xv.h"
+#if HAVE_HWC
+#include "xdbg_evlog_hwc.h"
+#endif
 #include <list.h>
 
 

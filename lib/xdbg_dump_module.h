@@ -29,13 +29,28 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __X_DEBUG_DBUS_H__
-#define __X_DEBUG_DBUS_H__
+#if defined(XDBG_CLIENT)
+#error "This header is not for client."
+#endif
 
-#define XDBG_DBUS_INTERFACE     "org.x.dbg.interface"
-#define XDBG_DBUS_CLIENT        "org.x.dbg.client"
-#define XDBG_DBUS_METHOD        "x_dbg_method"
+#ifndef __XDBG_DUMP_MODULE_H__
+#define __XDBG_DUMP_MODULE_H__
 
-#define MDBUS   XDBG_M('D','B','U','S')
+#include <X11/Xdefs.h>
+#include <X11/Xprotostr.h>
+#include "xdbg_dump.h"
 
-#endif  /* __X_DEBUG_DBUS_H__ */
+Bool  xDbgDumpSetType    (char *type_str);
+Bool  xDbgDumpSetFile    (char *file_str);
+Bool  xDbgDumpSetCount   (char *count_str);
+Bool  xDbgDumpSetCrop    (char *crop_str);
+char* xDbgDumpGetType    (void);
+char* xDbgDumpGetFile    (void);
+char* xDbgDumpGetCount   (void);
+char* xDbgDumpGetCrop    (void);
+
+Bool xDbgDumpPrepare    (void);
+void xDbgDumpSave       (void);
+void xDbgDumpClear      (void);
+
+#endif  /* __XDBG_DUMP_MODULE_H__ */

@@ -386,10 +386,6 @@ XDbgLogSetWindowPixmap (WindowPtr pWin, PixmapPtr pPixmap)
     pScreen->SetWindowPixmap (pWin, pPixmap);
     pScreen->SetWindowPixmap = XDbgLogSetWindowPixmap;
 
-    /* temporary : check the root window and ignore */
-    if (!pParent)
-        return;
-
     if (pPixmap != pScreen->GetWindowPixmap(pParent))
     {
         //Add to window list
@@ -453,8 +449,16 @@ XDbgLogSetWindowPixmap (WindowPtr pWin, PixmapPtr pPixmap)
             XDBG_TRACE (MMEM,"Unset WinPixmap win(0x%x): pixmap(%p) to NULL\n",
                         (unsigned int)pWin->drawable.id, d->pRefPixmap->pPixmap);
 
-            xorg_list_del (&d->pRefPixmap->link);
-            free (d->pRefPixmap);
+            p_ref = _findXDbgRefPixmap (d, d->pRefPixmap->pPixmap);
+            if(p_ref)
+            {
+                xorg_list_del (&d->pRefPixmap->link);
+                free (d->pRefPixmap);
+            }
+            else
+                XDBG_WARNING (MMEM, "Unknown refpixmap : WinPixmap win(0x%x) pixmap(%p) \n",
+                                       (unsigned int)pWin->drawable.id, d->pRefPixmap->pPixmap);
+
             d->pRefPixmap = NULL;
 
             if (xorg_list_is_empty (&d->refPixmaps))

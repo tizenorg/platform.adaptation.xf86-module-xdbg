@@ -24,7 +24,7 @@
 
 libxdbg_la_LTLIBRARIES = libxdbg.la
 libxdbg_ladir = @moduledir@
-libxdbg_la_LIBADD = @XDBG_LIBS@ ../common/libcommon-server.la ../lib/libxdbg-log.la
+libxdbg_la_LIBADD = @XDBG_LIBS@ ../common/libcommon-server.la ../lib/libxdbg-lib.la
 libxdbg_la_LDFLAGS = -module -avoid-version ${LDFLAGS}
 libxdbg_la_CFLAGS = \
 	${CFLAGS} \

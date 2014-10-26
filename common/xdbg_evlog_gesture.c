@@ -51,6 +51,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <windowstr.h>
+#include <X11/extensions/gesture.h>
 #include <X11/extensions/gestureproto.h>
 
 
@@ -68,13 +69,13 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GestureSelectEvents:
         {
             xGestureSelectEventsReq *stuff = (xGestureSelectEventsReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
-                REPLY (" mask(0x%x)",
-                    (unsigned int)stuff->mask);
+                REPLY (" mask(0x%lx)",
+                    stuff->mask);
             }
 
             return reply;
@@ -83,8 +84,8 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GestureGetSelectedEvents:
         {
             xGestureGetSelectedEventsReq *stuff = (xGestureGetSelectedEventsReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             return reply;
         }
@@ -92,8 +93,8 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GestureGrabEvent:
         {
             xGestureGrabEventReq *stuff = (xGestureGrabEventReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -109,13 +110,13 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                     case GestureNotifyTapNHold:  event_type = "GestureNotifyTapNHold"; break;
                     case GestureNotifyHold:  event_type = "GestureNotifyHold"; break;
                     case GestureNotifyGroup:  event_type = "GestureNotifyGroup"; break;
-                    default:  event_type = devent_type; sprintf (devent_type, "%ld", (long int)stuff->eventType); break;
+                    default:  event_type = devent_type; snprintf (devent_type, 10, "%ld", stuff->eventType); break;
                 }
 
                 REPLY (" event_type(%s) num_finger(%d) time(%lums)",
                     event_type,
                     stuff->num_finger,
-                    (unsigned long)stuff->time);
+                    stuff->time);
             }
 
             return reply;
@@ -124,8 +125,8 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_GestureUngrabEvent:
         {
             xGestureUngrabEventReq *stuff = (xGestureUngrabEventReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -141,13 +142,13 @@ _EvlogRequestGesture(EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                     case GestureNotifyTapNHold:  event_type = "GestureNotifyTapNHold"; break;
                     case GestureNotifyHold:  event_type = "GestureNotifyHold"; break;
                     case GestureNotifyGroup:  event_type = "GestureNotifyGroup"; break;
-                    default:  event_type = devent_type; sprintf (devent_type, "%ld", (long int)stuff->eventType); break;
+                    default:  event_type = devent_type; snprintf (devent_type, 10, "%ld", stuff->eventType); break;
                 }
 
                 REPLY (" event_type(%s) num_finger(%d) time(%lums)",
                     event_type,
                     stuff->num_finger,
-                    (unsigned long)stuff->time);
+                    stuff->time);
             }
 
             return reply;
@@ -170,8 +171,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyFlick:
         {
             xGestureNotifyFlickEvent *stuff = (xGestureNotifyFlickEvent *) evt;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -184,12 +185,12 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     case GestureBegin:  kind = "GestureBegin"; break;
                     case GestureUpdate:  kind = "GestureUpdate"; break;
                     case GestureDone:  kind = "GestureDone"; break;
-                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                    default:  kind = dkind; snprintf (dkind, 10, "%d", stuff->kind); break;
                 }
 
                 REPLY (" kind(%s) time(%lums) num_finger(%d) direction(%d) distance(%d)",
                     kind,
-                    (unsigned long)stuff->time,
+                    stuff->time,
                     stuff->num_finger,
                     stuff->direction,
                     stuff->distance);
@@ -197,8 +198,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("\n");
                 REPLY ("%67s duration(%lums) angle(%ld)",
                     " ",
-                    (unsigned long)stuff->duration,
-                    (long int)stuff->angle);
+                    stuff->duration,
+                    stuff->angle);
             }
 
             return reply;
@@ -207,8 +208,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyPan:
         {
             xGestureNotifyPanEvent *stuff = (xGestureNotifyPanEvent *) evt;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -221,13 +222,13 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     case GestureBegin:  kind = "GestureBegin"; break;
                     case GestureUpdate:  kind = "GestureUpdate"; break;
                     case GestureDone:  kind = "GestureDone"; break;
-                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                    default:  kind = dkind; snprintf (dkind, 10, "%d", stuff->kind); break;
                 }
 
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) direction(%d) ",
                     kind,
                     stuff->sequenceNumber,
-                    (unsigned long)stuff->time,
+                    stuff->time,
                     stuff->num_finger,
                     stuff->direction);
 
@@ -235,7 +236,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("%67s distance(%d) duration(%ldms) coord(%d,%d)",
                     " ",
                     stuff->distance,
-                    (long int)stuff->duration,
+                    stuff->duration,
                     stuff->dx,
                     stuff->dy);
             }
@@ -246,8 +247,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyPinchRotation:
         {
             xGestureNotifyPinchRotationEvent *stuff = (xGestureNotifyPinchRotationEvent *) evt;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -260,13 +261,13 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     case GestureBegin:  kind = "GestureBegin"; break;
                     case GestureUpdate:  kind = "GestureUpdate"; break;
                     case GestureDone:  kind = "GestureDone"; break;
-                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                    default:  kind = dkind; snprintf (dkind, 10, "%d", stuff->kind); break;
                 }
 
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) distance(%d)",
                     kind,
                     stuff->sequenceNumber,
-                    (unsigned long)stuff->time,
+                    stuff->time,
                     stuff->num_finger,
                     stuff->distance);
 
@@ -275,8 +276,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     " ",
                     stuff->cx,
                     stuff->cy,
-                    (long int)stuff->zoom,
-                    (long int)stuff->angle);
+                    stuff->zoom,
+                    stuff->angle);
             }
 
             return reply;
@@ -285,8 +286,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyTap:
         {
             xGestureNotifyTapEvent *stuff = (xGestureNotifyTapEvent *) evt;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -299,13 +300,13 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     case GestureBegin:  kind = "GestureBegin"; break;
                     case GestureUpdate:  kind = "GestureUpdate"; break;
                     case GestureDone:  kind = "GestureDone"; break;
-                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                    default:  kind = dkind; snprintf (dkind, 10, "%d", stuff->kind); break;
                 }
 
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) coord(%d,%d)",
                     kind,
                     stuff->sequenceNumber,
-                    (unsigned long)stuff->time,
+                    stuff->time,
                     stuff->num_finger,
                     stuff->cx,
                     stuff->cy);
@@ -314,7 +315,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("%67s tap_repeat(%d) interval(%lums)",
                     " ",
                     stuff->tap_repeat,
-                    (unsigned long)stuff->interval);
+                    stuff->interval);
             }
 
             return reply;
@@ -323,8 +324,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyTapNHold:
         {
             xGestureNotifyTapNHoldEvent *stuff = (xGestureNotifyTapNHoldEvent *) evt;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -337,13 +338,13 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     case GestureBegin:  kind = "GestureBegin"; break;
                     case GestureUpdate:  kind = "GestureUpdate"; break;
                     case GestureDone:  kind = "GestureDone"; break;
-                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                    default:  kind = dkind; snprintf (dkind, 10, "%d", stuff->kind); break;
                 }
 
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) coord(%d,%d)",
                     kind,
                     stuff->sequenceNumber,
-                    (unsigned long)stuff->time,
+                    stuff->time,
                     stuff->num_finger,
                     stuff->cx,
                     stuff->cy);
@@ -351,8 +352,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("\n");
                 REPLY ("%67s interval(%lums) hold_time(%lums)",
                     " ",
-                    (unsigned long)stuff->interval,
-                    (unsigned long)stuff->holdtime);
+                    stuff->interval,
+                    stuff->holdtime);
             }
 
             return reply;
@@ -361,8 +362,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyHold:
         {
             xGestureNotifyHoldEvent *stuff = (xGestureNotifyHoldEvent *) evt;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -375,13 +376,13 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     case GestureBegin:  kind = "GestureBegin"; break;
                     case GestureUpdate:  kind = "GestureUpdate"; break;
                     case GestureDone:  kind = "GestureDone"; break;
-                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                    default:  kind = dkind; snprintf (dkind, 10, "%d", stuff->kind); break;
                 }
 
                 REPLY (" kind(%s) sequence_num(%d) time(%lums) num_finger(%d) coord(%d,%d) ",
                     kind,
                     stuff->sequenceNumber,
-                    (unsigned long)stuff->time,
+                    stuff->time,
                     stuff->num_finger,
                     stuff->cx,
                     stuff->cy);
@@ -389,7 +390,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                 REPLY ("\n");
                 REPLY ("%67s hold_time(%lums)",
                     " ",
-                    (unsigned long)stuff->holdtime);
+                    stuff->holdtime);
             }
 
             return reply;
@@ -398,8 +399,8 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
     case GestureNotifyGroup:
         {
             xGestureNotifyGroupEvent *stuff = (xGestureNotifyGroupEvent *) evt;
-            REPLY (": XID(0x%x) groupID(%d) groupNum(%d)",
-                (unsigned int)stuff->window,
+            REPLY (": XID(0x%lx) groupID(%d) groupNum(%d)",
+                stuff->window,
                 stuff->groupid,
                 stuff->num_group);
 
@@ -413,7 +414,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     case GestureGroupRemoved:  kind = "GestureGroupRemoved"; break;
                     case GestureGroupAdded:  kind = "GestureGroupAdded"; break;
                     case GestureGroupCurrent:  kind = "GestureGroupCurrent"; break;
-                    default:  kind = dkind; sprintf (dkind, "%d", stuff->kind); break;
+                    default:  kind = dkind; snprintf (dkind, 10, "%d", stuff->kind); break;
                 }
 
                 REPLY ("\n");
@@ -421,7 +422,7 @@ _EvlogEventGesture (EvlogInfo *evinfo, int first_base, int detail_level, char *r
                     " ",
                     kind,
                     stuff->sequenceNumber,
-                    (unsigned long)stuff->time,
+                    stuff->time,
                     stuff->groupid,
                     stuff->num_group);
             }

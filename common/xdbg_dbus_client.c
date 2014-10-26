@@ -48,6 +48,8 @@ struct _XDbgDBusClientInfo
     char reqname[STR_LEN];
     char client[STR_LEN];
     int  pid;
+    char xdbg_dbus_server[STR_LEN];
+    char xdbg_dbus_path[STR_LEN];
 };
 
 static DBusHandlerResult
@@ -74,6 +76,18 @@ _xDbgDBusClinetInit (XDbgDBusClientInfo *info)
 {
     DBusError err;
     int ret;
+    char *display_num;
+
+    if(!(display_num = getenv("DISPLAY")))
+    {
+        XDBG_LOG ("[CLIENT:%s] failed: get DISPLAY ENV\n", info->client);
+        return FALSE;
+    }
+
+    snprintf(info->xdbg_dbus_server, sizeof(info->xdbg_dbus_path), "org.x.dbg.server%d", atoi(display_num));
+    snprintf(info->xdbg_dbus_path, sizeof(info->xdbg_dbus_path), "/org/x/dbg/path/%d", atoi(display_num));
+
+    XDBG_LOG ("[CLIENT:%s] display number :%d\n", info->client, atoi(display_num));
 
     dbus_error_init (&err);
     RETURN_VAL_IF_FAIL (info->conn == NULL, FALSE);
@@ -205,7 +219,7 @@ xDbugDBusClientSendMessage (XDbgDBusClientInfo *info, int argc, char **argv)
 
     dbus_error_init (&err);
 
-    msg = dbus_message_new_method_call (XDBG_DBUS_SERVER, XDBG_DBUS_PATH,
+    msg = dbus_message_new_method_call (info->xdbg_dbus_server, info->xdbg_dbus_path,
                                         XDBG_DBUS_INTERFACE, XDBG_DBUS_METHOD);
     GOTO_IF_FAIL (msg != NULL, err_send);
 

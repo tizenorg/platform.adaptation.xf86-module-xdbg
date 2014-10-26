@@ -47,6 +47,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define API __attribute__ ((visibility("default")))
 #endif
 
+#define FPS_DEBUG_TIMER_INTERVAL    500
+
 static int init_fpsdebug = 0;
 static Bool g_on = FALSE;
 
@@ -167,7 +169,7 @@ xDbgLogFpsDebugCount (FpsDebugPtr pFpsDebug, int connector_type)
     }
 
     pFpsDebug->tCur = GetTimeInMillis();
-    if (pFpsDebug->nPanCount && pFpsDebug->tStart + 1000 <= pFpsDebug->tCur)
+    if (pFpsDebug->nPanCount && pFpsDebug->tStart + FPS_DEBUG_TIMER_INTERVAL <= pFpsDebug->tCur)
         _fps_print_fps (pFpsDebug, FALSE);
 
     if (pFpsDebug->nPanCount == 0)
@@ -176,7 +178,7 @@ xDbgLogFpsDebugCount (FpsDebugPtr pFpsDebug, int connector_type)
     pFpsDebug->nPanCount++;
     pFpsDebug->tLast = pFpsDebug->tCur;
     pFpsDebug->fpsTimer = TimerSet (pFpsDebug->fpsTimer
-                                    , 0, 1000
+                                    , 0, FPS_DEBUG_TIMER_INTERVAL
                                     , _fps_frame_timeout, pFpsDebug);
 }
 

@@ -39,8 +39,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <errno.h>
 #include <stdlib.h>
 #include <os.h>
-#include <dlog.h>
-
+#include <xdbg_log_secure.h>
 
 unsigned int xDbgLogGetModule (char *name);
 Bool         xDbgGetLogEnableDlog ();
@@ -65,22 +64,19 @@ enum
     XLOG_LEVEL_3,
     XLOG_LEVEL_4,
     XLOG_LEVEL_MAX,
-    XLOG_LEVEL_DEFAULT = XLOG_LEVEL_MAX
+    XLOG_LEVEL_DEFAULT = XLOG_LEVEL_MAX,
 };
 
 #define XDBG_ALL_MODULE  0xFFFFFFFF
 
-#define XLOG_LEVEL_DEBUG    XLOG_LEVEL_0
-#define XLOG_LEVEL_TRACE    XLOG_LEVEL_1
-#define XLOG_LEVEL_INFO     XLOG_LEVEL_2
-#define XLOG_LEVEL_WARNING  XLOG_LEVEL_3
-#define XLOG_LEVEL_ERROR    XLOG_LEVEL_4
+#define XLOG_LEVEL_DEBUG    XLOG_LEVEL_0    /* console */
+#define XLOG_LEVEL_TRACE    XLOG_LEVEL_1    /* console */
+#define XLOG_LEVEL_INFO     XLOG_LEVEL_2    /* Xorg.0.log or dlog */
+#define XLOG_LEVEL_WARNING  XLOG_LEVEL_3    /* Xorg.0.log and dlog */
+#define XLOG_LEVEL_ERROR    XLOG_LEVEL_4    /* Xorg.0.log and dlog */
 
-// Log Options
-#define XLOG_OPTION_KLOG        (1 << 8)
-#define XLOG_OPTION_SLOG        (1 << 9)
-#define XLOG_OPTION_XORG        (1 << 10)
-#define XLOG_OPTION_SECURE      (1 << 11)   /* print secure log */
+#define XLOG_OPTION_KLOG        (1 << 8)    /* LV:WARNING and /dev/kmsg */
+#define XLOG_OPTION_SECURE      (1 << 12)   /* LV:INFO. Disable when released */
 
 typedef enum
 {
@@ -99,9 +95,7 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 #define XLOG_INFO(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_INFO, __FILE__, __LINE__, ##ARG)
 #define XLOG_WARNING(mod, ARG...)  xDbgLog(mod, XLOG_LEVEL_WARNING, __FILE__, __LINE__, ##ARG)
 #define XLOG_ERROR(mod, ARG...)    xDbgLog(mod, XLOG_LEVEL_ERROR, __FILE__, __LINE__, ##ARG)
-#define XLOG_KLOG(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_KLOG, __FILE__, __LINE__, ##ARG)
-#define XLOG_SLOG(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_SLOG, __FILE__, __LINE__, ##ARG)
-#define XLOG_XORG(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_XORG, __FILE__, __LINE__, ##ARG)
+#define XLOG_KLOG(mod, ARG...)     xDbgLog(mod, XLOG_LEVEL_WARNING|XLOG_OPTION_KLOG, __FILE__, __LINE__, ##ARG)
 #define XLOG_SECURE(mod, ARG...)   xDbgLog(mod, XLOG_LEVEL_INFO|XLOG_OPTION_SECURE, __FILE__, __LINE__, ##ARG)
 
 #define XDBG_DEBUG(mod, fmt, ARG...)      XLOG_DEBUG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
@@ -111,11 +105,8 @@ void* xDbgLog            (unsigned int module, int logoption, const char *file, 
 #define XDBG_ERROR(mod, fmt, ARG...)      XLOG_ERROR(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 #define XDBG_ERRNO(mod, fmt, ARG...)      XLOG_ERROR(mod, "[%s](err=%s(%d)) "fmt, __FUNCTION__, strerror(errno), errno, ##ARG)
 #define XDBG_KLOG(mod, fmt, ARG...)       XLOG_KLOG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
-#define XDBG_SLOG(mod, fmt, ARG...)       XLOG_SLOG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
-#define XDBG_XORG(mod, fmt, ARG...)       XLOG_XORG(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 
-/* _SECURE_LOG defined by system, <dlog.h> */
-#ifdef _SECURE_LOG
+#if TIZEN_ENGINEER_MODE
 #define XDBG_SECURE(mod, fmt, ARG...)     XLOG_SECURE(mod, "[%s] "fmt, __FUNCTION__, ##ARG)
 #else
 #define XDBG_SECURE(mod, fmt, ARG...)     do { } while(0)

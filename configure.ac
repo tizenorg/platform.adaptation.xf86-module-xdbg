@@ -47,9 +47,26 @@ AC_ARG_WITH(xorg-module-dir,
                            [Default xorg module directory [[default=$libdir/xorg/modules]]]),
                            [moduledir="$withval"],
                            [moduledir="$libdir/xorg/modules"])
+AC_ARG_ENABLE(secure-log,
+              AS_HELP_STRING([--enable-secure-log],
+                             [Enable secure log (default: disabled)]),
+                             [SECURELOG=$enableval], [SECURELOG=no])
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XDBG, dlog xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dmxproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto scrnsaverproto videoproto xcmiscproto xextproto xf86bigfontproto xf86dgaproto xf86driproto xf86vidmodeproto xineramaproto xproto libdrm xcomposite libdri2 xtst xrandr xi xv)
+PKG_CHECK_MODULES(XDBG, dlog xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto videoproto xcmiscproto xextproto xf86vidmodeproto xproto libdrm xcomposite libdri2 xgesture xtst xrandr xi xv)
+
+PKG_CHECK_MODULES(HWC, libhwc hwcproto,
+	[SAVE_CPPFLAGS="$CPPFLAGS"
+	CPPFLAGS="$CPPFLAGS $HWC_CFLAGS"
+	AC_CHECK_HEADERS([X11/extensions/hwc.h],[have_hwc_h="yes"],[have_hwc_h="no"])
+	CPPFLAGS="$SAVE_CPPFLAGS"],[echo "not found"])
+
+AM_CONDITIONAL(HAVE_HWC, [test "x$have_hwc_h" = xyes])
+if test "x$have_hwc_h" = xyes; then
+    AC_DEFINE(HAVE_HWC, 1, [Have libhwc])
+    XDBG_CFLAGS="$XDBG_CFLAGS $HWC_CFLAGS"
+    XDBG_LIBS="$XDBG_LIBS $HWC_LIBS"
+fi
 
 AC_SUBST([XDBG_CFLAGS])
 AC_SUBST([XDBG_LIBS])
@@ -68,12 +85,19 @@ AC_SUBST([moduledir])
 
 AC_DEFINE_UNQUOTED(MODULE_NAME, "$MODULE_NAME", [module name])
 
+TIZEN_ENGINEER_MODE=0
+if test "x$SECURELOG" = xyes; then
+    TIZEN_ENGINEER_MODE=1
+    AC_SUBST([TIZEN_ENGINEER_MODE])
+fi
+
 AC_OUTPUT([Makefile
            common/Makefile
            bin/Makefile
            bin/xdbg/Makefile
            bin/xevlog_analyze/Makefile
            lib/Makefile
+           lib/xdbg_log_secure.h
            lib/xdbg.pc
            module/Makefile])
 

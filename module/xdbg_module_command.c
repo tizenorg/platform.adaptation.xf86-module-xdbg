@@ -44,6 +44,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xdbg.h>
 #include "xdbg_types.h"
 #include <xf86Priv.h>
+#include "xdbg_dump_module.h"
 #include "xdbg_module.h"
 #include "xdbg_module_clist.h"
 #include "xdbg_module_plist.h"
@@ -76,6 +77,7 @@ _CommandSetLogFile (int pid, char *path, char *reply, int *len, XDbgModule *pMod
     static int old_stderr = -1;
     char fd_name[XDBG_PATH_MAX];
     int  log_fd = -1;
+    FILE *log_fl;
 
     if (!path || strlen (path) <= 0)
     {
@@ -101,8 +103,8 @@ _CommandSetLogFile (int pid, char *path, char *reply, int *len, XDbgModule *pMod
         }
     }
 
-    log_fd = open (fd_name, O_CREAT|O_RDWR|O_APPEND, 0755);
-    if (log_fd < 0)
+    log_fl = fopen (fd_name, "a");
+    if (!log_fl)
     {
         XDBG_REPLY ("failed: open file(%s)\n", fd_name);
         return FALSE;
@@ -110,16 +112,20 @@ _CommandSetLogFile (int pid, char *path, char *reply, int *len, XDbgModule *pMod
 
     fflush (stderr);
     close (STDERR_FILENO);
+
+    setvbuf (log_fl, NULL, _IOLBF, 512);
+    log_fd = fileno (log_fl);
+
     dup2 (log_fd, STDERR_FILENO);
-    close (log_fd);
+    fclose (log_fl);
 
-    if (pMod->real_log_path)
-        free (pMod->real_log_path);
+    if (pMod->log_path)
+        free (pMod->log_path);
 
-    pMod->real_log_path = strdup (fd_name);
-    XDBG_RETURN_VAL_IF_FAIL (pMod->real_log_path != NULL, FALSE);
+    pMod->log_path = strdup (fd_name);
+    XDBG_RETURN_VAL_IF_FAIL (pMod->log_path != NULL, FALSE);
 
-    XDBG_REPLY ("log path: %s\n", pMod->real_log_path);
+    XDBG_REPLY ("log path: %s\n", pMod->log_path);
 
     return TRUE;
 }
@@ -130,7 +136,7 @@ _CommandLogPath (int pid, int argc, char **argv, char *reply, int *len, XDbgModu
 {
     if (argc != 3)
     {
-        XDBG_REPLY ("log path: %s\n", (pMod->real_log_path)?pMod->real_log_path:"stderr");
+        XDBG_REPLY ("log path: %s\n", (pMod->log_path)?pMod->log_path:"stderr");
         return;
     }
 
@@ -238,6 +244,20 @@ _CommandSetEvlogRule (int pid, int argc, char **argv, char *reply, int *len, XDb
         return;
     }
 
+    if (argc > 2 && argv[2] && !strcmp (argv[2], "file"))
+    {
+        if (argc < 4 || !argv[3])
+        {
+            XDBG_REPLY ("Error : no evlog rule file.\n");
+            return;
+        }
+
+        if (pMod->evlog_rule_path)
+            free (pMod->evlog_rule_path);
+
+        pMod->evlog_rule_path = strdup (argv[3]);
+    }
+
     xDbgModuleEvlogInfoSetRule (pMod, argc - 2, (const char**)&(argv[2]), reply, len);
 }
 
@@ -306,6 +326,105 @@ _CommandFpsDebug (int pid, int argc, char **argv, char *reply, int *len, XDbgMod
     xDbgModuleFpsDebug (pMod, on, reply, len);
 
     XDBG_REPLY ("Success\n");
+}
+
+static char *
+_printDumpOption (char *reply, int *len)
+{
+    if (xDbgDumpGetType ())
+        XDBG_REPLY ("type:%s ", xDbgDumpGetType ());
+    if (xDbgDumpGetCount ())
+        XDBG_REPLY ("count:%s ", xDbgDumpGetCount ());
+    if (xDbgDumpGetFile ())
+        XDBG_REPLY ("file:%s ", xDbgDumpGetFile ());
+    if (xDbgDumpGetCrop ())
+        XDBG_REPLY ("crop:%s ", xDbgDumpGetCrop ());
+
+    return reply;
+}
+
+static void
+_CommandDump (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
+{
+    int i;
+    char *c;
+
+    if (argc < 3)
+    {
+        reply = _printDumpOption (reply, len);
+        XDBG_REPLY("\n");
+        return;
+    }
+
+    for (i = 0; i < argc; i++)
+    {
+        char *c = argv[i];
+        if (*c != '-')
+            continue;
+
+        if (!strcmp (c, "-type"))
+        {
+            c = argv[++i];
+            if (!xDbgDumpSetType (c))
+            {
+                XDBG_REPLY ("fail: set '%s' (already running)\n", c);
+                return;
+            }
+        }
+        else if (!strcmp (c, "-count"))
+        {
+            c = argv[++i];
+            if (!xDbgDumpSetCount (c))
+            {
+                XDBG_REPLY ("fail: set '%s' (already running)\n", c);
+                return;
+            }
+        }
+        else if (!strcmp (c, "-file"))
+        {
+            c = argv[++i];
+            if (!xDbgDumpSetFile (c))
+            {
+                XDBG_REPLY ("fail: set '%s' (already running)\n", c);
+                return;
+            }
+        }
+        else if (!strcmp (c, "-crop"))
+        {
+            c = argv[++i];
+            if (!xDbgDumpSetCrop (c))
+            {
+                XDBG_REPLY ("fail: set '%s' (already running)\n", c);
+                return;
+            }
+        }
+    }
+
+    c = argv[2];
+    if (!strcmp (c, "on"))
+    {
+        xDbgDumpPrepare ();
+        XDBG_REPLY ("'%s'", c);
+        reply = _printDumpOption (reply, len);
+    }
+    else if (!strcmp (c, "off"))
+    {
+        xDbgDumpSave ();
+        xDbgDumpClear ();
+        XDBG_REPLY ("'%s' ", c);
+    }
+    else if (!strcmp (c, "clear"))
+    {
+        xDbgDumpClear ();
+        XDBG_REPLY ("'%s' ", c);
+    }
+    else if (*c != '-')
+    {
+        XDBG_REPLY ("unknown option '%s'\n", c);
+        return;
+    }
+
+    XDBG_REPLY ("success\n");
 }
 
 static struct
@@ -384,6 +503,12 @@ static struct
         "fpsdebug", "to print fps", "[0-1]",
         NULL, "[OFF:0/ON:1]",
         _CommandFpsDebug
+    },
+
+    {
+        "dump", "to dump buffers", "[on,off,clear]",
+        NULL, "[on,off,clear] -type [ui,drawable,fb,video] -count [n] -file [bmp,raw]",
+        _CommandDump
     },
 };
 
@@ -468,12 +593,12 @@ xDbgModuleCommand (void *data, int argc, char **argv, char *reply, int *len)
 }
 
 Bool
-xDbgModuleCommandInitLogPath (XDbgModule *pMod)
+xDbgModuleCommandInitLogPath (XDbgModule *pMod, char *log_path)
 {
     char reply[1024];
     int len = sizeof (reply);
 
-    if (pMod->log_path && strlen (pMod->log_path) > 0)
+    if (log_path && strlen (log_path) > 0)
     {
         char newname[XDBG_PATH_MAX];
         char filename[XDBG_PATH_MAX];
@@ -481,7 +606,7 @@ xDbgModuleCommandInitLogPath (XDbgModule *pMod)
         char *p = NULL, *last = NULL;
         int i;
 
-        snprintf (newname, XDBG_PATH_MAX, "%s", pMod->log_path);
+        snprintf (newname, XDBG_PATH_MAX, "%s", log_path);
 
         for (i = 0; i < strlen (newname); i++)
         {
@@ -493,18 +618,17 @@ xDbgModuleCommandInitLogPath (XDbgModule *pMod)
         snprintf (filename, XDBG_PATH_MAX, "%s", last + 1);
         snprintf (last, XDBG_PATH_MAX - (last - newname), "/prev.%s", filename);
 
-        if (!stat (pMod->log_path, &status))
+        if (!stat (log_path, &status))
         {
-            if (rename (pMod->log_path, newname))
+            if (rename (log_path, newname))
             {
-                XDBG_ERROR (MXDBG, "Failed: rename %s -> %s\n", pMod->log_path, newname);
+                XDBG_ERROR (MXDBG, "Failed: rename %s -> %s\n", log_path, newname);
                 return FALSE;
             }
         }
-    }
 
-    if (pMod->log_path)
-        _CommandSetLogFile (0, pMod->log_path, reply, &len, pMod);
+        _CommandSetLogFile (0, log_path, reply, &len, pMod);
+    }
     else
         _CommandSetLogFile (0, "console", reply, &len, pMod);
 
@@ -512,30 +636,24 @@ xDbgModuleCommandInitLogPath (XDbgModule *pMod)
 }
 
 Bool
-xDbgModuleCommandInitEvlogRulePath (XDbgModule *pMod)
+xDbgModuleCommandInitEvlogRulePath (XDbgModule *pMod, char *evlog_rule_path)
 {
-    if (pMod->evlog_rule_path && strlen (pMod->evlog_rule_path) > 0)
-    {
-        char reply[4096];
-        int len = sizeof (reply);
-        char *argv[4];
-        int argc = 4;
+    char reply[4096];
+    int len = sizeof (reply);
+    char *argv[4];
+    int argc = 4;
 
-        if (!pMod->evlog_path)
-        {
-            XDBG_XORG (MXDBG, "no evlog_path!!!\n");
-            return TRUE;
-        }
+    if (!evlog_rule_path || strlen (evlog_rule_path) <= 0)
+        return TRUE;
 
-        argv[0] = "unknown";
-        argv[1] = "evlog_rule";
-        argv[2] = "file";
-        argv[3] = pMod->evlog_rule_path;
+    argv[0] = "unknown";
+    argv[1] = "evlog_rule";
+    argv[2] = "file";
+    argv[3] = evlog_rule_path;
 
-        _CommandSetEvlogRule (0, argc, argv, reply, &len, pMod);
+    _CommandSetEvlogRule (0, argc, argv, reply, &len, pMod);
 
-        xDbgModuleEvlogPrintEvents (pMod, TRUE, "", reply, &len);
-    }
+    xDbgModuleEvlogPrintEvents (pMod, TRUE, "", reply, &len);
 
     return TRUE;
 }

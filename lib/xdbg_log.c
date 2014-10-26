@@ -33,6 +33,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "config.h"
 #endif
 
+#include <sys/time.h>
+#include <unistd.h>
+#include <time.h>
 #include <string.h>
 #include <stdarg.h>
 #include <dlog.h>
@@ -49,6 +52,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define MAX_MODULE_NAME	4
 #define MAX_MODULE_CNT	256
 #define BUF_LEN         1024
+#define MAX_MONTH 12
 
 typedef struct
 {
@@ -60,6 +64,7 @@ typedef struct
 static ModuleInfo modules[MAX_MODULE_CNT];
 static int module_cnt = 0;
 static int default_level = XLOG_LEVEL_DEFAULT;
+static char *st_month[MAX_MONTH] = {"Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"};
 
 static Bool dlog_enable;
 
@@ -89,6 +94,8 @@ _LogModule (void * handle, int logoption, const char * file, int line, const cha
     char tmpBuf[BUF_LEN];
     int loglevel = logoption & XLOG_MASK_LOGLEVEL;
     const char *name;
+    struct timeval  tv;
+    struct tm      *tm=NULL;
 
     if (!h)
         return;
@@ -100,35 +107,51 @@ _LogModule (void * handle, int logoption, const char * file, int line, const cha
         snprintf(tmpBuf, BUF_LEN, "[%s]%s", (name)?name:"", f);
         kLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
     }
-
-    /* write to file */
-    if (loglevel >= XLOG_LEVEL_INFO)
+    else if (loglevel >= XLOG_LEVEL_INFO)
     {
-        if (logoption & XLOG_OPTION_SECURE)
-            snprintf(tmpBuf, BUF_LEN, "(%s) > [SECURE_LOG] [%s]%s", ostr[loglevel], (name)?name:"", f);
-        else
-            snprintf(tmpBuf, BUF_LEN, "(%s) [%s]%s", ostr[loglevel], (name)?name:"", f);
+        if( !dlog_enable )
+        {
+            /* get local time from tv */
+            gettimeofday(&tv, NULL);
+            tm = localtime(&tv.tv_sec);
 
-        if (!dlog_enable)
+            /* write to file */
+            if (logoption & XLOG_OPTION_SECURE)
+                snprintf(tmpBuf, BUF_LEN, "[%s %d %02d:%02d:%02d:%03ld] (%s) > [SECURE_LOG] [%s]%s", st_month[tm->tm_mon], tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec/1000, ostr[loglevel], (name)?name:"", f);
+            else
+                snprintf(tmpBuf, BUF_LEN, "[%s %d %02d:%02d:%02d:%03ld] (%s) [%s]%s", st_month[tm->tm_mon], tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, tv.tv_usec/1000, ostr[loglevel], (name)?name:"", f);
+
             LogVWrite (1, tmpBuf, args);
+        }
         else
         {
-            dLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
+            /* dlog already supports localtime stamp. So we just add clock time! */
+            /* write to file */
+            if (logoption & XLOG_OPTION_SECURE)
+                snprintf(tmpBuf, BUF_LEN, "[%10.3f] (%s) > [SECURE_LOG] [%s]%s", GetTimeInMillis()/1000.0, ostr[loglevel], (name)?name:"", f);
+            else
+                snprintf(tmpBuf, BUF_LEN, "[%10.3f] (%s) [%s]%s", GetTimeInMillis()/1000.0, ostr[loglevel], (name)?name:"", f);
 
-            /* write to Xorg.0.log too */
-            if (logoption & XLOG_OPTION_XORG || loglevel >= XLOG_LEVEL_WARNING)
-                LogVWrite (1, tmpBuf, args);
+            dLogWrapper (loglevel, logoption, file, line, tmpBuf, args);
         }
     }
 
-    /* write to terminal */
-    if (loglevel >= h->loglevel || logoption & XLOG_OPTION_SLOG)
+    /* write to console */
+    if (loglevel >= h->loglevel)
     {
         char *buf = tmpBuf;
         int   remain = BUF_LEN;
         int   len = 0;
+        unsigned int tv_ms;
 
-        len = snprintf (buf, remain, "(%s) [%10.3f][%s]", ostr[loglevel], GetTimeInMillis()/1000.0, name?name:"");
+        if( tm == NULL )
+        {
+            gettimeofday(&tv, NULL);
+            tm = localtime(&tv.tv_sec);
+        }
+
+        tv_ms = tv.tv_usec/1000;
+        len = snprintf (buf, remain, "[%10.3f] [%s %d %02d:%02d:%02d:%03d] (%s) [%s]", GetTimeInMillis()/1000.0, st_month[tm->tm_mon], tm->tm_mday, tm->tm_hour, tm->tm_min, tm->tm_sec, tv_ms, ostr[loglevel], name?name:"");
         buf += len;
         remain -= len;
 
@@ -210,13 +233,9 @@ xDbgLog (unsigned int module, int logoption, const char * file, int line, const 
         return NULL;
 
 check_level:
-    if (logoption & (XLOG_OPTION_KLOG | XLOG_OPTION_SLOG))
-        goto write_log;
-
     if (loglevel < XLOG_LEVEL_INFO && loglevel < h->loglevel)
         return h;
 
-write_log:
     va_start (args, f);
     _LogModule (h, logoption, file, line, f, args);
     va_end (args);

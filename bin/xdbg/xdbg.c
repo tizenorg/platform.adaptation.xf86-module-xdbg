@@ -80,8 +80,9 @@ int main(int argc, char ** argv)
     snprintf (temp, sizeof(temp), "%d", getpid ());
     new_argv[0] = temp;
 
-    if (getcwd (cwd, sizeof(cwd)))
-        new_argv[1] = cwd;
+    if (!getcwd (cwd, sizeof(cwd)))
+        snprintf (cwd, sizeof(cwd), "/tmp");
+    new_argv[1] = cwd;
 
     for (i = 0; i < argc; i++)
         new_argv[i+2] = argv[i];

@@ -42,6 +42,10 @@ COMMON_SOURCE =  \
     ds/bool_exp_rule_checker.c \
     ds/bool_exp_tokenizer.c
 
+if HAVE_HWC
+COMMON_SOURCE += xdbg_evlog_hwc.c
+endif
+
 COMMON_CFLAGS = \
     ${CFLAGS} \
     @XDBG_CFLAGS@ \

@@ -80,6 +80,7 @@ _debugClientInfo (ClientPtr client)
             goto finish;
 
         strncpy (info->command, path, PATH_MAX);
+        info->command[PATH_MAX] = '\0';
 
         info->pid = creds.pid;
         info->uid = creds.uid;
@@ -92,6 +93,7 @@ _debugClientInfo (ClientPtr client)
         info->pid = -1;
         info->index = client->index;
         strncpy (info->command, "REMOTE", PATH_MAX);
+        info->command[PATH_MAX] = '\0';
     }
 
     return;
@@ -162,18 +164,6 @@ xDbgModuleMain (XDbgModule *pMod)
     if (!xDbgDBusServerConnect ())
     {
         XDBG_ERROR (MXDBG, "failed: xDbgDBusServerConnect\n");
-        return FALSE;
-    }
-
-    if (!xDbgModuleCommandInitLogPath (pMod))
-    {
-        XDBG_ERROR (MXDBG, "failed: xDbgModuleInitLogPath\n");
-        return FALSE;
-    }
-
-    if (!xDbgModuleCommandInitEvlogRulePath (pMod))
-    {
-        XDBG_ERROR (MXDBG, "failed: xDbgModuleCommandInitEvlogRulePath\n");
         return FALSE;
     }
 

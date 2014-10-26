@@ -95,7 +95,7 @@ xDbgLogDrmEventAddVblank ( int crtc_pipe, unsigned int client_idx, unsigned int 
 {
     XDbgVblankInfoPtr pVblankInfo = NULL;
 
-    pVblankInfo = calloc (1, sizeof (XDbgPageFlipInfo));
+    pVblankInfo = calloc (1, sizeof (XDbgVblankInfo));
     if (!pVblankInfo)
         return NULL;
 

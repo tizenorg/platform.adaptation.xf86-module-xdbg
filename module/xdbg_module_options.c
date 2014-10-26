@@ -36,12 +36,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xdbg.h>
 
 #include "xdbg_module.h"
+#include "xdbg_module_command.h"
+#include "xdbg_module_evlog.h"
 
 /* Supported options */
 typedef enum
 {
     OPTION_DLOG,
     OPTION_LOG_PATH,
+    OPTION_LOG_LEVEL,
     OPTION_EVLOG_PATH,
     OPTION_EVLOG_RULE_PATH,
 } ModuleOption;
@@ -49,8 +52,9 @@ typedef enum
 static const OptionInfoRec module_options[] =
 {
     { OPTION_DLOG,			"dlog",			OPTV_BOOLEAN,	{0},	FALSE },
-    { OPTION_LOG_PATH,		"log_path",			OPTV_STRING,	{0},	FALSE },
-    { OPTION_EVLOG_PATH,	"evlog_path",		OPTV_STRING,	{0},	FALSE },
+    { OPTION_LOG_PATH,		"log_path",		OPTV_STRING,	{0},	FALSE },
+    { OPTION_LOG_LEVEL,		"log_level",	OPTV_INTEGER,	{0},	FALSE },
+    { OPTION_EVLOG_PATH,	"evlog_path",	OPTV_STRING,	{0},	FALSE },
     { OPTION_EVLOG_RULE_PATH,	"evlog_rule_path",		OPTV_STRING,	{0},	FALSE },
     { -1,				NULL,				OPTV_NONE,		{0},	FALSE }
 };
@@ -59,7 +63,9 @@ void
 xDbgModuleParseOptions (XDbgModule *pMod, XF86OptionPtr pOpt)
 {
     OptionInfoPtr options = xnfalloc (sizeof (module_options));
-    const char *log_path;
+    const char *path;
+    char temp[256];
+    int log_level = XLOG_LEVEL_DEFAULT;
 
     memcpy (options, module_options, sizeof(module_options));
 
@@ -67,38 +73,40 @@ xDbgModuleParseOptions (XDbgModule *pMod, XF86OptionPtr pOpt)
 
     /* dlog */
     xf86GetOptValBool (options, OPTION_DLOG, &pMod->dlog);
-    XDBG_SLOG (MXDBG, "dlog: \"%s\"\n", (pMod->dlog)?"on":"off");
+    XDBG_INFO (MXDBG, "dlog: \"%s\"\n", (pMod->dlog)?"on":"off");
     xDbgLogEnableDlog (pMod->dlog);
 
     /* log_path */
-    log_path = xf86GetOptValString (options, OPTION_LOG_PATH);
-    if (log_path)
+    path = xf86GetOptValString (options, OPTION_LOG_PATH);
+    XDBG_INFO (MXDBG, "log path: \"%s\"\n", (path)?path:"none");
+    if (path)
     {
-        XDBG_SLOG (MXDBG, "drv's log path: \"%s\"\n", log_path);
-        pMod->log_path = strdup (log_path);
+        snprintf (temp, sizeof(temp), "%s", path);
+        xDbgModuleCommandInitLogPath (pMod, temp);
     }
-    else
-        XDBG_SLOG (MXDBG, "drv's log path: none\n");
+
+    /* log_level */
+    xf86GetOptValInteger (options, OPTION_LOG_LEVEL, &log_level);
+    XDBG_INFO (MXDBG, "log default level: %d\n", log_level);
+    xDbgLogSetLevel (XDBG_ALL_MODULE, log_level);
 
     /* evlog_path */
-    log_path = xf86GetOptValString (options, OPTION_EVLOG_PATH);
-    if (log_path)
+    path = xf86GetOptValString (options, OPTION_EVLOG_PATH);
+    XDBG_INFO (MXDBG, "evlog path: \"%s\"\n", (path)?path:"none");
+    if (path)
     {
-        XDBG_SLOG (MXDBG, "evlog path: \"%s\"\n", log_path);
-        pMod->evlog_path = strdup (log_path);
+        snprintf (temp, sizeof(temp), "%s", path);
+        xDbgModuleEvlogSetEvlogPath (pMod, -1, temp, NULL, NULL);
     }
-    else
-        XDBG_SLOG (MXDBG, "evlog path: none\n");
 
     /* evlog_rule_path */
-    log_path = xf86GetOptValString (options, OPTION_EVLOG_RULE_PATH);
-    if (log_path)
+    path = xf86GetOptValString (options, OPTION_EVLOG_RULE_PATH);
+    XDBG_INFO (MXDBG, "evlog rule path: \"%s\"\n", (path)?path:"none");
+    if (path)
     {
-        XDBG_SLOG (MXDBG, "evlog log path: \"%s\"\n", log_path);
-        pMod->evlog_rule_path = strdup (log_path);
+        snprintf (temp, sizeof(temp), "%s", path);
+        xDbgModuleCommandInitEvlogRulePath (pMod, temp);
     }
-    else
-        XDBG_SLOG (MXDBG, "evlog log path: none\n");
 
     free (options);
 }

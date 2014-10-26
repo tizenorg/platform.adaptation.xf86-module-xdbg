@@ -73,7 +73,6 @@ Bool	    xev_trace_on = FALSE;
 int         xev_trace_detail_level = EVLOG_PRINT_DEFAULT;
 static int  xev_trace_fd = -1;
 static int  xev_trace_record_fd = -1;
-static Atom atom_rotate = None;
 static Atom atom_client_pid = None;
 static int  init = 0;
 
@@ -286,13 +285,18 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
     {
         ModuleClientInfo *info = GetClientInfo (client);
         XDBG_RETURN_IF_FAIL (info != NULL);
+        int min;
 
         evinfo.mask |= EVLOG_MASK_CLIENT;
         evinfo.client.index = info->index;
         evinfo.client.pid = info->pid;
         evinfo.client.gid = info->gid;
         evinfo.client.uid = info->uid;
-        strncpy (evinfo.client.command, info->command, strlen (info->command));
+
+        min = MIN (sizeof (evinfo.client.command) - 1, strlen (info->command));
+        strncpy (evinfo.client.command, info->command, min);
+        evinfo.client.command[min] = '\0';
+
         evinfo.client.pClient = (void*)client;
 
         /* evinfo.req */
@@ -380,7 +384,7 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
     evinfo.time = GetTimeInMillis ();
 
     /* get extension entry */
-    if (!EntryInit && !xDbgEvlogGetExtensionEntry())
+    if (!EntryInit && !xDbgEvlogGetExtensionEntry (NULL))
         return;
 
     EntryInit = 1;
@@ -407,7 +411,7 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
     xDbgDistroyRegionList(&evinfo);
 }
 
-#ifdef _SECURE_LOG
+#if TIZEN_ENGINEER_MODE
 static const char*
 _traceGetWindowName (ClientPtr client, Window window)
 {
@@ -473,7 +477,7 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
     static int xi2_opcode = -1;
     xEvent *pev;
 
-#ifdef _SECURE_LOG
+#if TIZEN_ENGINEER_MODE
     static char* ename[]=
     {
         "KeyPress",
@@ -504,20 +508,20 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
             {
             case KeyPress:
             case KeyRelease:
-                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%x) root(%d,%d) win(%d,%d)\n"
+                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%lx) root(%d,%d) win(%d,%d)\n"
                         , ename[type-KeyPress], pev->u.u.detail, pev->u.u.type
                         , info->command, info->pid
-                        , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), (unsigned int)pev->u.keyButtonPointer.event
+                        , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), pev->u.keyButtonPointer.event
                         , pev->u.keyButtonPointer.rootX, pev->u.keyButtonPointer.rootY
                         , pev->u.keyButtonPointer.eventX, pev->u.keyButtonPointer.eventY);
                 break;
 
             case ButtonPress:
             case ButtonRelease:
-                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%x) root(%d,%d) win(%d,%d)\n"
+                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%lx) root(%d,%d) win(%d,%d)\n"
                         , ename[type-KeyPress], pev->u.u.detail, pev->u.u.type
                         , info->command, info->pid
-                        , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), (unsigned int)pev->u.keyButtonPointer.event
+                        , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), pev->u.keyButtonPointer.event
                         , pev->u.keyButtonPointer.rootX, pev->u.keyButtonPointer.rootY
                         , pev->u.keyButtonPointer.eventX, pev->u.keyButtonPointer.eventY);
                 break;
@@ -655,17 +659,12 @@ xDbgModuleEvlogInstallHooks (XDbgModule *pMod)
 
     if (atom_client_pid == None)
         atom_client_pid = MakeAtom ("X_CLIENT_PID", 12, TRUE);
-    if (atom_rotate == None)
-        atom_rotate = MakeAtom ("_E_ILLUME_ROTATE_ROOT_ANGLE", 12, TRUE);
 
     if (!ret)
     {
         XDBG_ERROR (MXDBG, "failed: register one or more callbacks\n");
         return FALSE;
     }
-
-    if (pMod && pMod->evlog_path)
-        xDbgModuleEvlogSetEvlogPath (pMod, -1, pMod->evlog_path, NULL, NULL);
 
     return TRUE;
 }
@@ -764,15 +763,18 @@ xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply,
     int  fd_check = -1;
 
     if (!path || strlen (path) <= 0)
-    {
-        XDBG_REPLY ("failed: invalid path\n");
         return FALSE;
-    }
 
     if (xev_trace_record_fd >= 0)
     {
         close (xev_trace_record_fd);
         xev_trace_record_fd = -1;
+    }
+
+    if (pMod->log_path)
+    {
+        free (pMod->log_path);
+        pMod->log_path = NULL;
     }
 
     if (!strcmp (path, "console"))
@@ -789,6 +791,8 @@ xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply,
             xev_trace_fd = open (fd_name, O_RDWR);
             if (xev_trace_fd < 0)
                 XDBG_REPLY ("failed: open consol '%s'. (%s)\n", fd_name, strerror(errno));
+
+            pMod->evlog_path = strdup (fd_name);
         }
 
         return TRUE;
@@ -803,6 +807,8 @@ xDbgModuleEvlogSetEvlogPath (XDbgModule *pMod, int pid, char *path, char *reply,
         else
             snprintf (fd_name, XDBG_PATH_MAX, "%s", path);
     }
+
+    pMod->evlog_path = strdup (fd_name);
 
     fd_check = open (fd_name, O_RDONLY);
     if(fd_check < 0)

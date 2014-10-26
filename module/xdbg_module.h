@@ -50,7 +50,6 @@ typedef struct _XDbgModule
 {
     Bool  dlog;
     char *log_path;
-    char *real_log_path;
     char *evlog_path;
     char *evlog_rule_path;
     char *cwd;

@@ -38,6 +38,22 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #define MAX_RULE	64
 
+#ifndef REPLY
+#define REPLY(fmt, ARG...)  \
+    do { \
+        if (reply && len && *len > 0) \
+        { \
+            int s = snprintf (reply, *len, fmt, ##ARG); \
+            reply += s; \
+            *len -= s; \
+        } \
+    } while (0)
+#endif
+
+#ifndef MIN
+#define MIN(a,b) (((a) < (b)) ? (a) : (b))
+#endif
+
 typedef struct
 {
     POLICY_TYPE policy;
@@ -61,51 +77,44 @@ typedef struct
     char * cmd;
 } VAL_ARGUMENTS;
 
+typedef struct
+{
+    char **reply;
+    int  *len;
+} REPLY_BUFFER;
+
 static int print_func (BINARY_TREE tree, BINARY_TREE_NODE node, BINARY_TREE_NODE parent, void * arg)
 {
-    int len;
-    char ** string = (char **)arg;
+    REPLY_BUFFER *buffer = (REPLY_BUFFER*)arg;
+    char *reply = *buffer->reply;
+    int *len = buffer->len;
     char * operators[] = { "==", "<", ">", "<=", ">=", "!=" };
 
     PARSE_DATA data = bintree_get_node_data (node);
 
     if (data->node_type == ALL)
-    {
-        len = sprintf (*string, "ALL");
-        (*string) += len;
-    }
+        REPLY ("ALL");
     else if (data->node_type == AND)
-    {
-        len = sprintf (*string, " and ");
-        (*string) += len;
-    }
+        REPLY (" and ");
     else if (data->node_type == OR)
-    {
-        len = sprintf (*string, " or ");
-        (*string) += len;
-    }
+        REPLY (" or ");
     else // data->node_type == DATA
     {
         if (node == bintree_get_left_child (parent))
-        {
-            **string = '(';
-            (*string) ++;
-        }
+            REPLY ("(");
 
-        len = sprintf (*string, "%s %s ", data->variable_name, operators[data->compare]);
-        (*string) += len;
+        REPLY ("%s %s ", data->variable_name, operators[data->compare]);
+
         if (data->value_type == INTEGER)
-            len = sprintf (*string, "%d", data->value.integer);
+            REPLY ("%d", data->value.integer);
         else
-            len = sprintf (*string, "%s", data->value.string);
-        (*string) += len;
+            REPLY ("%s", data->value.string);
 
         if (node == bintree_get_right_child (parent))
-        {
-            **string = ')';
-            (*string) ++;
-        }
+            REPLY (")");
     }
+
+    *buffer->reply = reply;
 
     return 0;
 }
@@ -190,8 +199,9 @@ static int validate_func (BINARY_TREE tree, BINARY_TREE_NODE node, BINARY_TREE_N
             minor = index (args->name, ':');
         if (minor)
         {
-            strncpy (major, args->name, minor - args->name);
-            major[minor - args->name] = '\0';
+            int min = MIN (sizeof(major)-1, minor-args->name);
+            strncpy (major, args->name, min);
+            major[min] = '\0';
             minor++;
         }
         if (!strcasecmp (data->variable_name, "TYPE"))
@@ -317,27 +327,20 @@ RC_RESULT_TYPE rulechecker_remove_rule (RULE_CHECKER rc, int index)
     return RC_OK;
 }
 
-void rulechecker_print_rule (RULE_CHECKER rc, char * rules_buf)
+void rulechecker_print_rule (RULE_CHECKER rc, char *reply, int *len)
 {
-    char * rules_print = rules_buf;
-    int len;
-
+    REPLY_BUFFER buffer = {&reply, len};
     int i;
 
-    len = sprintf (rules_print, " ---------------- Evlog Rules ----------------\n");
-    rules_print += len;
+    REPLY (" ---------------- Evlog Rules ----------------\n");
 
     for (i=0; i<rc->count; i++)
     {
-        len = sprintf (rules_print, " [Rule %d] [%s] \"", i, rc->rules[i].policy == ALLOW ? "ALLOW" : "DENY");
-        rules_print += len;
-        bintree_inorder_traverse (rc->rules[i].tree, print_func, (void*)&rules_print);
-        *rules_print = '\"';
-        rules_print++;
-        *rules_print = '\n';
-        rules_print++;
+        REPLY (" [Rule %d] [%s] \"", i, rc->rules[i].policy == ALLOW ? "ALLOW" : "DENY");
+
+        bintree_inorder_traverse (rc->rules[i].tree, print_func, (void*)&buffer);
+        REPLY ("\"\n");
     }
-    *rules_print = '\0';
 }
 
 const char * rulechecker_print_usage()

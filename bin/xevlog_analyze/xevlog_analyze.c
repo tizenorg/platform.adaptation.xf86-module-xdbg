@@ -113,7 +113,7 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
     EvlogInfo evinfo={0,};
     int i;
 
-    if (!strlen(eo->path_name))
+    if (!eo->path_name || !strlen(eo->path_name))
     {
         printf ("failed: no evlog path\n");
         _printUsage(eo->command_name);
@@ -160,6 +160,7 @@ static void _xEvlogAnalyzePrint (EvlogOption *eo, char* reply, int* len)
 
             read_len = read (fd, &Extensions_size, sizeof (int));
             GOTO_IF_FAIL (read_len == sizeof (int), print_done);
+            GOTO_IF_FAIL (Extensions_size > 0, print_done);
             total += read_len;
 
             for (i = 0 ; i < Extensions_size ; i++)
@@ -375,8 +376,6 @@ static void
 _checkOption(int argc, char** argv)
 {
     int c;
-    int opt_str_len = 0;
-    char* opt_str = NULL;
     EvlogOption eo = {0,};
     char rule_log[LOG_SIZE];
     int rule_size = sizeof (rule_log);
@@ -384,7 +383,7 @@ _checkOption(int argc, char** argv)
     eo.pid = atoi (argv[0]);
     eo.isRule = FALSE;
     eo.detail_level = 0;
-    strncpy(eo.command_name, argv[1], PATH_MAX);
+    snprintf (eo.command_name, sizeof (eo.command_name), "%s", argv[1]);
 
     if (argc < 3)
     {
@@ -398,108 +397,93 @@ _checkOption(int argc, char** argv)
         {
             case 'f':
                 {
-                    opt_str = optarg;
-                    opt_str_len = strlen(opt_str);
-
-                    if(opt_str_len > 0)
-                    {
-                        strncpy (eo.path_name, opt_str, PATH_MAX);
-                    }
+                    if (!optarg || strlen(optarg) <= 0)
+                        break;
+                    snprintf (eo.path_name, sizeof (eo.path_name), "%s", optarg);
                     break;
                 }
 
             case 'a':
                 {
-                    opt_str = optarg;
-                    opt_str_len = strlen(opt_str);
-                    if(opt_str_len > 0)
+                    int new_argc = 3;
+                    char* new_argv[3] = {"add", "allow", };
+
+                    if (!optarg || strlen(optarg) <= 0)
+                        break;
+
+                    new_argv[2] = (char*)calloc (1, PATH_MAX);
+                    if(!new_argv[2])
                     {
-                        int new_argc = 3;
-                        char* new_argv[3] = {"add", "allow", };
-
-                        new_argv[2] = (char*)malloc (opt_str_len + 1);
-                        if(!new_argv[2])
-                        {
-                            printf ("failed: malloc new_argv[2]\n");
-                            return;
-                        }
-
-                        strncpy (new_argv[2], opt_str , opt_str_len);
-                        if(!xDbgEvlogRuleSet ((const int) new_argc,
-                                              (const char**) new_argv,
-                                               rule_log, &rule_size))
-                        {
-                            printf("%s\n", rule_log);
-                            return;
-                        }
-                        eo.isRule = TRUE;
-
-                        free (new_argv[2]);
+                        printf ("failed: malloc new_argv[2]\n");
+                        return;
                     }
+
+                    snprintf (new_argv[2], PATH_MAX, "%s", optarg);
+                    if(!xDbgEvlogRuleSet ((const int) new_argc,
+                                          (const char**) new_argv,
+                                           rule_log, &rule_size))
+                    {
+                        printf("%s\n", rule_log);
+                        return;
+                    }
+                    eo.isRule = TRUE;
+
+                    free (new_argv[2]);
 
                     break;
                }
 
             case 'n':
                 {
-                    opt_str = optarg;
-                    opt_str_len = strlen(opt_str);
+                    int new_argc = 3;
+                    char* new_argv[3] = {"add", "deny", };
 
-                    if(opt_str_len > 0)
+                    if (!optarg || strlen(optarg) <= 0)
+                        break;
+
+                    new_argv[2] = (char*)calloc (1, PATH_MAX);
+                    if(!new_argv[2])
                     {
-                        int new_argc = 3;
-                        char* new_argv[3] = {"add", "deny", };
-
-                        new_argv[2] = (char*)malloc (opt_str_len + 1);
-                        if(!new_argv[2])
-                        {
-                            printf ("failed: malloc new_argv[2]\n");
-                            return;
-                        }
-
-                        strncpy (new_argv[2], opt_str , opt_str_len);
-                        if(!xDbgEvlogRuleSet ((const int) new_argc,
-                                              (const char**) new_argv,
-                                               rule_log, &rule_size))
-                        {
-                            printf("%s\n", rule_log);
-                            return;
-                        }
-                        eo.isRule = TRUE;
-
-                        free (new_argv[2]);
+                        printf ("failed: malloc new_argv[2]\n");
+                        return;
                     }
+
+                    snprintf (new_argv[2], PATH_MAX, "%s", optarg);
+                    if(!xDbgEvlogRuleSet ((const int) new_argc,
+                                          (const char**) new_argv,
+                                           rule_log, &rule_size))
+                    {
+                        printf("%s\n", rule_log);
+                        return;
+                    }
+                    eo.isRule = TRUE;
+
+                    free (new_argv[2]);
 
                     break;
                 }
 
             case 'r':
                 {
-                    opt_str = optarg;
-                    opt_str_len = strlen(opt_str);
+                    if (!optarg || strlen(optarg) <= 0)
+                        break;
 
-                    if(opt_str_len > 0)
+                    if(!xDbgEvlogReadRuleFile(optarg, rule_log, &rule_size))
                     {
-                        if(!xDbgEvlogReadRuleFile(opt_str, rule_log, &rule_size))
-                        {
-                            printf("%s", rule_log);
-                            return;
-                        }
-                        eo.isRule = TRUE;
+                        printf("%s", rule_log);
+                        return;
                     }
+                    eo.isRule = TRUE;
                     break;
                 }
 
             case 'd':
                 {
-                    opt_str = optarg;
-                    opt_str_len = strlen(opt_str);
+                    if (!optarg || strlen(optarg) <= 0 || strlen(optarg) > 2)
+                        break;
 
-                    if(opt_str_len > 0)
-                    {
-                        eo.detail_level = (atoi(optarg));
-                        printf ("Detail Level: %d\n", eo.detail_level);
-                    }
+                    eo.detail_level = atoi(optarg);
+                    printf ("Detail Level: %d\n", eo.detail_level);
                     break;
                 }
 

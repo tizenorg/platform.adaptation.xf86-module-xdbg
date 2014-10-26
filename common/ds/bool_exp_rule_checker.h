@@ -45,7 +45,7 @@ RC_RESULT_TYPE rulechecker_add_rule (RULE_CHECKER rc, POLICY_TYPE policy, const 
 
 RC_RESULT_TYPE rulechecker_remove_rule (RULE_CHECKER rc, int index);
 
-void rulechecker_print_rule (RULE_CHECKER rc, char * rules_buf);
+void rulechecker_print_rule (RULE_CHECKER rc, char *reply, int *len);
 
 const char * rulechecker_print_usage (void);
 

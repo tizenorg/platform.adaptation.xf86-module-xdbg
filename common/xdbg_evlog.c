@@ -29,6 +29,8 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
+#include <config.h>
+
 #include <stdio.h>
 #include <string.h>
 #include <strings.h>
@@ -58,18 +60,22 @@ static char *evt_dir[]  = { "<====", "---->",   "<----", "*****", "<----"};
 static RULE_CHECKER rc = NULL;
 
 static void
-_mergeArgs (char * target, int argc, const char ** argv)
+_mergeArgs (char *target, int target_size, int argc, const char ** argv)
 {
     int i;
     int len;
 
     for (i=0; i<argc; i++)
     {
-        len = sprintf (target, "%s", argv[i]);
+        len = snprintf (target, target_size, "%s", argv[i]);
         target += len;
+        target_size -= len;
 
         if (i != argc - 1)
+        {
             *(target++) = ' ';
+            target_size--;
+        }
     }
 }
 
@@ -107,7 +113,7 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
 
     if (argc == 0)
     {
-        rulechecker_print_rule (rc, reply);
+        rulechecker_print_rule (rc, reply, len);
         return TRUE;
     }
 
@@ -118,8 +124,8 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
         POLICY_TYPE policy_type;
         RC_RESULT_TYPE result;
         const char * policy = argv[1];
-        char merge[8192], rule[8192]={0,};
-        int i, index = 0;
+        char merge[8192]={0,}, rule[8192]={0,};
+        int i, index = 0, size_rule;
         int apply = 0;
 
         if (argc < 3)
@@ -138,32 +144,43 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
             return FALSE;
         }
 
-        _mergeArgs (merge, argc - 2, &(argv[2]));
+        _mergeArgs (merge, sizeof (merge), argc - 2, &(argv[2]));
+
+        size_rule = sizeof (rule) - 1;
 
         for (i = 0 ; i < strlen(merge) ; i++)
         {
             if(merge[i] == '\"' || merge[i] == '\'')
             {
                 rule[index++] = ' ';
+                if (index > size_rule)
+                    return FALSE;
+
                 continue;
             }
 
             if(merge[i] == '+')
             {
                 rule[index++] = ' ';
+                if (index > size_rule)
+                    return FALSE;
 
                 if (apply == 0)
                 {
                     const char* plus = "|| type=reply || type=error";
-
-                    strcat(rule, plus);
-                    index += strlen(plus);
+                    int len = MIN (size_rule - index, strlen(plus));
+                    strncat(rule, plus, len);
+                    index += len;
+                    if (index > size_rule)
+                        return FALSE;
 
                     apply = 1;
                 }
                 continue;
             }
             rule[index++] = merge[i];
+            if (index > size_rule)
+                return FALSE;
         }
 
         result = rulechecker_add_rule (rc, policy_type, rule);
@@ -179,7 +196,7 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
         }
 
         REPLY ("The rule was successfully added.\n\n");
-        rulechecker_print_rule (rc, reply);
+        rulechecker_print_rule (rc, reply, len);
         return TRUE;
     }
     else if (!_strcasecmp (command, "remove"))
@@ -212,7 +229,7 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
                     REPLY ("Rule remove fail : No such rule [%s].\n", remove_idx);
             }
         }
-        rulechecker_print_rule (rc, reply);
+        rulechecker_print_rule (rc, reply, len);
         return TRUE;
     }
     else if (!_strcasecmp (command, "file"))
@@ -225,13 +242,13 @@ xDbgEvlogRuleSet (const int argc, const char **argv, char *reply, int *len)
 
         if (!xDbgEvlogReadRuleFile(argv[1], reply, len))
             return FALSE;
-        rulechecker_print_rule (rc, reply);
-        
+        rulechecker_print_rule (rc, reply, len);
+
         return TRUE;
     }
     else if (!_strcasecmp (command, "print"))
     {
-        rulechecker_print_rule (rc, reply);
+        rulechecker_print_rule (rc, reply, len);
         return TRUE;
     }
     else if (!_strcasecmp (command, "help"))
@@ -336,7 +353,6 @@ xDbgEvlogReadRuleFile(const char *filename, char *reply, int *len)
     return TRUE;
 }
 
-
 ExtensionInfo Evlog_extensions[] = {
     {xDbgEvlogCompositeGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogDamageGetBase, 0, 0, 0, NULL, NULL},
@@ -350,8 +366,12 @@ ExtensionInfo Evlog_extensions[] = {
     {xDbgEvlogXextXtestGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXextXtestExt1GetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXextShapeGetBase, 0, 0, 0, NULL, NULL},
-    {xDbgEvlogXvGetBase, 0, 0, 0, NULL, NULL}
+    {xDbgEvlogXvGetBase, 0, 0, 0, NULL, NULL},
+#if HAVE_HWC
+    {xDbgEvlogHwcGetBase, 0, 0, 0, NULL, NULL},
+#endif
 };
+
 ExtensionInfo* Sorted_Evlog_extensions;
 int Extensions_size = 0;
 
@@ -440,7 +460,7 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     else
         REPLY ("[%10.3f][%5ld] %22s(%2d:%5d) %s %7s ",
                     evinfo->time / 1000.0,
-                    (long int)evinfo->time - prev,
+                    evinfo->time - prev,
                     xDbgEvlogGetCmd (evinfo->client.command),
                     evinfo->client.index,
                     evinfo->client.pid,
@@ -468,9 +488,9 @@ xDbgEvlogFillLog (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     }
     else if (evinfo->type == ERROR)
     {
-        REPLY("(ErrorCode(0x%02x) resourceID(0x%x) majorCode(%d) minorCode(%d))",
+        REPLY("(ErrorCode(0x%02x) resourceID(0x%lx) majorCode(%d) minorCode(%d))",
             evinfo->err.errorCode,
-            (unsigned int)evinfo->err.resourceID,
+            evinfo->err.resourceID,
             evinfo->err.majorCode,
             evinfo->err.minorCode);
     }
@@ -548,7 +568,7 @@ char* xDbgGetAtom(Atom atom, EvlogInfo *evinfo, char *reply, int *len)
     if (NameForAtom(atom))
         snprintf (table->buf, XDBG_BUF_SIZE, "%s", (char*)NameForAtom(atom));
     else
-        snprintf (table->buf, XDBG_BUF_SIZE, "0x%x", (unsigned int)atom);
+        snprintf (table->buf, XDBG_BUF_SIZE, "0x%lx", atom);
 
     xorg_list_add(&table->link, &evinfo->evatom.list);
     evinfo->evatom.size++;
@@ -592,7 +612,7 @@ char* xDbgGetRegion(XserverRegion region, EvlogInfo *evinfo, char *reply, int *l
 
         table->xid = region;
 
-        snprintf (table->buf, XDBG_BUF_SIZE, "0x%x", (unsigned int)region);
+        snprintf (table->buf, XDBG_BUF_SIZE, "0x%lx", region);
         xorg_list_add(&table->link, &evinfo->evregion.list);
         evinfo->evregion.size++;
     }

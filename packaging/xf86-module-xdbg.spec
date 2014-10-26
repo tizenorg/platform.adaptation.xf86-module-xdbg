@@ -2,7 +2,7 @@
 
 Name: xf86-module-xdbg
 Summary: Xserver debug module
-Version: 0.1.26
+Version: 0.1.46
 Release:    1
 Group:      System/Libraries
 License:    MIT
@@ -23,6 +23,7 @@ BuildRequires:  pkgconfig(libdri2)
 BuildRequires:  pkgconfig(dri2proto)
 BuildRequires:  pkgconfig(fixesproto)
 BuildRequires:  pkgconfig(fontsproto)
+BuildRequires:  pkgconfig(xgesture)
 BuildRequires:  pkgconfig(gestureproto)
 BuildRequires:  pkgconfig(inputproto)
 BuildRequires:  pkgconfig(kbproto)
@@ -59,6 +60,7 @@ Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: pkgconfig(xorg-server)
 Requires: pkgconfig(x11)
+Requires: pkgconfig(xproto)
 Requires: pkgconfig(dlog)
 
 %description devel
@@ -86,12 +88,12 @@ cp -af COPYING %{buildroot}/usr/share/license/%{name}
 /usr/share/license/%{name}
 %{_bindir}/xdbg
 %{_bindir}/xevlog_analyze
-%{_libdir}/libxdbg-log.so.*
+%{_libdir}/libxdbg-lib.so.*
 %{_libdir}/xorg/modules/libxdbg.so
 
 %files devel
 %dir %{_includedir}/xdbg/
 %{_includedir}/xdbg/*.h
-%{_libdir}/libxdbg-log.so
+%{_libdir}/libxdbg-lib.so
 %{_libdir}/pkgconfig/xdbg.pc
 

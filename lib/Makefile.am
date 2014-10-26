@@ -22,31 +22,34 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
-libxdbg_log_la_LTLIBRARIES = libxdbg-log.la
-libxdbg_log_ladir = $(libdir)
-libxdbg_log_la_LIBADD = @XDBG_LIBS@
-libxdbg_log_la_LDFLAGS = ${LDFLAGS}
-libxdbg_log_la_CFLAGS = \
+libxdbg_lib_la_LTLIBRARIES = libxdbg-lib.la
+libxdbg_lib_ladir = $(libdir)
+libxdbg_lib_la_LIBADD = @XDBG_LIBS@
+libxdbg_lib_la_LDFLAGS = ${LDFLAGS}
+libxdbg_lib_la_CFLAGS = \
     ${CFLAGS} \
     @XDBG_CFLAGS@ \
     -I$(top_srcdir)/lib \
     -I$(top_srcdir)/common
 
-libxdbg_log_la_SOURCES = \
+libxdbg_lib_la_SOURCES = \
 	xdbg_log.c \
 	xdbg_log_klog.c \
 	xdbg_log_dlog.c \
 	xdbg_log_drmevent.c \
 	xdbg_log_plist.c \
-	xdbg_log_fpsdebug.c
+	xdbg_log_fpsdebug.c \
+	xdbg_dump.c 
 
 xdbgincludedir = $(includedir)/xdbg
 xdbginclude_HEADERS = \
 	xdbg.h \
 	xdbg_log.h \
 	xdbg_log_drmevent.h \
+	xdbg_log_secure.h \
 	xdbg_log_plist.h \
-	xdbg_log_fpsdebug.h
+	xdbg_log_fpsdebug.h \
+	xdbg_dump.h
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = xdbg.pc

@@ -29,13 +29,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 **************************************************************************/
 
-#ifndef __X_DEBUG_DBUS_H__
-#define __X_DEBUG_DBUS_H__
+#ifndef __XDBG_EVLOG_HWC_H__
+#define __XDBG_EVLOG_HWC_H__
 
-#define XDBG_DBUS_INTERFACE     "org.x.dbg.interface"
-#define XDBG_DBUS_CLIENT        "org.x.dbg.client"
-#define XDBG_DBUS_METHOD        "x_dbg_method"
+#include "xdbg_types.h"
 
-#define MDBUS   XDBG_M('D','B','U','S')
+void    xDbgEvlogHwcGetBase (ExtensionInfo *extinfo);
 
-#endif  /* __X_DEBUG_DBUS_H__ */
+#endif

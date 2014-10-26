@@ -8,4 +8,4 @@ Description: The X debug Library
 Version: @PACKAGE_VERSION@
 Requires.private: xorg-server x11 dlog
 Cflags: -I${includedir}/xdbg
-Libs: -L${libdir} -lxdbg-log
+Libs: -L${libdir} -lxdbg-lib

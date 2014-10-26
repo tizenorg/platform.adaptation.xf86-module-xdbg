@@ -70,8 +70,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRGetScreenSizeRange:
         {
             xRRGetScreenSizeRangeReq *stuff = (xRRGetScreenSizeRangeReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             return reply;
         }
@@ -79,16 +79,16 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRSetScreenSize:
         {
             xRRSetScreenSizeReq *stuff = (xRRSetScreenSizeReq *)req;
-            REPLY (": XID(0x%x) size(%dx%d)",
-                (unsigned int)stuff->window,
+            REPLY (": XID(0x%lx) size(%dx%d)",
+                stuff->window,
                 stuff->width,
                 stuff->height);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" milliSize(%ldx%ld)",
-                    (long int)stuff->widthInMillimeters,
-                    (long int)stuff->heightInMillimeters);
+                    stuff->widthInMillimeters,
+                    stuff->heightInMillimeters);
             }
 
             return reply;
@@ -97,8 +97,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRGetScreenResources:
         {
             xRRGetScreenResourcesReq *stuff = (xRRGetScreenResourcesReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             return reply;
         }
@@ -106,13 +106,13 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRGetOutputInfo:
         {
             xRRGetOutputInfoReq *stuff = (xRRGetOutputInfoReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->output);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" config_timestamp(%lums)",
-                    (unsigned long)stuff->configTimestamp);
+                    stuff->configTimestamp);
             }
 
             return reply;
@@ -121,8 +121,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRListOutputProperties:
         {
             xRRListOutputPropertiesReq *stuff = (xRRListOutputPropertiesReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->output);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
 
             return reply;
         }
@@ -130,8 +130,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRQueryOutputProperty:
         {
             xRRQueryOutputPropertyReq *stuff = (xRRQueryOutputPropertyReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->output);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
 
             REPLY (" Property");
             reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
@@ -142,8 +142,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRConfigureOutputProperty:
         {
             xRRConfigureOutputPropertyReq *stuff = (xRRConfigureOutputPropertyReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->output);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
 
             REPLY (" Property");
             reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
@@ -161,8 +161,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRChangeOutputProperty:
         {
             xRRChangeOutputPropertyReq *stuff = (xRRChangeOutputPropertyReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->output);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
 
             REPLY (" Property");
             reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
@@ -179,7 +179,7 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                     case PropModeReplace:  mode = "PropModeReplace"; break;
                     case PropModePrepend:  mode = "PropModePrepend"; break;
                     case PropModeAppend:  mode = "PropModeAppend"; break;
-                    default:  mode = dmode; sprintf (dmode, "%d", stuff->mode); break;
+                    default:  mode = dmode; snprintf (dmode, 10, "%d", stuff->mode); break;
                 }
 
                 REPLY ("\n");
@@ -187,7 +187,7 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                     " ",
                     mode,
                     stuff->format,
-                    (long int)stuff->nUnits);
+                    stuff->nUnits);
             }
 
             return reply;
@@ -196,8 +196,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRDeleteOutputProperty:
         {
             xRRDeleteOutputPropertyReq *stuff = (xRRDeleteOutputPropertyReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->output);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
 
             REPLY (" Property");
             reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
@@ -208,8 +208,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRGetOutputProperty:
         {
             xRRGetOutputPropertyReq *stuff = (xRRGetOutputPropertyReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->output);
+            REPLY (": XID(0x%lx)",
+                stuff->output);
 
             REPLY (" Property");
             reply = xDbgGetAtom(stuff->property, evinfo, reply, len);
@@ -219,8 +219,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" longOffset(%ld) longLength(%ld)",
-                    (long int)stuff->longOffset,
-                    (long int)stuff->longLength);
+                    stuff->longOffset,
+                    stuff->longLength);
             }
 
             return reply;
@@ -229,13 +229,13 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRGetCrtcInfo:
         {
             xRRGetCrtcInfoReq *stuff = (xRRGetCrtcInfoReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->crtc);
+            REPLY (": XID(0x%lx)",
+                stuff->crtc);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
                 REPLY (" config_timestamp(%lums)",
-                    (unsigned long)stuff->configTimestamp);
+                    stuff->configTimestamp);
             }
 
             return reply;
@@ -244,8 +244,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRSetCrtcConfig:
         {
             xRRSetCrtcConfigReq *stuff = (xRRSetCrtcConfigReq *)req;
-            REPLY (": XID(0x%x) coord(%d,%d) ",
-                (unsigned int)stuff->crtc,
+            REPLY (": XID(0x%lx) coord(%d,%d) ",
+                stuff->crtc,
                 stuff->x,
                 stuff->y);
 
@@ -263,11 +263,11 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 }
 
                 REPLY ("\n");
-                REPLY ("%67s timestamp(%lums) config_timestamp(%lums) RRmode(0x%x) rotation(%s)",
+                REPLY ("%67s timestamp(%lums) config_timestamp(%lums) RRmode(0x%lx) rotation(%s)",
                     " ",
-                    (unsigned long)stuff->timestamp,
-                    (unsigned long)stuff->configTimestamp,
-                    (unsigned int)stuff->mode,
+                    stuff->timestamp,
+                    stuff->configTimestamp,
+                    stuff->mode,
                     rotation);
             }
 
@@ -277,8 +277,8 @@ _EvlogRequestRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
     case X_RRGetScreenResourcesCurrent:
         {
             xRRGetScreenResourcesCurrentReq *stuff = (xRRGetScreenResourcesCurrentReq *)req;
-            REPLY (": XID(0x%x)",
-                (unsigned int)stuff->window);
+            REPLY (": XID(0x%lx)",
+                stuff->window);
 
             return reply;
         }
@@ -301,9 +301,9 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
     case RRScreenChangeNotify:
         {
             xRRScreenChangeNotifyEvent *stuff = (xRRScreenChangeNotifyEvent *) evt;
-            REPLY (": Root(0x%x) Window(0x%x)",
-                (unsigned int)stuff->root,
-                (unsigned int)stuff->window);
+            REPLY (": Root(0x%lx) Window(0x%lx)",
+                stuff->root,
+                stuff->window);
 
             if (detail_level >= EVLOG_PRINT_DETAIL)
             {
@@ -331,8 +331,8 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                     " ",
                     rotation,
                     stuff->sequenceNumber,
-                    (unsigned long)stuff->timestamp,
-                    (unsigned long)stuff->configTimestamp);
+                    stuff->timestamp,
+                    stuff->configTimestamp);
             }
 
             return reply;
@@ -345,10 +345,10 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
             case RRNotify_CrtcChange:
                 {
                     xRRCrtcChangeNotifyEvent *stuff = (xRRCrtcChangeNotifyEvent *) evt;
-                    REPLY (": XID(0x%x) Crtc(0x%x) RRmode(0x%x) new_size(%udx%ud) new_coord(%d,%d)",
-                        (unsigned int)stuff->window,
-                        (unsigned int)stuff->crtc,
-                        (unsigned int)stuff->mode,
+                    REPLY (": XID(0x%lx) Crtc(0x%lx) RRmode(0x%lx) new_size(%udx%ud) new_coord(%d,%d)",
+                        stuff->window,
+                        stuff->crtc,
+                        stuff->mode,
                         stuff->width,
                         stuff->height,
                         stuff->x,
@@ -372,7 +372,7 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                             " ",
                             rotation,
                             stuff->sequenceNumber,
-                            (unsigned long)stuff->timestamp);
+                            stuff->timestamp);
                     }
 
                     return reply;
@@ -381,11 +381,11 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
             case RRNotify_OutputChange:
                 {
                     xRROutputChangeNotifyEvent *stuff = (xRROutputChangeNotifyEvent *) evt;
-                    REPLY (": XID(0x%x) Output(0x%x) Crtc(0x%x) RRmode(0x%x)",
-                        (unsigned int)stuff->window,
-                        (unsigned int)stuff->output,
-                        (unsigned int)stuff->crtc,
-                        (unsigned int)stuff->mode);
+                    REPLY (": XID(0x%lx) Output(0x%lx) Crtc(0x%lx) RRmode(0x%lx)",
+                        stuff->window,
+                        stuff->output,
+                        stuff->crtc,
+                        stuff->mode);
 
                     if (detail_level >= EVLOG_PRINT_DETAIL)
                     {
@@ -406,7 +406,7 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                             case RR_Connected:          connection = "RR_Connected"; break;
                             case RR_Disconnected:       connection = "RR_Disconnected"; break;
                             case RR_UnknownConnection:  connection = "RR_UnknownConnection"; break;
-                            default:  connection = dconnection; sprintf (dconnection, "%d", stuff->connection); break;
+                            default:  connection = dconnection; snprintf (dconnection, 10, "%d", stuff->connection); break;
                         }
 
                         switch (stuff->subpixelOrder)
@@ -417,7 +417,7 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                             case SubPixelVerticalRGB:    subpixelOrder = "SubPixelVerticalRGB"; break;
                             case SubPixelVerticalBGR:    subpixelOrder = "SubPixelVerticalBGR"; break;
                             case SubPixelNone:           subpixelOrder = "SubPixelNone"; break;
-                            default:  subpixelOrder = dsubpixelOrder; sprintf (dsubpixelOrder, "%d", stuff->connection); break;
+                            default:  subpixelOrder = dsubpixelOrder; snprintf (dsubpixelOrder, 10, "%d", stuff->connection); break;
                         }
 
                         REPLY (" sequence_num(%d)",
@@ -426,8 +426,8 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                         REPLY ("\n");
                         REPLY ("%67s timestamp(%lums) config_timestamp(%lums) rotation(%s) connection(%s) subpixel_order(%s)",
                             " ",
-                            (unsigned long)stuff->timestamp,
-                            (unsigned long)stuff->configTimestamp,
+                            stuff->timestamp,
+                            stuff->configTimestamp,
                             rotation,
                             connection,
                             subpixelOrder);
@@ -439,9 +439,9 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
             case RRNotify_OutputProperty:
                 {
                     xRROutputPropertyNotifyEvent *stuff = (xRROutputPropertyNotifyEvent *) evt;
-                    REPLY (": XID(0x%x) Output(0x%x)",
-                        (unsigned int)stuff->window,
-                        (unsigned int)stuff->output);
+                    REPLY (": XID(0x%lx) Output(0x%lx)",
+                        stuff->window,
+                        stuff->output);
 
                     REPLY (" Property");
                     reply = xDbgGetAtom(stuff->atom, evinfo, reply, len);
@@ -455,14 +455,14 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                         {
                             case PropertyNewValue:    state = "PropertyNewValue"; break;
                             case PropertyDelete:   state = "PropertyDelete"; break;
-                            default:  state = dstate; sprintf (dstate, "%d", stuff->state); break;
+                            default:  state = dstate; snprintf (dstate, 10, "%d", stuff->state); break;
                         }
 
                         REPLY ("\n");
                         REPLY ("%67s sequence_num(%d) timestamp(%lums) state(%s)",
                             " ",
                             stuff->sequenceNumber,
-                            (unsigned long)stuff->timestamp,
+                            stuff->timestamp,
                             state);
                     }
 
@@ -472,15 +472,15 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
             case RRNotify_ProviderChange:
                 {
                     xRRProviderChangeNotifyEvent *stuff = (xRRProviderChangeNotifyEvent *) evt;
-                    REPLY (": XID(0x%x) Provider(0x%x)",
-                        (unsigned int)stuff->window,
-                        (unsigned int)stuff->provider);
+                    REPLY (": XID(0x%lx) Provider(0x%lx)",
+                        stuff->window,
+                        stuff->provider);
 
                     if (detail_level >= EVLOG_PRINT_DETAIL)
                     {
                         REPLY (" sequence_num(%d) timestamp(%lums)",
                             stuff->sequenceNumber,
-                            (unsigned long)stuff->timestamp);
+                            stuff->timestamp);
                     }
 
                     return reply;
@@ -489,9 +489,9 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
             case RRNotify_ProviderProperty:
                 {
                     xRRProviderPropertyNotifyEvent *stuff = (xRRProviderPropertyNotifyEvent *) evt;
-                    REPLY (": XID(0x%x) Provider(0x%x)",
-                        (unsigned int)stuff->window,
-                        (unsigned int)stuff->provider);
+                    REPLY (": XID(0x%lx) Provider(0x%lx)",
+                        stuff->window,
+                        stuff->provider);
 
                     REPLY (" Atom");
                     reply = xDbgGetAtom(stuff->atom, evinfo, reply, len);
@@ -505,12 +505,12 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
                         {
                             case PropertyNewValue:    state = "PropertyNewValue"; break;
                             case PropertyDelete:   state = "PropertyDelete"; break;
-                            default:  state = dstate; sprintf (dstate, "%d", stuff->state); break;
+                            default:  state = dstate; snprintf (dstate, 10, "%d", stuff->state); break;
                         }
 
                         REPLY (" sequence_num(%d) timestamp(%lums) state(%s)",
                             stuff->sequenceNumber,
-                            (unsigned long)stuff->timestamp,
+                            stuff->timestamp,
                             state);
                     }
 
@@ -520,14 +520,14 @@ _EvlogEventRandr (EvlogInfo *evinfo, int first_base, int detail_level, char *rep
             case RRNotify_ResourceChange:
                 {
                     xRRResourceChangeNotifyEvent *stuff = (xRRResourceChangeNotifyEvent *) evt;
-                    REPLY (": XID(0x%x)",
-                        (unsigned int)stuff->window);
+                    REPLY (": XID(0x%lx)",
+                        stuff->window);
 
                     if (detail_level >= EVLOG_PRINT_DETAIL)
                     {
                         REPLY (" sequence_num(%d) timestamp(%lums)",
                             stuff->sequenceNumber,
-                            (unsigned long)stuff->timestamp);
+                            stuff->timestamp);
                     }
 
                     return reply;
@@ -579,8 +579,8 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             {
                 xRRGetScreenResourcesReply *stuff = (xRRGetScreenResourcesReply *)rep;
                 REPLY (": Timestamp(%ldms) ConfigTimestamp(%ldms) nCrtcs(%d) nOutputs(%d) nModes(%d) nbytesNames(%d)",
-                    (long int)stuff->timestamp,
-                    (long int)stuff->configTimestamp,
+                    stuff->timestamp,
+                    stuff->configTimestamp,
                     stuff->nCrtcs,
                     stuff->nOutputs,
                     stuff->nModes,
@@ -606,7 +606,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nCrtcs ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)crtcs[i]);
+                    REPLY ("0x%lx", crtcs[i]);
                     if(i != nCrtcs - 1)
                         REPLY (", ");
                 }
@@ -616,7 +616,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nOutputs ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)outputs[i]);
+                    REPLY ("0x%lx", outputs[i]);
                     if(i != nOutputs - 1)
                         REPLY (", ");
                 }
@@ -626,7 +626,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nModes ; i++)
                 {
-                    REPLY ("0x%x %dx%d", (unsigned int)modeinfos[i].id, modeinfos[i].width, modeinfos[i].height);
+                    REPLY ("0x%lx %dx%d", modeinfos[i].id, modeinfos[i].width, modeinfos[i].height);
                     if(i != nModes - 1)
                         REPLY (", ");
                 }
@@ -634,7 +634,9 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 
                 REPLY (" Names");
 
-                strncpy (temp, (char *)names, nbytesNames);
+                int min = MIN (sizeof (temp) - 1, nbytesNames);
+                strncpy (temp, (char *)names, min);
+                temp[min] = '\0';
 
                 REPLY ("(");
                 REPLY ("%s", temp);
@@ -651,11 +653,11 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xRRGetOutputInfoReply *stuff = (xRRGetOutputInfoReply *)rep;
-                REPLY (": Timestamp(%ldms) Crtc(0x%x) mmSize(%ldx%ld) nCrtcs(%d) nModes(%d) nPreferred(%d) nClones(%d)",
-                    (long int)stuff->timestamp,
-                    (unsigned int)stuff->crtc,
-                    (long int)stuff->mmWidth,
-                    (long int)stuff->mmHeight,
+                REPLY (": Timestamp(%ldms) Crtc(0x%lx) mmSize(%ldx%ld) nCrtcs(%d) nModes(%d) nPreferred(%d) nClones(%d)",
+                    stuff->timestamp,
+                    stuff->crtc,
+                    stuff->mmWidth,
+                    stuff->mmHeight,
                     stuff->nCrtcs,
                     stuff->nModes,
                     stuff->nPreferred,
@@ -680,7 +682,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nCrtcs ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)crtcs[i]);
+                    REPLY ("0x%lx", crtcs[i]);
                     if(i != nCrtcs - 1)
                         REPLY (", ");
                 }
@@ -690,7 +692,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nModes ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)modes[i]);
+                    REPLY ("0x%lx", modes[i]);
                     if(i != nModes - 1)
                         REPLY (", ");
                 }
@@ -700,7 +702,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nClones ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)clones[i]);
+                    REPLY ("0x%lx", clones[i]);
                     if(i != nClones - 1)
                         REPLY (", ");
                 }
@@ -749,8 +751,8 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 reply = xDbgGetAtom(stuff->propertyType, evinfo, reply, len);
 
                 REPLY (" bytesAfter(%ld) nItems(%ld)",
-                    (long int)stuff->bytesAfter,
-                    (long int)stuff->nItems);
+                    stuff->bytesAfter,
+                    stuff->nItems);
             }
             else
             {
@@ -767,13 +769,13 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             if (evinfo->rep.isStart)
             {
                 xRRGetCrtcInfoReply *stuff = (xRRGetCrtcInfoReply *)rep;
-                REPLY (" Timestamp(%ldms) coord(%d,%d %dx%d) RRmode(0x%x) rot(%d) rots(%d) nOutput(%d) nPossibleOutput(%d)",
-                    (long int)stuff->timestamp,
+                REPLY (" Timestamp(%ldms) coord(%d,%d %dx%d) RRmode(0x%lx) rot(%d) rots(%d) nOutput(%d) nPossibleOutput(%d)",
+                    stuff->timestamp,
                     stuff->x,
                     stuff->y,
                     stuff->width,
                     stuff->height,
-                    (unsigned int)stuff->mode,
+                    stuff->mode,
                     stuff->rotation,
                     stuff->rotations,
                     stuff->nOutput,
@@ -792,7 +794,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nOutput ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)outputs[i]);
+                    REPLY ("0x%lx", outputs[i]);
                     if(i != nOutput - 1)
                         REPLY (", ");
                 }
@@ -802,7 +804,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nPossibleOutput ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)possible[i]);
+                    REPLY ("0x%lx", possible[i]);
                     if(i != nPossibleOutput - 1)
                         REPLY (", ");
                 }
@@ -819,7 +821,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 xRRSetCrtcConfigReply *stuff = (xRRSetCrtcConfigReply *)rep;
 
                 REPLY (" newTimestamp(%ldms)",
-                    (long int)stuff->newTimestamp);
+                    stuff->newTimestamp);
             }
             else
             {
@@ -838,8 +840,8 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 xRRGetScreenResourcesReply *stuff = (xRRGetScreenResourcesReply *)rep;
 
                 REPLY (" Timestamp(%ldms) ConfigTimestamp(%ldms) nCrtcs(%d) nOutputs(%d) nModes(%d) nbytesNames(%d)",
-                    (long int)stuff->timestamp,
-                    (long int)stuff->configTimestamp,
+                    stuff->timestamp,
+                    stuff->configTimestamp,
                     stuff->nCrtcs,
                     stuff->nOutputs,
                     stuff->nModes,
@@ -863,7 +865,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nCrtcs ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)crtcs[i]);
+                    REPLY ("0x%lx", crtcs[i]);
                     if(i != nCrtcs - 1)
                         REPLY (", ");
                 }
@@ -873,7 +875,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nOutputs ; i++)
                 {
-                    REPLY ("0x%x", (unsigned int)outputs[i]);
+                    REPLY ("0x%lx", outputs[i]);
                     if(i != nOutputs - 1)
                         REPLY (", ");
                 }
@@ -883,7 +885,7 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
                 REPLY ("(");
                 for (i = 0 ; i < nModes ; i++)
                 {
-                    REPLY ("0x%x %dx%d", (unsigned int)modeinfos[i].id, modeinfos[i].width, modeinfos[i].height);
+                    REPLY ("0x%lx %dx%d", modeinfos[i].id, modeinfos[i].width, modeinfos[i].height);
                     if(i != nModes - 1)
                         REPLY (", ");
                 }
@@ -891,7 +893,9 @@ _EvlogReplyRandr (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 
                 REPLY (" Names");
 
-                strncpy (temp, (char *)names, nbytesNames);
+                int min = MIN (sizeof (temp) - 1, nbytesNames);
+                strncpy (temp, (char *)names, min);
+                temp[min] = '\0';
 
                 REPLY ("(");
                 REPLY ("%s", temp);

@@ -35,7 +35,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_module.h"
 
 void xDbgModuleCommand (void *data, int argc, char **argv, char *reply, int *len);
-Bool xDbgModuleCommandInitLogPath (XDbgModule *pMod);
-Bool xDbgModuleCommandInitEvlogRulePath (XDbgModule *pMod);
+Bool xDbgModuleCommandInitLogPath (XDbgModule *pMod, char *log_path);
+Bool xDbgModuleCommandInitEvlogRulePath (XDbgModule *pMod, char *evlog_rule_path);
 
 #endif /* __XDBG_MODULE_COMMAND_H__ */
