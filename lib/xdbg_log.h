@@ -38,6 +38,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 #include <errno.h>
 #include <stdlib.h>
+#include <xorg-server.h>
 #include <os.h>
 #include <xdbg_log_secure.h>
 
