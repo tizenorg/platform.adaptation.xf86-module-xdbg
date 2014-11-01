@@ -59,7 +59,6 @@ Summary: X server runtime debug library development package
 Group: Development/Libraries
 Requires: %{name} = %{version}-%{release}
 Requires: pkgconfig(xorg-server)
-Requires: pkgconfig(x11)
 Requires: pkgconfig(xproto)
 Requires: pkgconfig(dlog)
 
