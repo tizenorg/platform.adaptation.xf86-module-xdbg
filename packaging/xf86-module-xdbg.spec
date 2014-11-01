@@ -46,6 +46,7 @@ BuildRequires:  pkgconfig(libdrm)
 BuildRequires:  pkgconfig(xtst)
 BuildRequires:  pkgconfig(xi)
 BuildRequires:  pkgconfig(xv)
+BuildRequires:  pkgconfig(xcb)
 
 %if !%{with x}
 ExclusiveArch:
@@ -70,7 +71,7 @@ X server runtime debug library development package
 %setup -q
 
 %build
-%reconfigure --disable-static --prefix=/usr --enable-normal-log \
+%autogen --disable-static --enable-normal-log \
   CFLAGS="$CFLAGS -Wall -Werror" \
   LDFLAGS="$LDFLAGS -Wl,--hash-style=both -Wl,--as-needed"
 make %{?jobs:-j%jobs}
@@ -90,6 +91,7 @@ cp -af COPYING %{buildroot}/usr/share/license/%{name}
 %{_bindir}/xevlog_analyze
 %{_libdir}/libxdbg-lib.so.*
 %{_libdir}/xorg/modules/libxdbg.so
+%{_sysconfdir}/dbus-1/system.d/xdbg.conf
 
 %files devel
 %dir %{_includedir}/xdbg/

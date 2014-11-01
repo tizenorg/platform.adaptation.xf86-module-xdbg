@@ -51,8 +51,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #define RECONNECT_TIME  1000
 #define DISPATCH_TIME   50
 
-extern _X_EXPORT char *display;
-
 typedef struct _XDbgDBusServerInfo
 {
     OsTimerPtr timer;
@@ -60,8 +58,6 @@ typedef struct _XDbgDBusServerInfo
     XDbgDbusServerMethod *methods;
     char rule[STR_LEN];
     int fd;
-    char xdbg_dbus_server[STR_LEN];
-    char xdbg_dbus_path[STR_LEN];
 } XDbgDBusServerInfo;
 
 static XDbgDBusServerInfo server_info;
@@ -290,11 +286,6 @@ _xDbgDBusServerInit (XDbgDBusServerInfo *info)
 
     XDBG_RETURN_VAL_IF_FAIL (info->conn == NULL, FALSE);
 
-    snprintf(info->xdbg_dbus_server, sizeof(info->xdbg_dbus_server), "org.x.dbg.server%d", atoi(display));
-    snprintf(info->xdbg_dbus_path, sizeof(info->xdbg_dbus_path), "/org/x/dbg/path/%d", atoi(display));
-
-    XDBG_DEBUG (MDBUS, "[SERVER] display number %d\n", atoi(display));
-
     info->conn = dbus_bus_get (DBUS_BUS_SYSTEM, &err);
     if (dbus_error_is_set (&err))
     {
@@ -307,7 +298,7 @@ _xDbgDBusServerInit (XDbgDBusServerInfo *info)
         goto free_err;
     }
 
-    ret = dbus_bus_request_name (info->conn, info->xdbg_dbus_server,
+    ret = dbus_bus_request_name (info->conn, XDBG_DBUS_SERVER,
                                  DBUS_NAME_FLAG_REPLACE_EXISTING , &err);
     if (dbus_error_is_set (&err))
     {
@@ -332,7 +323,7 @@ _xDbgDBusServerInit (XDbgDBusServerInfo *info)
     }
 
     if (!dbus_connection_register_object_path (info->conn,
-                                               info->xdbg_dbus_path, &vtable,
+                                               XDBG_DBUS_PATH, &vtable,
                                                info))
     {
         XDBG_ERROR (MDBUS, "[SERVER] failed: register object path\n");
@@ -347,7 +338,7 @@ _xDbgDBusServerInit (XDbgDBusServerInfo *info)
         goto free_register;
     }
 
-	if (!dbus_connection_get_unix_fd (info->conn, &info->fd) || info->fd < 0)
+    if (!dbus_connection_get_unix_fd (info->conn, &info->fd) || info->fd < 0)
     {
         XDBG_ERROR (MDBUS, "[SERVER] failed: get fd\n");
         goto free_filter;
@@ -366,15 +357,15 @@ _xDbgDBusServerInit (XDbgDBusServerInfo *info)
 free_filter:
     dbus_connection_remove_filter (info->conn, _xDbgDBusServerMsgFilter, info);
 free_register:
-    dbus_connection_unregister_object_path (info->conn, info->xdbg_dbus_path);
+    dbus_connection_unregister_object_path (info->conn, XDBG_DBUS_PATH);
 free_match:
     dbus_bus_remove_match (info->conn, info->rule, &err);
     dbus_error_free (&err);
 free_name:
-    dbus_bus_release_name (info->conn, info->xdbg_dbus_server, &err);
+    dbus_bus_release_name (info->conn, XDBG_DBUS_SERVER, &err);
     dbus_error_free (&err);
 free_conn:
-    dbus_connection_close (info->conn);
+    dbus_connection_unref (info->conn);
 free_err:
     dbus_error_free (&err);
     info->conn = NULL;
@@ -397,10 +388,10 @@ _xDbgDBusServerDeinit (XDbgDBusServerInfo *info)
         DBusError err;
         dbus_error_init (&err);
         dbus_connection_remove_filter (info->conn, _xDbgDBusServerMsgFilter, info);
-        dbus_connection_unregister_object_path (info->conn, info->xdbg_dbus_path);
+        dbus_connection_unregister_object_path (info->conn, XDBG_DBUS_PATH);
         dbus_bus_remove_match (info->conn, info->rule, &err);
         dbus_error_free (&err);
-        dbus_bus_release_name (info->conn, info->xdbg_dbus_server, &err);
+        dbus_bus_release_name (info->conn, XDBG_DBUS_SERVER, &err);
         dbus_error_free (&err);
         dbus_connection_unref (info->conn);
         info->conn = NULL;

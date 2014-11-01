@@ -32,7 +32,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #ifndef __X_DEBUG_DBUS_H__
 #define __X_DEBUG_DBUS_H__
 
+#define XDBG_DBUS_SERVER        "org.x.dbg.server"
 #define XDBG_DBUS_INTERFACE     "org.x.dbg.interface"
+#define XDBG_DBUS_PATH          "/org/x/dbg/path"
 #define XDBG_DBUS_CLIENT        "org.x.dbg.client"
 #define XDBG_DBUS_METHOD        "x_dbg_method"
 
