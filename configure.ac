@@ -44,9 +44,14 @@ AH_TOP([#include "xorg-server.h"])
 
 AC_ARG_WITH(xorg-module-dir,
             AC_HELP_STRING([--with-xorg-module-dir=DIR],
-                           [Default xorg module directory [[default=$libdir/xorg/modules]]]),
+                           [directory of xorg module [[default=$libdir/xorg/modules]]]),
                            [moduledir="$withval"],
                            [moduledir="$libdir/xorg/modules"])
+AC_ARG_WITH(dbus-busconfig-dir,
+            AC_HELP_STRING([--with-dbus-busconfig-dir=DIR],
+                           [directory of the xdbg's dbus busconfig file [[default=$sysconfdir/dbus-1/system.d]]]),
+                           [dbusbusconfigdir="$withval"],
+                           [dbusbusconfigdir="$sysconfdir/dbus-1/system.d"])
 AC_ARG_ENABLE(secure-log,
               AS_HELP_STRING([--enable-secure-log],
                              [Enable secure log (default: disabled)]),
@@ -58,7 +63,7 @@ AC_ARG_ENABLE(normal-log,
                              [NORMALLOG=$enableval], [NORMALLOG=no])
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XDBG, dlog xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto videoproto xcmiscproto xextproto xf86vidmodeproto xproto libdrm xcomposite libdri2 xgesture xtst xrandr xi xv)
+PKG_CHECK_MODULES(XDBG, dlog xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto videoproto xcmiscproto xextproto xf86vidmodeproto xproto libdrm xcomposite libdri2 xgesture xtst xrandr xi xv xcb)
 
 PKG_CHECK_MODULES(HWC, libhwc hwcproto,
 	[SAVE_CPPFLAGS="$CPPFLAGS"
@@ -87,6 +92,7 @@ AC_HEADER_STDC
 MODULE_NAME=xdbg
 AC_SUBST([MODULE_NAME])
 AC_SUBST([moduledir])
+AC_SUBST([dbusbusconfigdir])
 
 AC_DEFINE_UNQUOTED(MODULE_NAME, "$MODULE_NAME", [module name])
 

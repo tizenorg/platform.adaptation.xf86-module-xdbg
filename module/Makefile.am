@@ -22,6 +22,9 @@
 # TORT OR OTHERWISE, ARISING FROM, OUT OF OR IN CONNECTION WITH THE
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
+configdir = @dbusbusconfigdir@
+config_DATA = xdbg.conf
+
 libxdbg_la_LTLIBRARIES = libxdbg.la
 libxdbg_ladir = @moduledir@
 libxdbg_la_LIBADD = @XDBG_LIBS@ ../common/libcommon-server.la ../lib/libxdbg-lib.la
