@@ -38,7 +38,9 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <time.h>
 #include <string.h>
 #include <stdarg.h>
+#if ENABLE_DLOG
 #include <dlog.h>
+#endif
 #include "xdbg_log.h"
 
 #ifndef API

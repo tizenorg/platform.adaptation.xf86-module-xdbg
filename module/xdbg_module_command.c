@@ -44,15 +44,11 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <xdbg.h>
 #include "xdbg_types.h"
 #include <xf86Priv.h>
-#include "xdbg_dump_module.h"
 #include "xdbg_module.h"
-#include "xdbg_module_clist.h"
-#include "xdbg_module_plist.h"
 #include "xdbg_module_evlog.h"
-#include "xdbg_module_drmevent.h"
-#include "xdbg_module_fpsdebug.h"
 #include "xdbg_module_command.h"
 
+#if ENABLE_DLOG
 static void
 _CommandDLog (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
 {
@@ -70,6 +66,7 @@ _CommandDLog (int pid, int argc, char **argv, char *reply, int *len, XDbgModule 
 
     XDBG_REPLY ("Success\n");
 }
+#endif
 
 static Bool
 _CommandSetLogFile (int pid, char *path, char *reply, int *len, XDbgModule *pMod)
@@ -175,30 +172,6 @@ _CommandSetLogLevel (int pid, int argc, char **argv, char *reply, int *len, XDbg
 }
 
 static void
-_CommandClientList (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
-{
-    if (argc != 2)
-    {
-        XDBG_REPLY ("Error : too few arguments\n");
-        return;
-    }
-
-    xDbgModuleCList (pMod, reply, len);
-}
-
-static void
-_CommandPixmapList (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
-{
-    if (argc != 2)
-    {
-        XDBG_REPLY ("Error : too few arguments\n");
-        return;
-    }
-
-    xDbgModulePList (pMod, reply, len);
-}
-
-static void
 _CommandEvlog (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
 {
     int on;
@@ -298,135 +271,6 @@ _CommandSetEvlogPath (int pid, int argc, char **argv, char *reply, int *len, XDb
         XDBG_REPLY ("evlog path: %s/%s\n", pMod->cwd, pMod->evlog_path);
 }
 
-static void
-_CommandDrmEventPending (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
-{
-    if (argc != 2)
-    {
-        XDBG_REPLY ("Error : too few arguments\n");
-        return;
-    }
-
-    xDbgModuleDrmEventPending (pMod, reply, len);
-}
-
-static void
-_CommandFpsDebug (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
-{
-    int on;
-
-    if (argc != 3)
-    {
-        XDBG_REPLY ("Error : too few arguments\n");
-        return;
-    }
-
-    on = atoi (argv[2]);
-
-    xDbgModuleFpsDebug (pMod, on, reply, len);
-
-    XDBG_REPLY ("Success\n");
-}
-
-static char *
-_printDumpOption (char *reply, int *len)
-{
-    if (xDbgDumpGetType ())
-        XDBG_REPLY ("type:%s ", xDbgDumpGetType ());
-    if (xDbgDumpGetCount ())
-        XDBG_REPLY ("count:%s ", xDbgDumpGetCount ());
-    if (xDbgDumpGetFile ())
-        XDBG_REPLY ("file:%s ", xDbgDumpGetFile ());
-    if (xDbgDumpGetCrop ())
-        XDBG_REPLY ("crop:%s ", xDbgDumpGetCrop ());
-
-    return reply;
-}
-
-static void
-_CommandDump (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod)
-{
-    int i;
-    char *c;
-
-    if (argc < 3)
-    {
-        reply = _printDumpOption (reply, len);
-        XDBG_REPLY("\n");
-        return;
-    }
-
-    for (i = 0; i < argc; i++)
-    {
-        char *c = argv[i];
-        if (*c != '-')
-            continue;
-
-        if (!strcmp (c, "-type"))
-        {
-            c = argv[++i];
-            if (!xDbgDumpSetType (c))
-            {
-                XDBG_REPLY ("fail: set '%s' (already running)\n", c);
-                return;
-            }
-        }
-        else if (!strcmp (c, "-count"))
-        {
-            c = argv[++i];
-            if (!xDbgDumpSetCount (c))
-            {
-                XDBG_REPLY ("fail: set '%s' (already running)\n", c);
-                return;
-            }
-        }
-        else if (!strcmp (c, "-file"))
-        {
-            c = argv[++i];
-            if (!xDbgDumpSetFile (c))
-            {
-                XDBG_REPLY ("fail: set '%s' (already running)\n", c);
-                return;
-            }
-        }
-        else if (!strcmp (c, "-crop"))
-        {
-            c = argv[++i];
-            if (!xDbgDumpSetCrop (c))
-            {
-                XDBG_REPLY ("fail: set '%s' (already running)\n", c);
-                return;
-            }
-        }
-    }
-
-    c = argv[2];
-    if (!strcmp (c, "on"))
-    {
-        xDbgDumpPrepare ();
-        XDBG_REPLY ("'%s'", c);
-        reply = _printDumpOption (reply, len);
-    }
-    else if (!strcmp (c, "off"))
-    {
-        xDbgDumpSave ();
-        xDbgDumpClear ();
-        XDBG_REPLY ("'%s' ", c);
-    }
-    else if (!strcmp (c, "clear"))
-    {
-        xDbgDumpClear ();
-        XDBG_REPLY ("'%s' ", c);
-    }
-    else if (*c != '-')
-    {
-        XDBG_REPLY ("unknown option '%s'\n", c);
-        return;
-    }
-
-    XDBG_REPLY ("success\n");
-}
-
 static struct
 {
     const char *Cmd;
@@ -439,11 +283,13 @@ static struct
     void (*func) (int pid, int argc, char **argv, char *reply, int *len, XDbgModule *pMod);
 } command_proc[] =
 {
+#if ENABLE_DLOG
     {
         "dlog", "to enable dlog", "[0-1]",
         NULL, "[OFF:0/ON:1]",
         _CommandDLog
     },
+#endif
 
     {
         "log_path", "to set log path", "[console/filepath]",
@@ -455,18 +301,6 @@ static struct
         "log", "to set loglevel", "[MODULE] [0-4]",
         (int(*)(int, char*, int*))xDbgLogEnumModules, "[DEBUG:0/TRACE:1/INFO:2/WARNING:3/ERROR:4]",
         _CommandSetLogLevel
-    },
-
-    {
-        "clist", "to print clients", "",
-        NULL, "",
-        _CommandClientList
-    },
-
-    {
-        "plist", "to print pixmap list", "",
-        NULL, "",
-        _CommandPixmapList
     },
 
     {
@@ -491,24 +325,6 @@ static struct
         "evlog_path", "to set filepath of evlog", "[console/filepath]",
         NULL, "[console/filepath]",
         _CommandSetEvlogPath
-    },
-
-    {
-        "drmevent_pending", "to print pending drmvents", "",
-        NULL, "",
-        _CommandDrmEventPending
-    },
-
-    {
-        "fpsdebug", "to print fps", "[0-1]",
-        NULL, "[OFF:0/ON:1]",
-        _CommandFpsDebug
-    },
-
-    {
-        "dump", "to dump buffers", "[on,off,clear]",
-        NULL, "[on,off,clear] -type [ui,drawable,fb,video] -count [n] -file [bmp,raw]",
-        _CommandDump
     },
 };
 

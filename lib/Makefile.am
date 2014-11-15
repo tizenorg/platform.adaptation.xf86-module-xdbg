@@ -34,22 +34,15 @@ libxdbg_lib_la_CFLAGS = \
 
 libxdbg_lib_la_SOURCES = \
 	xdbg_log.c \
-	xdbg_log_klog.c \
-	xdbg_log_dlog.c \
-	xdbg_log_drmevent.c \
-	xdbg_log_plist.c \
-	xdbg_log_fpsdebug.c \
-	xdbg_dump.c 
+	xdbg_log_klog.c 
+if ENABLE_DLOG
+libxdbg_lib_la_SOURCES += xdbg_log_dlog.c
+endif
 
 xdbgincludedir = $(includedir)/xdbg
 xdbginclude_HEADERS = \
 	xdbg.h \
-	xdbg_log.h \
-	xdbg_log_drmevent.h \
-	xdbg_log_secure.h \
-	xdbg_log_plist.h \
-	xdbg_log_fpsdebug.h \
-	xdbg_dump.h
+	xdbg_log.h 
 
 pkgconfigdir = $(libdir)/pkgconfig
 pkgconfig_DATA = xdbg.pc

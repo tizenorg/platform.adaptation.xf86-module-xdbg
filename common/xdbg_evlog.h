@@ -43,11 +43,13 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include "xdbg_evlog_dri2.h"
 #include "xdbg_evlog_composite.h"
 #include "xdbg_evlog_damage.h"
-#include "xdbg_evlog_gesture.h"
 #include "xdbg_evlog_xext.h"
 #include "xdbg_evlog_randr.h"
 #include "xdbg_evlog_xinput.h"
 #include "xdbg_evlog_xv.h"
+#if HAVE_GESTURE
+#include "xdbg_evlog_gesture.h"
+#endif
 #if HAVE_HWC
 #include "xdbg_evlog_hwc.h"
 #endif

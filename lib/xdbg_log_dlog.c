@@ -59,4 +59,3 @@ void dLogWrapper (int loglevel, int module, const char * file, int line, const c
         return;
     }
 }
-

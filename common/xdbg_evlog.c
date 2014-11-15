@@ -357,7 +357,6 @@ ExtensionInfo Evlog_extensions[] = {
     {xDbgEvlogCompositeGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogDamageGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogDri2GetBase, 0, 0, 0, NULL, NULL},
-    {xDbgEvlogGestureGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXinputGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogRandrGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXextDpmsGetBase, 0, 0, 0, NULL, NULL},
@@ -367,6 +366,9 @@ ExtensionInfo Evlog_extensions[] = {
     {xDbgEvlogXextXtestExt1GetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXextShapeGetBase, 0, 0, 0, NULL, NULL},
     {xDbgEvlogXvGetBase, 0, 0, 0, NULL, NULL},
+#if HAVE_GESTURE
+    {xDbgEvlogGestureGetBase, 0, 0, 0, NULL, NULL},
+#endif
 #if HAVE_HWC
     {xDbgEvlogHwcGetBase, 0, 0, 0, NULL, NULL},
 #endif

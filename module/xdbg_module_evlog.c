@@ -411,7 +411,6 @@ static void evtPrint (EvlogType type, ClientPtr client, xEvent *ev, ReplyInfoRec
     xDbgDistroyRegionList(&evinfo);
 }
 
-#if (TIZEN_ENGINEER_MODE || USE_NORMAL_LOG)
 static const char*
 _traceGetWindowName (ClientPtr client, Window window)
 {
@@ -445,7 +444,6 @@ _traceGetWindowName (ClientPtr client, Window window)
 
     return NULL;
 }
-#endif
 
 static void
 _traceFlush (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
@@ -477,7 +475,6 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
     static int xi2_opcode = -1;
     xEvent *pev;
 
-#if (TIZEN_ENGINEER_MODE || USE_NORMAL_LOG)
     static char* ename[]=
     {
         "KeyPress",
@@ -485,7 +482,6 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
         "ButtonPress",
         "ButtonRelease",
     };
-#endif
 
     XDBG_RETURN_IF_FAIL (pei != NULL);
 
@@ -508,7 +504,7 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
             {
             case KeyPress:
             case KeyRelease:
-                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%x) root(%d,%d) win(%d,%d)\n"
+                XDBG_INFO (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%x) root(%d,%d) win(%d,%d)\n"
                         , ename[type-KeyPress], pev->u.u.detail, pev->u.u.type
                         , info->command, info->pid
                         , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), (unsigned int)pev->u.keyButtonPointer.event
@@ -518,7 +514,7 @@ _traceEvent (CallbackListPtr *pcbl, pointer nulldata, pointer calldata)
 
             case ButtonPress:
             case ButtonRelease:
-                XDBG_SECURE (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%x) root(%d,%d) win(%d,%d)\n"
+                XDBG_INFO (MXDBG, "%s(%d)_%d(%s.%d : %s.0x%x) root(%d,%d) win(%d,%d)\n"
                         , ename[type-KeyPress], pev->u.u.detail, pev->u.u.type
                         , info->command, info->pid
                         , _traceGetWindowName (pClient, pev->u.keyButtonPointer.event), (unsigned int)pev->u.keyButtonPointer.event

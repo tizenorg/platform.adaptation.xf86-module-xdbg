@@ -38,9 +38,5 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 /* include only headers */
 #include <xdbg_log.h>
-#include <xdbg_log_drmevent.h>
-#include <xdbg_log_plist.h>
-#include <xdbg_log_fpsdebug.h>
-#include <xdbg_dump.h>
 
 #endif  /* __XDBG_H__ */

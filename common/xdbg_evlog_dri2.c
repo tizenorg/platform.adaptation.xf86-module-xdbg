@@ -51,7 +51,6 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <X11/Xatom.h>
 #include <X11/Xlib.h>
 #include <windowstr.h>
-#include <dri2/dri2.h>
 #include <X11/extensions/dri2proto.h>
 
 
@@ -162,6 +161,7 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
             return reply;
         }
 
+#if HAVE_GESTURE
     case X_DRI2SwapBuffersWithRegion:
         {
             xDRI2SwapBuffersWithRegionReq *stuff = (xDRI2SwapBuffersWithRegionReq *)req;
@@ -176,6 +176,7 @@ _EvlogRequestDri2 (EvlogInfo *evinfo, int detail_level, char *reply, int *len)
 
             return reply;
         }
+#endif
 
     default:
             break;

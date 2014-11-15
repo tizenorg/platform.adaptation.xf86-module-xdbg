@@ -23,14 +23,12 @@
 # SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 
 COMMON_SOURCE =  \
-    xdbg_dbus_client.c \
     xdbg_evlog.c \
     xdbg_evlog_request.c \
     xdbg_evlog_core.c \
     xdbg_evlog_composite.c \
     xdbg_evlog_dri2.c \
     xdbg_evlog_damage.c \
-    xdbg_evlog_gesture.c \
     xdbg_evlog_xext.c \
     xdbg_evlog_randr.c \
     xdbg_evlog_xinput.c \
@@ -41,6 +39,10 @@ COMMON_SOURCE =  \
     ds/bool_exp_parser.c \
     ds/bool_exp_rule_checker.c \
     ds/bool_exp_tokenizer.c
+
+if HAVE_GESTURE
+COMMON_SOURCE += xdbg_evlog_gesture.c
+endif
 
 if HAVE_HWC
 COMMON_SOURCE += xdbg_evlog_hwc.c
@@ -66,8 +68,8 @@ noinst_LTLIBRARIES = libcommon-client.la  \
 libcommon_client_la_LIBADD = ${LDFLAGS} @XDBG_LIBS@
 libcommon_client_la_LDFLAGS = ${LDFLAGS} @XDBG_LIBS@
 libcommon_client_la_CFLAGS = ${COMMON_CLIENT_CFLAGS}
-libcommon_client_la_SOURCES = $(COMMON_SOURCE)
-
+libcommon_client_la_SOURCES = $(COMMON_SOURCE) \
+                                xdbg_dbus_client.c
 libcommon_server_la_LIBADD = ${LDFLAGS} @XDBG_LIBS@
 libcommon_server_la_LDFLAGS = ${LDFLAGS} @XDBG_LIBS@
 libcommon_server_la_CFLAGS = ${COMMON_CFLAGS}

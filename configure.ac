@@ -49,31 +49,41 @@ AC_ARG_WITH(xorg-module-dir,
                            [moduledir="$libdir/xorg/modules"])
 AC_ARG_WITH(dbus-busconfig-dir,
             AC_HELP_STRING([--with-dbus-busconfig-dir=DIR],
-                           [directory of the xdbg's dbus busconfig file [[default=$sysconfdir/dbus-1/system.d]]]),
+                           [directory of the xdbg's dbus busconfig file [[default=/etc/dbus-1/system.d]]]),
                            [dbusbusconfigdir="$withval"],
-                           [dbusbusconfigdir="$sysconfdir/dbus-1/system.d"])
-AC_ARG_ENABLE(secure-log,
-              AS_HELP_STRING([--enable-secure-log],
-                             [Enable secure log (default: disabled)]),
-                             [SECURELOG=$enableval], [SECURELOG=no])
+                           [dbusbusconfigdir="/etc/dbus-1/system.d"])
 
-AC_ARG_ENABLE(normal-log,
-              AS_HELP_STRING([--enable-normal-log],
-                             [Enable normal log instead of secure log (default: disabled)]),
-                             [NORMALLOG=$enableval], [NORMALLOG=no])
+AC_ARG_ENABLE(dlog,
+              AS_HELP_STRING([--enable-dlog],
+                             [Enable dlog (default: disabled)]),
+                             [enable_dlog=$enableval], [enable_dlog=no])
+
+AM_CONDITIONAL(ENABLE_DLOG, [test "x$enable_dlog" = xyes])
+if test "x$enable_dlog" = xyes; then
+    AC_DEFINE(ENABLE_DLOG, 1, [Enable dlog])
+fi
 
 # Checks for pkg-config packages
-PKG_CHECK_MODULES(XDBG, dlog xorg-server x11 xdamage xext dbus-1 bigreqsproto compositeproto damageproto dri2proto fixesproto fontsproto gestureproto inputproto kbproto randrproto recordproto renderproto resourceproto videoproto xcmiscproto xextproto xf86vidmodeproto xproto libdrm xcomposite libdri2 xgesture xtst xrandr xi xv xcb)
+PKG_CHECK_MODULES(DBUS, dbus-1)
+XDBG_CFLAGS="$DBUS_CFLAGS"
+XDBG_LIBS="$DBUS_LIBS"
 
-PKG_CHECK_MODULES(HWC, libhwc hwcproto,
-	[SAVE_CPPFLAGS="$CPPFLAGS"
-	CPPFLAGS="$CPPFLAGS $HWC_CFLAGS"
-	AC_CHECK_HEADERS([X11/extensions/hwc.h],[have_hwc_h="yes"],[have_hwc_h="no"])
-	CPPFLAGS="$SAVE_CPPFLAGS"],[echo "not found"])
+PKG_CHECK_MODULES(XORG, xorg-server > 1.12.0 x11 bigreqsproto compositeproto damageproto dri2proto fixesproto fontsproto inputproto kbproto randrproto recordproto renderproto resourceproto videoproto xcmiscproto xextproto xf86vidmodeproto xproto)
+XDBG_CFLAGS="$XDBG_CFLAGS $XORG_CFLAGS"
+XDBG_LIBS="$XDBG_LIBS $XORG_LIBS"
 
-AM_CONDITIONAL(HAVE_HWC, [test "x$have_hwc_h" = xyes])
-if test "x$have_hwc_h" = xyes; then
-    AC_DEFINE(HAVE_HWC, 1, [Have libhwc])
+PKG_CHECK_MODULES(GESTURE, gestureproto, [have_gesture="yes"], [have_gesture="no"])
+AM_CONDITIONAL(HAVE_GESTURE, [test "x$have_gesture" = xyes])
+if test "x$have_gesture" = xyes; then
+    AC_DEFINE(HAVE_GESTURE, 1, [Have gesture extension])
+    XDBG_CFLAGS="$XDBG_CFLAGS $GESTURE_CFLAGS"
+    XDBG_LIBS="$XDBG_LIBS $GESTURE_LIBS"
+fi
+
+PKG_CHECK_MODULES(HWC, hwcproto, [have_hwc="yes"], [have_hwc="no"])
+AM_CONDITIONAL(HAVE_HWC, [test "x$have_hwc" = xyes])
+if test "x$have_hwc" = xyes; then
+    AC_DEFINE(HAVE_HWC, 1, [Have hwc extension])
     XDBG_CFLAGS="$XDBG_CFLAGS $HWC_CFLAGS"
     XDBG_LIBS="$XDBG_LIBS $HWC_LIBS"
 fi
@@ -96,31 +106,17 @@ AC_SUBST([dbusbusconfigdir])
 
 AC_DEFINE_UNQUOTED(MODULE_NAME, "$MODULE_NAME", [module name])
 
-TIZEN_ENGINEER_MODE=0
-if test "x$SECURELOG" = xyes; then
-    TIZEN_ENGINEER_MODE=1
-    AC_SUBST([TIZEN_ENGINEER_MODE])
-fi
-
-USE_NORMAL_LOG=0
-if test "x$NORMALLOG" = xyes; then
-    USE_NORMAL_LOG=1
-    AC_SUBST([USE_NORMAL_LOG])
-fi
-
 AC_OUTPUT([Makefile
            common/Makefile
            bin/Makefile
            bin/xdbg/Makefile
            bin/xevlog_analyze/Makefile
            lib/Makefile
-           lib/xdbg_log_secure.h
            lib/xdbg.pc
            module/Makefile])
 
 echo "CFLAGS     : $CFLAGS"
 echo "LDFLAGS    : $LDFLAGS"
-echo "LOG        : secure($SECURELOG) normal($NORMALLOG)"
 echo "XDBG_CFLAGS: $XDBG_CFLAGS"
 echo "XDBG_LIBS  : $XDBG_LIBS"
 echo "XDBG_CLIENT_CFLAGS: $XDBG_CLIENT_CFLAGS"
